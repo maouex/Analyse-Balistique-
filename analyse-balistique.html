@@ -419,6 +419,125 @@
     }
     .scale-status.uncalibrated { color: var(--muted); }
 
+    /* ─── Tutorial Overlay ─── */
+    @keyframes tutFadeIn  { from{opacity:0}          to{opacity:1} }
+    @keyframes tutFadeOut { from{opacity:1}          to{opacity:0} }
+    @keyframes tutSlideIn {
+      from { opacity:0; transform: translateY(30px) scale(.96); }
+      to   { opacity:1; transform: translateY(0)    scale(1);   }
+    }
+    @keyframes tutCardIn  {
+      from { opacity:0; transform: translateY(12px); }
+      to   { opacity:1; transform: translateY(0);    }
+    }
+
+    #tutOverlay {
+      position: fixed; inset: 0; z-index: 9999;
+      background: rgba(4, 6, 12, .90);
+      backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 16px;
+      animation: tutFadeIn .3s ease;
+    }
+    #tutOverlay.tut-hidden { display: none; }
+    #tutOverlay.tut-closing { animation: tutFadeOut .25s ease forwards; }
+
+    .tut-modal {
+      background: #111520;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 20px;
+      max-width: 700px; width: 100%;
+      padding: 30px 28px 22px;
+      box-shadow: 0 32px 90px rgba(0,0,0,.8), 0 0 0 1px rgba(77,166,255,.06);
+      animation: tutSlideIn .45s cubic-bezier(.22,.68,0,1.15);
+    }
+
+    .tut-header { text-align: center; margin-bottom: 22px; }
+    .tut-logo { font-size: 2.6rem; display: block; margin-bottom: 10px; line-height: 1; }
+    .tut-header h2 {
+      font-size: 1.25rem; font-weight: 800; color: #e8eaf0;
+      margin: 0 0 5px; letter-spacing: -.02em;
+    }
+    .tut-header p { font-size: .76rem; color: var(--muted); margin: 0; }
+
+    .tut-steps {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+      margin-bottom: 22px;
+    }
+    .tut-card {
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: 13px; padding: 14px 10px 12px;
+      text-align: center; cursor: default;
+      transition: background .2s, border-color .2s, transform .2s;
+      animation: tutCardIn .4s ease both;
+    }
+    .tut-card:hover {
+      background: rgba(255,255,255,.07);
+      border-color: rgba(255,255,255,.13);
+      transform: translateY(-2px);
+    }
+    .tut-card:nth-child(1) { animation-delay: .08s; }
+    .tut-card:nth-child(2) { animation-delay: .14s; }
+    .tut-card:nth-child(3) { animation-delay: .20s; }
+    .tut-card:nth-child(4) { animation-delay: .26s; }
+    .tut-card:nth-child(5) { animation-delay: .32s; }
+    .tut-card:nth-child(6) { animation-delay: .38s; }
+
+    .tut-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 20px; height: 20px; border-radius: 50%;
+      font-size: .67rem; font-weight: 900; color: #000;
+      background: var(--tc, var(--blue));
+      margin-bottom: 7px; box-shadow: 0 0 10px color-mix(in srgb, var(--tc) 55%, transparent);
+    }
+    .tut-card .tut-icon { font-size: 1.55rem; display: block; line-height: 1; margin-bottom: 7px; }
+    .tut-card h3 {
+      font-size: .73rem; font-weight: 700; color: #d8dce8;
+      margin: 0 0 5px; letter-spacing: .005em;
+    }
+    .tut-card p { font-size: .63rem; color: var(--muted); margin: 0; line-height: 1.45; }
+    .tut-opt {
+      display: inline-block; font-size: .56rem; font-weight: 700;
+      background: rgba(245,159,0,.18); color: #f59f00;
+      border-radius: 4px; padding: 1px 5px; margin-left: 3px;
+      vertical-align: middle; letter-spacing: .04em; text-transform: uppercase;
+    }
+
+    .tut-divider { height: 1px; background: rgba(255,255,255,.07); margin-bottom: 18px; }
+
+    .tut-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px;
+    }
+    .tut-skip {
+      display: flex; align-items: center; gap: 7px;
+      font-size: .71rem; color: var(--muted); cursor: pointer;
+      user-select: none;
+    }
+    .tut-skip input { cursor: pointer; accent-color: var(--blue); width: 13px; height: 13px; }
+    #btnTutStart {
+      background: var(--blue); color: #000;
+      border: none; border-radius: 9px;
+      padding: 9px 26px; font-size: .82rem; font-weight: 800;
+      cursor: pointer; letter-spacing: .01em;
+      box-shadow: 0 0 22px rgba(77,166,255,.4);
+      transition: filter .15s, transform .15s;
+    }
+    #btnTutStart:hover { filter: brightness(1.12); transform: translateY(-1px); }
+    #btnTutStart:active { transform: translateY(0); }
+
+    /* Bouton "?" dans le header */
+    #btnTutHelp {
+      background: rgba(255,255,255,.06); border: 1px solid var(--border);
+      color: var(--muted); border-radius: 7px;
+      width: 28px; height: 28px; cursor: pointer;
+      font-size: .8rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .15s, color .15s;
+    }
+    #btnTutHelp:hover { background: rgba(77,166,255,.15); color: var(--blue); }
+
     /* ─── Scrollbar ─── */
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
@@ -449,6 +568,75 @@
 </head>
 <body>
 
+<!-- ════════ TUTORIAL OVERLAY ════════ -->
+<div id="tutOverlay">
+  <div class="tut-modal">
+
+    <div class="tut-header">
+      <span class="tut-logo">🎯</span>
+      <h2>Guide d'utilisation — Analyse Balistique</h2>
+      <p>Suivez ces 6 étapes pour analyser et exporter votre gerbe de plomb</p>
+    </div>
+
+    <div class="tut-steps">
+
+      <div class="tut-card">
+        <div class="tut-badge" style="--tc:#4da6ff">1</div>
+        <span class="tut-icon">📷</span>
+        <h3>Charger la photo</h3>
+        <p>Glissez votre cible sur le canevas ou cliquez sur <em>Charger une photo</em></p>
+      </div>
+
+      <div class="tut-card">
+        <div class="tut-badge" style="--tc:#f59f00">2</div>
+        <span class="tut-icon">📏</span>
+        <h3>Tracer l'échelle <span class="tut-opt">Optionnel</span></h3>
+        <p>Indiquez la longueur réelle d'un trait présent sur la cible pour calibrer automatiquement les cercles 50 et 100 cm</p>
+      </div>
+
+      <div class="tut-card">
+        <div class="tut-badge" style="--tc:#51cf66">3</div>
+        <span class="tut-icon">🎯</span>
+        <h3>Centre de la cible</h3>
+        <p>Cliquez au centre exact de la cible — les cercles de référence se positionnent dessus</p>
+      </div>
+
+      <div class="tut-card">
+        <div class="tut-badge" style="--tc:#ff6b6b">4</div>
+        <span class="tut-icon">💥</span>
+        <h3>Marquer les impacts</h3>
+        <p>Cliquez sur chaque impact de plomb · Clic droit pour supprimer le dernier ajouté</p>
+      </div>
+
+      <div class="tut-card">
+        <div class="tut-badge" style="--tc:#cc5de8">5</div>
+        <span class="tut-icon">📊</span>
+        <h3>Statistiques en live</h3>
+        <p>Dispersion, densité par zone et ellipse de covariance se calculent en temps réel dans le panneau droit</p>
+      </div>
+
+      <div class="tut-card">
+        <div class="tut-badge" style="--tc:#20c997">6</div>
+        <span class="tut-icon">💾</span>
+        <h3>Exporter en PNG</h3>
+        <p>Téléchargez la gerbe avec cercles, impacts et annotations en haute qualité</p>
+      </div>
+
+    </div>
+
+    <div class="tut-divider"></div>
+
+    <div class="tut-footer">
+      <label class="tut-skip">
+        <input type="checkbox" id="tutSkipCheck" />
+        Ne plus afficher au démarrage
+      </label>
+      <button id="btnTutStart">Commencer &rarr;</button>
+    </div>
+
+  </div>
+</div>
+
 <!-- ════════ HEADER ════════ -->
 <header>
   <div class="logo">🎯</div>
@@ -457,6 +645,7 @@
     <p>Outil d'analyse de tirs — Journal de Chasse</p>
   </div>
   <div class="header-right">
+    <button id="btnTutHelp" title="Guide d'utilisation">?</button>
     <span class="version-tag">v2.0</span>
   </div>
 </header>
@@ -1631,6 +1820,48 @@ exportConfirm.addEventListener('click', () => {
 
 // ── Init ─────────────────────────────────────
 resizeCanvas();
+
+// ── Tutorial ─────────────────────────────────
+(function () {
+  const overlay   = document.getElementById('tutOverlay');
+  const btnStart  = document.getElementById('btnTutStart');
+  const btnHelp   = document.getElementById('btnTutHelp');
+  const skipCheck = document.getElementById('tutSkipCheck');
+  const LS_KEY    = 'balistique_tut_seen';
+
+  function openTutorial() {
+    overlay.classList.remove('tut-hidden', 'tut-closing');
+    overlay.style.animation = 'none';
+    requestAnimationFrame(() => {
+      overlay.style.animation = '';
+      overlay.classList.add('tutFadeIn');
+    });
+  }
+
+  function closeTutorial() {
+    overlay.classList.add('tut-closing');
+    setTimeout(() => overlay.classList.add('tut-hidden'), 260);
+    if (skipCheck.checked) localStorage.setItem(LS_KEY, '1');
+  }
+
+  // Afficher uniquement si l'utilisateur n'a pas coché "Ne plus afficher"
+  if (localStorage.getItem(LS_KEY)) {
+    overlay.classList.add('tut-hidden');
+  }
+
+  btnStart.addEventListener('click', closeTutorial);
+  btnHelp.addEventListener('click', openTutorial);
+
+  // Fermer en cliquant hors de la modale
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) closeTutorial();
+  });
+
+  // Escape pour fermer
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !overlay.classList.contains('tut-hidden')) closeTutorial();
+  });
+}());
 </script>
 </body>
 </html>
