@@ -411,6 +411,14 @@
     .modal-btn.confirm:hover { box-shadow: 0 6px 20px rgba(200,134,10,.45); transform: translateY(-1px); }
     .modal-btn.confirm:active { transform: translateY(0); }
 
+    /* ─── Étalonnage ─── */
+    .scale-status {
+      font-size: .66rem; color: var(--blue); text-align: center;
+      padding: 3px 4px 1px; font-variant-numeric: tabular-nums;
+      min-height: 16px; word-break: break-all;
+    }
+    .scale-status.uncalibrated { color: var(--muted); }
+
     /* ─── Scrollbar ─── */
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
@@ -485,6 +493,25 @@
       </button>
       <button class="tb-btn" id="btnUndo">
         <span class="icon">↩</span> Annuler dernier
+      </button>
+      <button class="tb-btn" id="btnScale" data-mode="scale">
+        <span class="icon">📏</span> Tracer l'échelle
+      </button>
+    </div>
+
+    <!-- Étalonnage -->
+    <div class="tb-section">
+      <h3>Étalonnage</h3>
+      <div class="slider-row">
+        <div class="sl-header">
+          <span>Longueur du trait</span>
+          <span id="scaleRefVal">30 cm</span>
+        </div>
+        <input type="range" id="scaleRefDist" min="5" max="200" value="30" step="1" />
+      </div>
+      <div class="scale-status uncalibrated" id="scaleStatus">Non calibré</div>
+      <button class="tb-btn" id="btnScaleClear" style="margin-top:4px;">
+        <span class="icon">✕</span> Effacer l'étalonnage
       </button>
     </div>
 
@@ -764,6 +791,9 @@ const state = {
   panY: 0,
   dragging: false,
   lastMouse: null,
+  scalePt1: null,       // premier point du trait d'étalonnage
+  scalePt2: null,       // second point (segment confirmé)
+  mousePos: null,       // position souris en coords image (preview étalonnage)
 };
 
 // ── Canvas setup ────────────────────────────
@@ -934,6 +964,70 @@ function draw() {
     }
   });
 
+  // ── Règle d'étalonnage ──
+  if (state.scalePt1) {
+    const p1  = state.scalePt1;
+    const p2  = state.scalePt2 || (state.mode === 'scale' ? state.mousePos : null);
+    const col = '#f59f00';
+
+    // Point de départ
+    ctx.beginPath();
+    ctx.arc(p1.x, p1.y, 5 / state.zoom, 0, Math.PI * 2);
+    ctx.fillStyle = col;
+    ctx.fill();
+
+    if (p2) {
+      const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+      const perpA = angle + Math.PI / 2;
+      const tick  = 9 / state.zoom;
+
+      // Ligne principale (pointillée)
+      ctx.beginPath();
+      ctx.moveTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.strokeStyle = col;
+      ctx.lineWidth   = 2 / state.zoom;
+      ctx.setLineDash([6 / state.zoom, 3 / state.zoom]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Embouts perpendiculaires
+      [p1, p2].forEach(pt => {
+        ctx.beginPath();
+        ctx.moveTo(pt.x + Math.cos(perpA) * tick, pt.y + Math.sin(perpA) * tick);
+        ctx.lineTo(pt.x - Math.cos(perpA) * tick, pt.y - Math.sin(perpA) * tick);
+        ctx.strokeStyle = col;
+        ctx.lineWidth   = 2 / state.zoom;
+        ctx.stroke();
+      });
+
+      // Étiquette centrale
+      const mx  = (p1.x + p2.x) / 2;
+      const my  = (p1.y + p2.y) / 2;
+      const refCm = parseFloat(document.getElementById('scaleRefDist').value) || 30;
+      const lbl = state.scalePt2
+        ? `${refCm} cm`
+        : `${distPx(p1, p2).toFixed(0)} px`;
+      const fs  = Math.max(10 / state.zoom, 9);
+      ctx.font         = `bold ${fs}px Inter, sans-serif`;
+      ctx.textAlign    = 'center';
+      ctx.textBaseline = 'middle';
+      const tw  = ctx.measureText(lbl).width;
+      const pad = 5 / state.zoom;
+      ctx.fillStyle = 'rgba(10,12,20,.88)';
+      ctx.fillRect(mx - tw / 2 - pad, my - fs * 0.75, tw + pad * 2, fs * 1.5);
+      ctx.fillStyle = col;
+      ctx.fillText(lbl, mx, my);
+      ctx.textBaseline = 'alphabetic';
+
+      // Point d'arrivée
+      ctx.beginPath();
+      ctx.arc(p2.x, p2.y, 5 / state.zoom, 0, Math.PI * 2);
+      ctx.fillStyle = col;
+      ctx.fill();
+    }
+  }
+
   ctx.restore();
 }
 
@@ -993,6 +1087,10 @@ wrap.addEventListener('drop', e => {
 
 // ── Mode ─────────────────────────────────────
 function setMode(m) {
+  // Si on quitte l'étalonnage en plein dessin (pt1 posé, pt2 non), annuler
+  if (m !== 'scale' && state.mode === 'scale' && state.scalePt1 && !state.scalePt2) {
+    state.scalePt1 = null;
+  }
   state.mode = m;
   document.querySelectorAll('[data-mode]').forEach(b => {
     b.classList.toggle('active', b.dataset.mode === m);
@@ -1001,10 +1099,59 @@ function setMode(m) {
   if (m === 'center')  setInstruction('Cliquez pour placer / déplacer le centre');
   if (m === 'impact')  setInstruction('Cliquez sur chaque impact de plomb');
   if (m === 'move')    setInstruction('Cliquez-glissez pour naviguer · Molette pour zoomer');
+  if (m === 'scale') {
+    state.scalePt1 = null; state.scalePt2 = null;
+    draw();
+    setInstruction('Étape 1/2 — Cliquez sur le début du trait de référence');
+  }
 }
 document.getElementById('btnCenter').addEventListener('click', () => setMode('center'));
 document.getElementById('btnImpact').addEventListener('click', () => setMode('impact'));
 document.getElementById('btnMove').addEventListener('click',   () => setMode('move'));
+document.getElementById('btnScale').addEventListener('click',  () => setMode('scale'));
+
+// ── Étalonnage ───────────────────────────────
+function applyScale() {
+  if (!state.scalePt1 || !state.scalePt2) return;
+  const refCm  = parseFloat(document.getElementById('scaleRefDist').value) || 30;
+  const pxDist = distPx(state.scalePt1, state.scalePt2);
+  const pxPerCm = pxDist / refCm;
+
+  state.r1 = Math.round(50  * pxPerCm);
+  state.r2 = Math.round(100 * pxPerCm);
+
+  // Mettre à jour les sliders (valeur = diamètre)
+  const d1 = state.r1 * 2, d2 = state.r2 * 2;
+  const sl1 = document.getElementById('slC1');
+  const sl2 = document.getElementById('slC2');
+  if (d1 > parseInt(sl1.max)) sl1.max = d1 + 40;
+  if (d2 > parseInt(sl2.max)) sl2.max = d2 + 80;
+  sl1.value = d1; document.getElementById('c1Val').textContent = d1;
+  sl2.value = d2; document.getElementById('c2Val').textContent = d2;
+
+  // Afficher le statut
+  const mmPerPx = (10 / pxPerCm).toFixed(3);
+  const el = document.getElementById('scaleStatus');
+  el.textContent = `${mmPerPx} mm/px · ${pxDist.toFixed(0)} px = ${refCm} cm`;
+  el.classList.remove('uncalibrated');
+
+  setMode('center');
+  setInstruction(`Étalonnage OK — Cercles 50/100 cm recalculés automatiquement`);
+  draw(); updateStats();
+}
+
+document.getElementById('scaleRefDist').addEventListener('input', function () {
+  document.getElementById('scaleRefVal').textContent = this.value + ' cm';
+  // Recalculer si un segment est déjà tracé
+  if (state.scalePt1 && state.scalePt2) applyScale();
+});
+
+document.getElementById('btnScaleClear').addEventListener('click', () => {
+  state.scalePt1 = null; state.scalePt2 = null;
+  const el = document.getElementById('scaleStatus');
+  el.textContent = 'Non calibré'; el.classList.add('uncalibrated');
+  draw();
+});
 
 function setInstruction(txt) {
   instr.textContent = txt;
@@ -1032,6 +1179,19 @@ canvas.addEventListener('mousedown', e => {
     return;
   }
 
+  if (state.mode === 'scale') {
+    if (!state.scalePt1) {
+      state.scalePt1 = ip;
+      const refCm = parseFloat(document.getElementById('scaleRefDist').value) || 30;
+      setInstruction(`Étape 2/2 — Cliquez sur la fin du trait (${refCm} cm)`);
+    } else {
+      state.scalePt2 = ip;
+      applyScale();
+    }
+    draw();
+    return;
+  }
+
   if (state.mode === 'impact') {
     // Check right-click to remove nearest
     if (e.button === 2) return;
@@ -1053,6 +1213,23 @@ canvas.addEventListener('mousemove', e => {
     state.panY += e.clientY - state.lastMouse.y;
     state.lastMouse = { x: e.clientX, y: e.clientY };
     draw();
+    return;
+  }
+
+  // Mode étalonnage : preview de la ligne + tooltip distance
+  if (state.mode === 'scale') {
+    const ip = canvasToImg(cx, cy);
+    state.mousePos = ip;
+    if (state.scalePt1 && !state.scalePt2) {
+      const d = distPx(state.scalePt1, ip);
+      tooltip.style.display = 'block';
+      tooltip.style.left = (cx + 14) + 'px';
+      tooltip.style.top  = (cy - 10) + 'px';
+      tooltip.textContent = `${d.toFixed(0)} px en cours de tracé`;
+      draw();
+    } else {
+      tooltip.style.display = 'none';
+    }
     return;
   }
 
