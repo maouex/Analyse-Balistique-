@@ -2005,11 +2005,42 @@ document.getElementById('btnUndo').addEventListener('click', () => {
 
 document.getElementById('btnReset').addEventListener('click', () => {
   if (!confirm('Réinitialiser l\'analyse ? Tous les impacts seront effacés.')) return;
-  state.img = state.center = null;
-  state.impacts = [];
+
+  // État principal
+  state.img       = null;
+  state.center    = null;
+  state.impacts   = [];
+  state.scalePt1  = null;
+  state.scalePt2  = null;
+  state.mousePos  = null;
+  state.r1        = 100;
+  state.r2        = 200;
+  state.zoom      = 1;
+  state.panX      = 0;
+  state.panY      = 0;
+  state.dragging  = false;
+
+  // ↓ correctif principal : vider le file input pour que le prochain
+  //   upload (même fichier ou autre) déclenche bien l'événement change
+  document.getElementById('fileInput').value = '';
+
+  // UI étalonnage
+  const scaleEl = document.getElementById('scaleStatus');
+  scaleEl.textContent = 'Non calibré';
+  scaleEl.classList.add('uncalibrated');
+
+  // Sliders cercles → valeurs par défaut
+  document.getElementById('slC1').value = 200; document.getElementById('c1Val').textContent = '200';
+  document.getElementById('slC2').value = 400; document.getElementById('c2Val').textContent = '400';
+
+  // Zoom
+  document.getElementById('slZoom').value = 100;
+  document.getElementById('zoomVal').textContent = '100%';
+
   overlay.classList.remove('hidden');
-  setInstruction('Veuillez charger une photo pour commencer');
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  setInstruction('Veuillez charger une photo pour commencer');
+  setMode('center');
   updateStats();
 });
 
