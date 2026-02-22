@@ -336,6 +336,70 @@
     .export-btn:hover { box-shadow: 0 6px 22px rgba(200,134,10,.48); transform: translateY(-1px); }
     .export-btn:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(200,134,10,.2); }
 
+    /* ─── Modal Export ─── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(8,10,16,.75); backdrop-filter: blur(6px);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity .22s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px 30px 24px;
+      width: 350px;
+      box-shadow: 0 24px 64px rgba(0,0,0,.65), 0 0 0 1px rgba(200,134,10,.1);
+      transform: translateY(12px) scale(.97);
+      transition: transform .24s cubic-bezier(.34,1.56,.64,1);
+    }
+    .modal-overlay.open .modal { transform: translateY(0) scale(1); }
+    .modal-header {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 5px;
+    }
+    .modal-icon { font-size: 1.3rem; }
+    .modal-header h2 { font-size: 1rem; font-weight: 700; color: var(--text); }
+    .modal-sub { font-size: .76rem; color: var(--muted); margin-bottom: 20px; }
+    .modal-checks { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
+    .modal-check-row {
+      display: flex; align-items: center; gap: 11px;
+      font-size: .85rem; color: var(--text); cursor: pointer;
+      padding: 10px 14px;
+      background: rgba(255,255,255,.025);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      transition: all .15s; user-select: none;
+    }
+    .modal-check-row:hover { background: rgba(200,134,10,.07); border-color: rgba(200,134,10,.3); }
+    .modal-check-row input[type=checkbox] {
+      accent-color: var(--accent); width: 15px; height: 15px; flex-shrink: 0;
+    }
+    .modal-check-dot {
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+    }
+    .modal-check-dot.green { background: var(--green); box-shadow: 0 0 5px rgba(46,204,113,.5); }
+    .modal-check-dot.amber { background: var(--amber); box-shadow: 0 0 5px rgba(245,159,0,.5); }
+    .modal-check-dot.red   { background: var(--red);   box-shadow: 0 0 5px rgba(224,82,82,.5); }
+    .modal-check-dot.blue  { background: var(--blue);  box-shadow: 0 0 5px rgba(77,171,247,.5); }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+    .modal-btn {
+      padding: 9px 18px; border-radius: var(--radius); border: none;
+      font-size: .83rem; font-weight: 700; font-family: inherit; cursor: pointer;
+      transition: all .17s;
+    }
+    .modal-btn.cancel {
+      background: rgba(255,255,255,.04); border: 1px solid var(--border); color: var(--muted);
+    }
+    .modal-btn.cancel:hover { background: rgba(255,255,255,.08); color: var(--text); }
+    .modal-btn.confirm {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+      color: #fff; box-shadow: 0 4px 14px rgba(200,134,10,.3);
+    }
+    .modal-btn.confirm:hover { box-shadow: 0 6px 20px rgba(200,134,10,.45); transform: translateY(-1px); }
+    .modal-btn.confirm:active { transform: translateY(0); }
+
     /* ─── Scrollbar ─── */
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
@@ -616,9 +680,46 @@
       <div class="empty-state">Aucun impact enregistré.</div>
     </div>
 
-    <button class="export-btn" id="btnExport">📋 Exporter l'analyse (PNG)</button>
+    <button class="export-btn" id="btnExport">📥 Exporter l'analyse (PNG)</button>
   </aside>
 
+</div>
+
+<!-- ════════ MODAL EXPORT ════════ -->
+<div class="modal-overlay" id="exportModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-icon">📋</span>
+      <h2>Options d'export</h2>
+    </div>
+    <p class="modal-sub">Sélectionnez les éléments à inclure dans l'image PNG</p>
+    <div class="modal-checks">
+      <label class="modal-check-row">
+        <input type="checkbox" id="expC1" checked />
+        <span class="modal-check-dot green"></span>
+        Cercle 50 cm
+      </label>
+      <label class="modal-check-row">
+        <input type="checkbox" id="expC2" checked />
+        <span class="modal-check-dot amber"></span>
+        Cercle 100 cm
+      </label>
+      <label class="modal-check-row">
+        <input type="checkbox" id="expImpacts" checked />
+        <span class="modal-check-dot red"></span>
+        Impacts
+      </label>
+      <label class="modal-check-row">
+        <input type="checkbox" id="expNums" checked />
+        <span class="modal-check-dot blue"></span>
+        Numéros des impacts
+      </label>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" id="exportCancel">Annuler</button>
+      <button class="modal-btn confirm" id="exportConfirm">📥 Exporter PNG</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -1150,29 +1251,48 @@ function renderImpactList(distances) {
 }
 
 // ── Export ────────────────────────────────────
+const exportModal  = document.getElementById('exportModal');
+const exportCancel = document.getElementById('exportCancel');
+const exportConfirm = document.getElementById('exportConfirm');
+
+function openExportModal() {
+  exportModal.classList.add('open');
+}
+function closeExportModal() {
+  exportModal.classList.remove('open');
+}
+
 document.getElementById('btnExport').addEventListener('click', () => {
   if (!state.center) { alert('Veuillez placer le centre de la cible avant d\'exporter.'); return; }
+  openExportModal();
+});
 
-  // Canvas transparent centré sur les cercles + impacts
-  // Taille : diamètre du grand cercle + marge
+exportCancel.addEventListener('click', closeExportModal);
+exportModal.addEventListener('click', e => { if (e.target === exportModal) closeExportModal(); });
+
+exportConfirm.addEventListener('click', () => {
+  closeExportModal();
+
+  const showC1      = document.getElementById('expC1').checked;
+  const showC2      = document.getElementById('expC2').checked;
+  const showImpacts = document.getElementById('expImpacts').checked;
+  const showNums    = document.getElementById('expNums').checked;
+
+  // Canvas centré sur les cercles + impacts
   const margin = 30;
   const size   = (state.r2 * 2) + margin * 2;
   const ec     = document.createElement('canvas');
   ec.width     = size;
   ec.height    = size;
   const ectx   = ec.getContext('2d');
-  // Fond transparent par défaut (clearRect suffit)
 
-  // Origine locale : centre de la cible au milieu du canvas export
   const ox = size / 2;
   const oy = size / 2;
-
-  // Décalage depuis les coords image vers le canvas export
   const dx = ox - state.center.x;
   const dy = oy - state.center.y;
 
   // ── Cercles ──
-  if (document.getElementById('chkC1').checked) {
+  if (showC1) {
     ectx.beginPath();
     ectx.arc(ox, oy, state.r1, 0, Math.PI * 2);
     ectx.strokeStyle = document.getElementById('colC1').value;
@@ -1181,7 +1301,7 @@ document.getElementById('btnExport').addEventListener('click', () => {
     ectx.stroke();
     ectx.setLineDash([]);
   }
-  if (document.getElementById('chkC2').checked) {
+  if (showC2) {
     ectx.beginPath();
     ectx.arc(ox, oy, state.r2, 0, Math.PI * 2);
     ectx.strokeStyle = document.getElementById('colC2').value;
@@ -1193,7 +1313,7 @@ document.getElementById('btnExport').addEventListener('click', () => {
 
   // ── Croix centre ──
   const hs = 10;
-  ectx.strokeStyle = '#555555';
+  ectx.strokeStyle = '#666';
   ectx.lineWidth   = 1.5;
   ectx.beginPath();
   ectx.moveTo(ox - hs, oy); ectx.lineTo(ox + hs, oy);
@@ -1201,36 +1321,33 @@ document.getElementById('btnExport').addEventListener('click', () => {
   ectx.stroke();
 
   // ── Impacts ──
-  const impColor = document.getElementById('colImp').value;
-  const impSz    = parseInt(document.getElementById('slImpSz').value);
-  const showNums = document.getElementById('chkNums').checked;
-
-  state.impacts.forEach((imp, i) => {
-    const ix = imp.x + dx;
-    const iy = imp.y + dy;
-    // Halo
-    ectx.beginPath();
-    ectx.arc(ix, iy, impSz * 1.7, 0, Math.PI * 2);
-    ectx.fillStyle = impColor + '40';
-    ectx.fill();
-    // Point
-    ectx.beginPath();
-    ectx.arc(ix, iy, impSz, 0, Math.PI * 2);
-    ectx.fillStyle = impColor;
-    ectx.fill();
-    // Numéro
-    if (showNums) {
-      ectx.font      = `bold 11px Segoe UI, sans-serif`;
-      ectx.textAlign = 'center';
+  if (showImpacts) {
+    const impColor = document.getElementById('colImp').value;
+    const impSz    = parseInt(document.getElementById('slImpSz').value);
+    state.impacts.forEach((imp, i) => {
+      const ix = imp.x + dx;
+      const iy = imp.y + dy;
+      ectx.beginPath();
+      ectx.arc(ix, iy, impSz * 1.7, 0, Math.PI * 2);
+      ectx.fillStyle = impColor + '40';
+      ectx.fill();
+      ectx.beginPath();
+      ectx.arc(ix, iy, impSz, 0, Math.PI * 2);
       ectx.fillStyle = impColor;
-      ectx.fillText(i + 1, ix, iy - impSz - 3);
-    }
-  });
+      ectx.fill();
+      if (showNums) {
+        ectx.font      = 'bold 11px Inter, Segoe UI, sans-serif';
+        ectx.textAlign = 'center';
+        ectx.fillStyle = impColor;
+        ectx.fillText(i + 1, ix, iy - impSz - 3);
+      }
+    });
+  }
 
   // ── Téléchargement ──
-  const a      = document.createElement('a');
-  a.href       = ec.toDataURL('image/png');
-  a.download   = 'analyse-balistique.png';
+  const a    = document.createElement('a');
+  a.href     = ec.toDataURL('image/png');
+  a.download = 'analyse-balistique.png';
   a.click();
 });
 
