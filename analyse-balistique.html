@@ -91,11 +91,11 @@
       display: flex; flex-direction: column;
       overflow-y: auto; flex-shrink: 0;
     }
-    .tb-section { padding: 14px 14px; border-bottom: 1px solid var(--border); }
+    .tb-section { padding: 9px 12px; border-bottom: 1px solid var(--border); }
     .tb-section h3 {
-      font-size: .62rem; font-weight: 600;
+      font-size: .6rem; font-weight: 600;
       text-transform: uppercase; letter-spacing: 1.3px;
-      color: var(--muted); margin-bottom: 10px;
+      color: var(--muted); margin-bottom: 8px;
       display: flex; align-items: center; gap: 7px;
     }
     .tb-section h3::before {
@@ -104,12 +104,12 @@
       background: var(--accent); border-radius: 2px;
     }
     .tb-btn {
-      width: 100%; padding: 9px 12px;
+      width: 100%; padding: 7px 12px;
       border: 1px solid var(--border); border-radius: var(--radius);
       background: rgba(255,255,255,.02);
-      color: var(--text); font-size: .82rem; font-family: inherit;
-      cursor: pointer; display: flex; align-items: center; gap: 9px;
-      transition: all .17s; margin-bottom: 5px; text-align: left;
+      color: var(--text); font-size: .8rem; font-family: inherit;
+      cursor: pointer; display: flex; align-items: center; gap: 8px;
+      transition: all .17s; margin-bottom: 3px; text-align: left;
     }
     .tb-btn:hover {
       background: rgba(200,134,10,.09);
@@ -126,30 +126,30 @@
     input[type=file] { display: none; }
 
     /* sliders */
-    .slider-row { margin-bottom: 10px; }
+    .slider-row { margin-bottom: 6px; }
     .slider-row .sl-header {
       display: flex; justify-content: space-between;
-      font-size: .73rem; margin-bottom: 5px; color: var(--muted);
+      font-size: .7rem; margin-bottom: 3px; color: var(--muted);
     }
     .slider-row .sl-header span:last-child { color: var(--accent2); font-weight: 600; }
-    input[type=range] { width: 100%; accent-color: var(--accent); cursor: pointer; }
+    input[type=range] { width: 100%; accent-color: var(--accent); cursor: pointer; height: 14px; }
 
     /* color picker */
     .color-row {
       display: flex; align-items: center; gap: 8px;
-      font-size: .76rem; margin-bottom: 8px; color: var(--muted);
+      font-size: .72rem; margin-bottom: 5px; color: var(--muted);
     }
     input[type=color] {
-      width: 28px; height: 24px; border: 1px solid var(--border);
+      width: 26px; height: 22px; border: 1px solid var(--border);
       border-radius: 6px; background: none; cursor: pointer; padding: 2px;
     }
 
     /* checkbox */
     .check-row {
       display: flex; align-items: center; gap: 8px;
-      font-size: .78rem; margin-bottom: 7px; cursor: pointer; color: var(--muted);
+      font-size: .75rem; margin-bottom: 5px; cursor: pointer; color: var(--muted);
     }
-    input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; }
+    input[type=checkbox] { accent-color: var(--accent); width: 13px; height: 13px; }
 
     /* ─── Canvas area ─── */
     .canvas-wrap {
@@ -203,16 +203,17 @@
 
     /* ─── Right panel ─── */
     .stats-panel {
-      width: 290px; background: var(--surface);
+      width: 280px; background: var(--surface);
       border-left: 1px solid var(--border);
-      display: flex; flex-direction: column; overflow-y: auto; flex-shrink: 0;
+      display: flex; flex-direction: column; overflow: hidden; flex-shrink: 0;
     }
     .stats-header {
-      padding: 13px 18px; border-bottom: 1px solid var(--border);
-      font-size: .62rem; font-weight: 600;
+      padding: 10px 16px; border-bottom: 1px solid var(--border);
+      font-size: .6rem; font-weight: 600;
       text-transform: uppercase; letter-spacing: 1.3px; color: var(--muted);
       display: flex; align-items: center; justify-content: space-between;
       background: linear-gradient(135deg, rgba(200,134,10,.05) 0%, transparent 100%);
+      flex-shrink: 0;
     }
     .impact-badge {
       background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
@@ -221,11 +222,11 @@
       box-shadow: 0 2px 10px rgba(200,134,10,.32);
     }
 
-    .stat-block { padding: 13px 18px; border-bottom: 1px solid var(--border); }
+    .stat-block { padding: 9px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
     .stat-block h4 {
-      font-size: .62rem; font-weight: 600;
+      font-size: .6rem; font-weight: 600;
       text-transform: uppercase; letter-spacing: 1.1px; color: var(--muted);
-      margin-bottom: 10px; display: flex; align-items: center; gap: 7px;
+      margin-bottom: 7px; display: flex; align-items: center; gap: 7px;
     }
     .stat-block h4::before {
       content: ''; display: inline-block;
@@ -233,10 +234,10 @@
     }
     .stat-row {
       display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 5px; font-size: .8rem; color: var(--muted);
+      margin-bottom: 4px; font-size: .76rem; color: var(--muted);
     }
     .stat-row .val {
-      font-weight: 700; font-size: .86rem; color: var(--text);
+      font-weight: 700; font-size: .82rem; color: var(--text);
       font-variant-numeric: tabular-nums;
     }
     .val.green { color: var(--green); }
@@ -246,8 +247,8 @@
 
     /* Zone rows */
     .zone-row {
-      display: flex; align-items: center; gap: 9px;
-      margin-bottom: 6px; font-size: .8rem; color: var(--muted);
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 4px; font-size: .76rem; color: var(--muted);
     }
     .zone-dot {
       width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
@@ -273,12 +274,12 @@
     /* Score gauge (SVG ring) */
     .score-wrap {
       display: flex; flex-direction: column;
-      align-items: center; padding: 10px 0 14px;
+      align-items: center; padding: 6px 0 8px;
     }
     .score-circle {
-      width: 92px; height: 92px; position: relative;
+      width: 76px; height: 76px; position: relative;
       display: flex; align-items: center; justify-content: center;
-      margin-bottom: 8px;
+      margin-bottom: 5px;
     }
     .score-ring {
       position: absolute; inset: 0; width: 100%; height: 100%;
@@ -296,16 +297,16 @@
       display: flex; flex-direction: column; align-items: center; z-index: 1;
     }
     .score-inner .score-val {
-      font-size: 1.7rem; font-weight: 800; line-height: 1; letter-spacing: -1px;
+      font-size: 1.45rem; font-weight: 800; line-height: 1; letter-spacing: -1px;
     }
     .score-inner .score-lbl {
-      font-size: .55rem; color: var(--muted);
-      text-transform: uppercase; letter-spacing: .6px; margin-top: 2px;
+      font-size: .5rem; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .6px; margin-top: 1px;
     }
-    .score-label { font-size: .78rem; font-weight: 600; }
+    .score-label { font-size: .74rem; font-weight: 600; }
 
     /* Impact list */
-    .impact-list { padding: 6px 18px 10px; font-size: .76rem; max-height: 190px; overflow-y: auto; }
+    .impact-list { padding: 4px 16px 6px; font-size: .74rem; flex: 1; overflow-y: auto; min-height: 0; }
     .impact-item {
       display: flex; align-items: center; padding: 5px 0; gap: 8px;
       border-bottom: 1px solid rgba(255,255,255,.04);
@@ -325,11 +326,12 @@
 
     /* Export button */
     .export-btn {
-      margin: 14px 18px 18px; padding: 11px;
+      flex-shrink: 0;
+      margin: 10px 16px 12px; padding: 9px;
       background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
       color: #fff; border: none; border-radius: var(--radius);
-      font-size: .85rem; font-weight: 700; font-family: inherit;
-      cursor: pointer; width: calc(100% - 36px);
+      font-size: .82rem; font-weight: 700; font-family: inherit;
+      cursor: pointer; width: calc(100% - 32px);
       transition: all .2s; letter-spacing: .2px;
       box-shadow: 0 4px 16px rgba(200,134,10,.3);
     }
@@ -540,6 +542,14 @@
         <input type="checkbox" id="chkNums" checked />
         <label for="chkNums">Numéroter les impacts</label>
       </div>
+      <div class="check-row">
+        <input type="checkbox" id="chkEllipse" checked />
+        <label for="chkEllipse">Ellipse de dispersion</label>
+      </div>
+      <div class="color-row">
+        <input type="color" id="colEllipse" value="#4dabf7" />
+        <span>Couleur ellipse</span>
+      </div>
     </div>
 
     <!-- Zoom -->
@@ -723,6 +733,11 @@
         <label for="expNums" class="modal-check-label">Numéros des impacts</label>
         <input type="color" id="expColNums" class="exp-color" value="#e05252" title="Couleur des numéros" />
       </div>
+      <div class="modal-check-row">
+        <input type="checkbox" id="expEllipse" checked />
+        <label for="expEllipse" class="modal-check-label">Ellipse de dispersion</label>
+        <input type="color" id="expColEllipse" class="exp-color" value="#4dabf7" title="Couleur de l'ellipse" />
+      </div>
     </div>
     <div class="modal-actions">
       <button class="modal-btn cancel" id="exportCancel">Annuler</button>
@@ -865,6 +880,27 @@ function draw() {
       ctx.strokeStyle = '#4a90d9';
       ctx.lineWidth = 1.5 / state.zoom;
       ctx.stroke();
+    }
+
+    // Ellipse de dispersion (covariance 1σ)
+    if (document.getElementById('chkEllipse').checked && state.impacts.length >= 3) {
+      const ell = computeEllipse();
+      if (ell && ell.a > 0) {
+        const ellCol = document.getElementById('colEllipse').value;
+        ctx.save();
+        ctx.translate(ell.cx, ell.cy);
+        ctx.rotate(ell.angle);
+        ctx.beginPath();
+        ctx.ellipse(0, 0, ell.a, ell.b, 0, 0, Math.PI * 2);
+        ctx.strokeStyle = ellCol + 'bb';
+        ctx.lineWidth   = 1.5 / state.zoom;
+        ctx.setLineDash([6 / state.zoom, 3 / state.zoom]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = ellCol + '18';
+        ctx.fill();
+        ctx.restore();
+      }
     }
   }
 
@@ -1108,7 +1144,7 @@ document.getElementById('slC2').addEventListener('input', function () {
   draw(); updateStats();
 });
 
-['colC1','colC2','colImp','slImpSz','chkC1','chkC2','chkNums'].forEach(id => {
+['colC1','colC2','colImp','colEllipse','slImpSz','chkC1','chkC2','chkNums','chkEllipse'].forEach(id => {
   document.getElementById(id).addEventListener('change', () => {
     if (id === 'slImpSz')
       document.getElementById('impSzVal').textContent = document.getElementById(id).value;
@@ -1144,6 +1180,29 @@ function dispersionCenter() {
   const sx = state.impacts.reduce((s, p) => s + p.x, 0) / n;
   const sy = state.impacts.reduce((s, p) => s + p.y, 0) / n;
   return { x: sx, y: sy };
+}
+
+// Ellipse de covariance (PCA) – retourne {cx,cy,a,b,angle} ou null
+function computeEllipse() {
+  const n = state.impacts.length;
+  if (n < 3) return null;
+  const dc = dispersionCenter();
+  let Cxx = 0, Cyy = 0, Cxy = 0;
+  state.impacts.forEach(p => {
+    const dx = p.x - dc.x, dy = p.y - dc.y;
+    Cxx += dx * dx; Cyy += dy * dy; Cxy += dx * dy;
+  });
+  Cxx /= n; Cyy /= n; Cxy /= n;
+  const tr   = Cxx + Cyy;
+  const disc = Math.sqrt(Math.max(0, (tr / 2) ** 2 - (Cxx * Cyy - Cxy * Cxy)));
+  const λ1   = tr / 2 + disc;
+  const λ2   = tr / 2 - disc;
+  return {
+    cx: dc.x, cy: dc.y,
+    a: Math.sqrt(Math.max(0, λ1)),
+    b: Math.sqrt(Math.max(0, λ2)),
+    angle: Math.atan2(2 * Cxy, Cxx - Cyy) / 2,
+  };
 }
 
 function updateStats() {
@@ -1266,10 +1325,11 @@ const exportConfirm = document.getElementById('exportConfirm');
 
 function openExportModal() {
   // Sync couleurs depuis la toolbar au moment de l'ouverture
-  document.getElementById('expColC1').value   = document.getElementById('colC1').value;
-  document.getElementById('expColC2').value   = document.getElementById('colC2').value;
-  document.getElementById('expColImp').value  = document.getElementById('colImp').value;
-  document.getElementById('expColNums').value = document.getElementById('colImp').value;
+  document.getElementById('expColC1').value      = document.getElementById('colC1').value;
+  document.getElementById('expColC2').value      = document.getElementById('colC2').value;
+  document.getElementById('expColImp').value     = document.getElementById('colImp').value;
+  document.getElementById('expColNums').value    = document.getElementById('colImp').value;
+  document.getElementById('expColEllipse').value = document.getElementById('colEllipse').value;
   exportModal.classList.add('open');
 }
 function closeExportModal() {
@@ -1287,14 +1347,16 @@ exportModal.addEventListener('click', e => { if (e.target === exportModal) close
 exportConfirm.addEventListener('click', () => {
   closeExportModal();
 
-  const showC1      = document.getElementById('expC1').checked;
-  const showC2      = document.getElementById('expC2').checked;
-  const showImpacts = document.getElementById('expImpacts').checked;
-  const showNums    = document.getElementById('expNums').checked;
-  const colC1exp    = document.getElementById('expColC1').value;
-  const colC2exp    = document.getElementById('expColC2').value;
-  const colImpExp   = document.getElementById('expColImp').value;
-  const colNumsExp  = document.getElementById('expColNums').value;
+  const showC1       = document.getElementById('expC1').checked;
+  const showC2       = document.getElementById('expC2').checked;
+  const showImpacts  = document.getElementById('expImpacts').checked;
+  const showNums     = document.getElementById('expNums').checked;
+  const showEllipse  = document.getElementById('expEllipse').checked;
+  const colC1exp     = document.getElementById('expColC1').value;
+  const colC2exp     = document.getElementById('expColC2').value;
+  const colImpExp    = document.getElementById('expColImp').value;
+  const colNumsExp   = document.getElementById('expColNums').value;
+  const colEllExp    = document.getElementById('expColEllipse').value;
 
   // Canvas centré sur les cercles + impacts
   const margin = 30;
@@ -1337,6 +1399,28 @@ exportConfirm.addEventListener('click', () => {
   ectx.moveTo(ox - hs, oy); ectx.lineTo(ox + hs, oy);
   ectx.moveTo(ox, oy - hs); ectx.lineTo(ox, oy + hs);
   ectx.stroke();
+
+  // ── Ellipse de dispersion ──
+  if (showEllipse && state.impacts.length >= 3) {
+    const ell = computeEllipse();
+    if (ell && ell.a > 0) {
+      const ex = ell.cx + dx;
+      const ey = ell.cy + dy;
+      ectx.save();
+      ectx.translate(ex, ey);
+      ectx.rotate(ell.angle);
+      ectx.beginPath();
+      ectx.ellipse(0, 0, ell.a, ell.b, 0, 0, Math.PI * 2);
+      ectx.strokeStyle = colEllExp + 'bb';
+      ectx.lineWidth   = 1.5;
+      ectx.setLineDash([6, 3]);
+      ectx.stroke();
+      ectx.setLineDash([]);
+      ectx.fillStyle = colEllExp + '18';
+      ectx.fill();
+      ectx.restore();
+    }
+  }
 
   // ── Impacts ──
   if (showImpacts) {
