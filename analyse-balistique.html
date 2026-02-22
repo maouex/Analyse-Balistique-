@@ -1135,102 +1135,86 @@ function renderImpactList(distances) {
 
 // ── Export ────────────────────────────────────
 document.getElementById('btnExport').addEventListener('click', () => {
-  if (!state.img) { alert('Aucune image chargée.'); return; }
+  if (!state.center) { alert('Veuillez placer le centre de la cible avant d\'exporter.'); return; }
 
-  // Create export canvas at full image resolution
-  const ec = document.createElement('canvas');
-  const oldZoom = state.zoom, oldPanX = state.panX, oldPanY = state.panY;
+  // Canvas transparent centré sur les cercles + impacts
+  // Taille : diamètre du grand cercle + marge
+  const margin = 30;
+  const size   = (state.r2 * 2) + margin * 2;
+  const ec     = document.createElement('canvas');
+  ec.width     = size;
+  ec.height    = size;
+  const ectx   = ec.getContext('2d');
+  // Fond transparent par défaut (clearRect suffit)
 
-  ec.width  = state.img.width;
-  ec.height = state.img.height;
-  const ectx = ec.getContext('2d');
+  // Origine locale : centre de la cible au milieu du canvas export
+  const ox = size / 2;
+  const oy = size / 2;
 
-  // Draw image
-  ectx.drawImage(state.img, 0, 0);
+  // Décalage depuis les coords image vers le canvas export
+  const dx = ox - state.center.x;
+  const dy = oy - state.center.y;
 
-  // Draw circles
-  if (state.center) {
-    const cx = state.center.x, cy = state.center.y;
-    if (document.getElementById('chkC1').checked) {
-      ectx.beginPath();
-      ectx.arc(cx, cy, state.r1, 0, Math.PI * 2);
-      ectx.strokeStyle = document.getElementById('colC1').value + 'cc';
-      ectx.lineWidth = 2; ectx.setLineDash([6, 4]); ectx.stroke(); ectx.setLineDash([]);
-    }
-    if (document.getElementById('chkC2').checked) {
-      ectx.beginPath();
-      ectx.arc(cx, cy, state.r2, 0, Math.PI * 2);
-      ectx.strokeStyle = document.getElementById('colC2').value + 'cc';
-      ectx.lineWidth = 2; ectx.setLineDash([8, 5]); ectx.stroke(); ectx.setLineDash([]);
-    }
-    // Crosshair
-    const hs = 14;
-    ectx.strokeStyle = '#ffffffcc'; ectx.lineWidth = 1.5;
+  // ── Cercles ──
+  if (document.getElementById('chkC1').checked) {
     ectx.beginPath();
-    ectx.moveTo(cx - hs, cy); ectx.lineTo(cx + hs, cy);
-    ectx.moveTo(cx, cy - hs); ectx.lineTo(cx, cy + hs);
+    ectx.arc(ox, oy, state.r1, 0, Math.PI * 2);
+    ectx.strokeStyle = document.getElementById('colC1').value;
+    ectx.lineWidth   = 2;
+    ectx.setLineDash([6, 4]);
     ectx.stroke();
-    ectx.beginPath(); ectx.arc(cx, cy, 4, 0, Math.PI * 2);
-    ectx.fillStyle = '#ffffff'; ectx.fill();
+    ectx.setLineDash([]);
+  }
+  if (document.getElementById('chkC2').checked) {
+    ectx.beginPath();
+    ectx.arc(ox, oy, state.r2, 0, Math.PI * 2);
+    ectx.strokeStyle = document.getElementById('colC2').value;
+    ectx.lineWidth   = 2;
+    ectx.setLineDash([8, 5]);
+    ectx.stroke();
+    ectx.setLineDash([]);
   }
 
-  // Draw impacts
+  // ── Croix centre ──
+  const hs = 10;
+  ectx.strokeStyle = '#555555';
+  ectx.lineWidth   = 1.5;
+  ectx.beginPath();
+  ectx.moveTo(ox - hs, oy); ectx.lineTo(ox + hs, oy);
+  ectx.moveTo(ox, oy - hs); ectx.lineTo(ox, oy + hs);
+  ectx.stroke();
+
+  // ── Impacts ──
   const impColor = document.getElementById('colImp').value;
   const impSz    = parseInt(document.getElementById('slImpSz').value);
-  const showNums  = document.getElementById('chkNums').checked;
+  const showNums = document.getElementById('chkNums').checked;
+
   state.impacts.forEach((imp, i) => {
+    const ix = imp.x + dx;
+    const iy = imp.y + dy;
+    // Halo
     ectx.beginPath();
-    ectx.arc(imp.x, imp.y, impSz * 1.7, 0, Math.PI * 2);
-    ectx.fillStyle = impColor + '30'; ectx.fill();
+    ectx.arc(ix, iy, impSz * 1.7, 0, Math.PI * 2);
+    ectx.fillStyle = impColor + '40';
+    ectx.fill();
+    // Point
     ectx.beginPath();
-    ectx.arc(imp.x, imp.y, impSz, 0, Math.PI * 2);
-    ectx.fillStyle = impColor; ectx.fill();
-    ectx.strokeStyle = '#ffffffaa'; ectx.lineWidth = 1; ectx.stroke();
+    ectx.arc(ix, iy, impSz, 0, Math.PI * 2);
+    ectx.fillStyle = impColor;
+    ectx.fill();
+    // Numéro
     if (showNums) {
-      ectx.font = `bold 11px Segoe UI, sans-serif`;
+      ectx.font      = `bold 11px Segoe UI, sans-serif`;
       ectx.textAlign = 'center';
-      ectx.fillStyle = '#ffffff';
-      ectx.fillText(i + 1, imp.x, imp.y - impSz - 3);
+      ectx.fillStyle = impColor;
+      ectx.fillText(i + 1, ix, iy - impSz - 3);
     }
   });
 
-  // Stats overlay (bottom bar)
-  const n  = state.impacts.length;
-  const bh = 56;
-  ectx.fillStyle = 'rgba(26,28,32,.88)';
-  ectx.fillRect(0, ec.height - bh, ec.width, bh);
-  ectx.font = 'bold 13px Segoe UI, sans-serif';
-  ectx.fillStyle = '#e8a020';
-  ectx.textAlign = 'left';
-  const distances = state.center ? state.impacts.map(p => distPx(p, state.center)) : [];
-  const z1 = distances.filter(d => d <= state.r1).length;
-  const z2 = distances.filter(d => d > state.r1 && d <= state.r2).length;
-  const z3 = distances.filter(d => d > state.r2).length;
-  const mean = n ? distances.reduce((a, b) => a + b, 0) / n : 0;
-  const pad  = 16;
-  const cols = [
-    `Impacts : ${n}`,
-    `Zone ≤50cm : ${z1} (${pct(z1,n)})`,
-    `Zone 50-100cm : ${z2} (${pct(z2,n)})`,
-    `Hors cible : ${z3} (${pct(z3,n)})`,
-    `Dist. moy : ${mean.toFixed(1)} px`,
-  ];
-  const cw = ec.width / cols.length;
-  cols.forEach((txt, i) => {
-    ectx.fillStyle = '#c8c9cc';
-    ectx.font = '12px Segoe UI, sans-serif';
-    ectx.textAlign = 'left';
-    ectx.fillText(txt, pad + i * cw, ec.height - 20);
-  });
-  ectx.fillStyle = '#8a8d96';
-  ectx.font = '10px Segoe UI, sans-serif';
-  ectx.textAlign = 'right';
-  ectx.fillText('Analyse Balistique — Journal de Chasse', ec.width - pad, ec.height - 8);
-
-  // Download
-  const a = document.createElement('a');
-  a.href     = ec.toDataURL('image/png');
-  a.download = 'analyse-balistique.png';
+  // ── Téléchargement ──
+  const a      = document.createElement('a');
+  a.href       = ec.toDataURL('image/png');
+  a.download   = 'analyse-balistique.png';
   a.click();
 });
 
