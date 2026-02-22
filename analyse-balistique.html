@@ -665,9 +665,14 @@ function pct(n, total) {
   if (!total) return '—';
   return (n / total * 100).toFixed(1) + '%';
 }
-function fmt(v, unit = 'px') {
+function fmt(v, unit = 'cm') {
   if (v === null || isNaN(v)) return '—';
-  return v.toFixed(1) + ' ' + unit;
+  return v.toFixed(2) + ' ' + unit;
+}
+// Convertit une distance en pixels (espace image) en centimètres
+// r1 (rayon du cercle 50 cm) sert d'étalon : r1 px = 50 cm
+function pxToCm(px) {
+  return px * (50 / state.r1);
 }
 
 // ── Draw ─────────────────────────────────────
@@ -912,7 +917,7 @@ canvas.addEventListener('mousemove', e => {
     tooltip.style.display = 'block';
     tooltip.style.left = (cx + 14) + 'px';
     tooltip.style.top  = (cy - 10) + 'px';
-    tooltip.textContent = `d = ${d.toFixed(1)} px  |  ${zone}`;
+    tooltip.textContent = `d = ${pxToCm(d).toFixed(2)} cm  |  ${zone}`;
   } else {
     tooltip.style.display = 'none';
   }
@@ -1072,21 +1077,21 @@ function updateStats() {
   const std   = Math.sqrt(variance);
   const cv    = mean > 0 ? (std / mean * 100).toFixed(1) + '%' : '—';
 
-  document.getElementById('statMean').textContent = fmt(mean);
-  document.getElementById('statMin').textContent  = fmt(minD);
-  document.getElementById('statMax').textContent  = fmt(maxD);
-  document.getElementById('statStd').textContent  = fmt(std);
+  document.getElementById('statMean').textContent = fmt(pxToCm(mean));
+  document.getElementById('statMin').textContent  = fmt(pxToCm(minD));
+  document.getElementById('statMax').textContent  = fmt(pxToCm(maxD));
+  document.getElementById('statStd').textContent  = fmt(pxToCm(std));
 
   // Dispersion center offset
   const dc = dispersionCenter();
-  document.getElementById('statCx').textContent = fmt(dc.x - cx);
-  document.getElementById('statCy').textContent = fmt(dc.y - cy);
+  document.getElementById('statCx').textContent = fmt(pxToCm(dc.x - cx));
+  document.getElementById('statCy').textContent = fmt(pxToCm(dc.y - cy));
 
   // R90 (radius containing 90% of impacts)
   const sortedD = [...distances].sort((a, b) => a - b);
   const r90idx  = Math.ceil(0.9 * n) - 1;
   const r90     = sortedD[Math.min(r90idx, sortedD.length - 1)];
-  document.getElementById('statR90').textContent = fmt(r90);
+  document.getElementById('statR90').textContent = fmt(pxToCm(r90));
 
   // Percentages
   document.getElementById('statPct50').textContent  = pct(z1, n);
@@ -1127,7 +1132,7 @@ function renderImpactList(distances) {
     else                    { zone = '> 100 cm';   cls = 'z3'; }
     return `<div class="impact-item">
       <span class="imp-num">#${i+1}</span>
-      <span>${d.toFixed(1)} px</span>
+      <span>${pxToCm(d).toFixed(2)} cm</span>
       <span class="zone-tag ${cls}">${zone}</span>
     </div>`;
   }).join('');
