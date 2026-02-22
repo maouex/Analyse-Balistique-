@@ -376,13 +376,22 @@
     .modal-check-row input[type=checkbox] {
       accent-color: var(--accent); width: 15px; height: 15px; flex-shrink: 0;
     }
-    .modal-check-dot {
-      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+    .modal-check-label { flex: 1; }
+    .exp-color {
+      margin-left: auto; flex-shrink: 0;
+      width: 28px; height: 28px;
+      border: 2px solid rgba(255,255,255,.15);
+      border-radius: 50%;
+      cursor: pointer;
+      padding: 0;
+      background: transparent;
+      -webkit-appearance: none; appearance: none;
+      transition: border-color .15s, transform .12s;
     }
-    .modal-check-dot.green { background: var(--green); box-shadow: 0 0 5px rgba(46,204,113,.5); }
-    .modal-check-dot.amber { background: var(--amber); box-shadow: 0 0 5px rgba(245,159,0,.5); }
-    .modal-check-dot.red   { background: var(--red);   box-shadow: 0 0 5px rgba(224,82,82,.5); }
-    .modal-check-dot.blue  { background: var(--blue);  box-shadow: 0 0 5px rgba(77,171,247,.5); }
+    .exp-color:hover { border-color: rgba(200,134,10,.6); transform: scale(1.1); }
+    .exp-color::-webkit-color-swatch-wrapper { padding: 0; border-radius: 50%; overflow: hidden; }
+    .exp-color::-webkit-color-swatch { border: none; border-radius: 50%; }
+    .exp-color::-moz-color-swatch { border: none; border-radius: 50%; }
     .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
     .modal-btn {
       padding: 9px 18px; border-radius: var(--radius); border: none;
@@ -694,26 +703,26 @@
     </div>
     <p class="modal-sub">Sélectionnez les éléments à inclure dans l'image PNG</p>
     <div class="modal-checks">
-      <label class="modal-check-row">
+      <div class="modal-check-row">
         <input type="checkbox" id="expC1" checked />
-        <span class="modal-check-dot green"></span>
-        Cercle 50 cm
-      </label>
-      <label class="modal-check-row">
+        <label for="expC1" class="modal-check-label">Cercle 50 cm</label>
+        <input type="color" id="expColC1" class="exp-color" value="#3dba6f" title="Couleur du cercle 50 cm" />
+      </div>
+      <div class="modal-check-row">
         <input type="checkbox" id="expC2" checked />
-        <span class="modal-check-dot amber"></span>
-        Cercle 100 cm
-      </label>
-      <label class="modal-check-row">
+        <label for="expC2" class="modal-check-label">Cercle 100 cm</label>
+        <input type="color" id="expColC2" class="exp-color" value="#e8a020" title="Couleur du cercle 100 cm" />
+      </div>
+      <div class="modal-check-row">
         <input type="checkbox" id="expImpacts" checked />
-        <span class="modal-check-dot red"></span>
-        Impacts
-      </label>
-      <label class="modal-check-row">
+        <label for="expImpacts" class="modal-check-label">Impacts</label>
+        <input type="color" id="expColImp" class="exp-color" value="#e05252" title="Couleur des impacts" />
+      </div>
+      <div class="modal-check-row">
         <input type="checkbox" id="expNums" checked />
-        <span class="modal-check-dot blue"></span>
-        Numéros des impacts
-      </label>
+        <label for="expNums" class="modal-check-label">Numéros des impacts</label>
+        <input type="color" id="expColNums" class="exp-color" value="#e05252" title="Couleur des numéros" />
+      </div>
     </div>
     <div class="modal-actions">
       <button class="modal-btn cancel" id="exportCancel">Annuler</button>
@@ -1256,6 +1265,11 @@ const exportCancel = document.getElementById('exportCancel');
 const exportConfirm = document.getElementById('exportConfirm');
 
 function openExportModal() {
+  // Sync couleurs depuis la toolbar au moment de l'ouverture
+  document.getElementById('expColC1').value   = document.getElementById('colC1').value;
+  document.getElementById('expColC2').value   = document.getElementById('colC2').value;
+  document.getElementById('expColImp').value  = document.getElementById('colImp').value;
+  document.getElementById('expColNums').value = document.getElementById('colImp').value;
   exportModal.classList.add('open');
 }
 function closeExportModal() {
@@ -1277,6 +1291,10 @@ exportConfirm.addEventListener('click', () => {
   const showC2      = document.getElementById('expC2').checked;
   const showImpacts = document.getElementById('expImpacts').checked;
   const showNums    = document.getElementById('expNums').checked;
+  const colC1exp    = document.getElementById('expColC1').value;
+  const colC2exp    = document.getElementById('expColC2').value;
+  const colImpExp   = document.getElementById('expColImp').value;
+  const colNumsExp  = document.getElementById('expColNums').value;
 
   // Canvas centré sur les cercles + impacts
   const margin = 30;
@@ -1295,7 +1313,7 @@ exportConfirm.addEventListener('click', () => {
   if (showC1) {
     ectx.beginPath();
     ectx.arc(ox, oy, state.r1, 0, Math.PI * 2);
-    ectx.strokeStyle = document.getElementById('colC1').value;
+    ectx.strokeStyle = colC1exp;
     ectx.lineWidth   = 2;
     ectx.setLineDash([6, 4]);
     ectx.stroke();
@@ -1304,7 +1322,7 @@ exportConfirm.addEventListener('click', () => {
   if (showC2) {
     ectx.beginPath();
     ectx.arc(ox, oy, state.r2, 0, Math.PI * 2);
-    ectx.strokeStyle = document.getElementById('colC2').value;
+    ectx.strokeStyle = colC2exp;
     ectx.lineWidth   = 2;
     ectx.setLineDash([8, 5]);
     ectx.stroke();
@@ -1322,23 +1340,22 @@ exportConfirm.addEventListener('click', () => {
 
   // ── Impacts ──
   if (showImpacts) {
-    const impColor = document.getElementById('colImp').value;
-    const impSz    = parseInt(document.getElementById('slImpSz').value);
+    const impSz = parseInt(document.getElementById('slImpSz').value);
     state.impacts.forEach((imp, i) => {
       const ix = imp.x + dx;
       const iy = imp.y + dy;
       ectx.beginPath();
       ectx.arc(ix, iy, impSz * 1.7, 0, Math.PI * 2);
-      ectx.fillStyle = impColor + '40';
+      ectx.fillStyle = colImpExp + '40';
       ectx.fill();
       ectx.beginPath();
       ectx.arc(ix, iy, impSz, 0, Math.PI * 2);
-      ectx.fillStyle = impColor;
+      ectx.fillStyle = colImpExp;
       ectx.fill();
       if (showNums) {
         ectx.font      = 'bold 11px Inter, Segoe UI, sans-serif';
         ectx.textAlign = 'center';
-        ectx.fillStyle = impColor;
+        ectx.fillStyle = colNumsExp;
         ectx.fillText(i + 1, ix, iy - impSz - 3);
       }
     });
