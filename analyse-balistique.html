@@ -419,6 +419,239 @@
     }
     .scale-status.uncalibrated { color: var(--muted); }
 
+    /* ─── Munitions Database ─── */
+    .mun-overlay {
+      position: fixed; inset: 0; z-index: 8000;
+      background: rgba(4, 6, 12, .88); backdrop-filter: blur(7px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 16px; animation: munFadeIn .28s ease;
+    }
+    @keyframes munFadeIn  { from{opacity:0} to{opacity:1} }
+    @keyframes munFadeOut { from{opacity:1} to{opacity:0} }
+    @keyframes munSlideIn {
+      from { opacity:0; transform: translateY(26px) scale(.97); }
+      to   { opacity:1; transform: translateY(0)    scale(1);   }
+    }
+    .mun-hidden { display: none !important; }
+    .mun-overlay.mun-closing { animation: munFadeOut .22s ease forwards; }
+
+    .mun-box {
+      background: #0c1018; border: 1px solid rgba(255,255,255,.08);
+      border-radius: 18px; display: flex; flex-direction: column;
+      max-height: 90vh; width: 100%;
+      box-shadow: 0 30px 90px rgba(0,0,0,.85);
+      animation: munSlideIn .38s cubic-bezier(.22,.68,0,1.15);
+    }
+    .mun-form-box { max-width: 790px; }
+    .mun-lib-box  { max-width: 960px; }
+    .mun-cmp-box  { max-width: 1160px; }
+
+    .mun-hdr {
+      display: flex; align-items: center; gap: 10px;
+      padding: 18px 22px 14px;
+      border-bottom: 1px solid rgba(255,255,255,.07); flex-shrink: 0;
+    }
+    .mun-hdr h2 {
+      font-size: 1rem; font-weight: 800; color: #dde0f0; margin: 0;
+      letter-spacing: -.01em; flex: 1;
+    }
+    .mun-hdr-tools { display: flex; align-items: center; gap: 7px; }
+    .mun-close {
+      background: rgba(255,255,255,.05); border: 1px solid var(--border);
+      color: var(--muted); border-radius: 7px; width: 27px; height: 27px;
+      cursor: pointer; font-size: .82rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .15s, color .15s; flex-shrink: 0;
+    }
+    .mun-close:hover { background: rgba(255,70,70,.2); color: #ff6b6b; }
+
+    .mun-tabs {
+      display: flex; gap: 1px; padding: 10px 22px 0; flex-shrink: 0;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+    }
+    .mun-tab {
+      background: none; border: none; color: var(--muted);
+      padding: 7px 15px; font-size: .75rem; font-weight: 700; cursor: pointer;
+      border-radius: 8px 8px 0 0; border-bottom: 2px solid transparent;
+      transition: color .15s, background .15s; white-space: nowrap;
+    }
+    .mun-tab.active { color: var(--blue); border-bottom-color: var(--blue); background: rgba(77,166,255,.07); }
+    .mun-tab:hover:not(.active) { color: var(--text); background: rgba(255,255,255,.04); }
+
+    .mun-panes { flex: 1; overflow-y: auto; padding: 18px 22px 8px; }
+    .mun-pane  { display: none; }
+    .mun-pane.active { display: block; }
+
+    .mun-fg { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .mun-fg-full { grid-column: 1 / -1; }
+    .mun-section {
+      grid-column: 1 / -1; font-size: .63rem; font-weight: 800;
+      text-transform: uppercase; letter-spacing: .11em; color: var(--muted);
+      margin: 8px 0 2px; padding-bottom: 6px;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .mun-field { display: flex; flex-direction: column; gap: 4px; }
+    .mun-field label {
+      font-size: .64rem; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .07em;
+    }
+    .mun-field input[type="text"],
+    .mun-field input[type="number"],
+    .mun-field textarea,
+    .mun-field select {
+      background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.09);
+      border-radius: 7px; color: var(--text); padding: 7px 10px;
+      font-size: .79rem; font-family: inherit; width: 100%; box-sizing: border-box;
+      transition: border-color .15s;
+    }
+    .mun-field input:focus, .mun-field textarea:focus, .mun-field select:focus {
+      outline: none; border-color: var(--blue); background: rgba(77,166,255,.05);
+    }
+    .mun-field select option { background: #1a1f2e; }
+    .mun-field textarea { resize: vertical; min-height: 90px; }
+    .mun-field input[readonly] {
+      background: rgba(255,255,255,.02); color: var(--muted);
+      cursor: not-allowed; border-style: dashed;
+    }
+    .mun-auto-lbl { font-size: .58rem; color: var(--blue); opacity: .75; margin-top: 1px; }
+
+    .mun-tags {
+      display: flex; flex-wrap: wrap; gap: 5px; align-items: center;
+      background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.09);
+      border-radius: 7px; padding: 5px 9px; min-height: 34px; cursor: text;
+      transition: border-color .15s;
+    }
+    .mun-tags:focus-within { border-color: var(--blue); background: rgba(77,166,255,.05); }
+    .mun-tag {
+      display: inline-flex; align-items: center; gap: 3px;
+      background: rgba(77,166,255,.14); color: var(--blue);
+      border-radius: 5px; padding: 2px 8px; font-size: .71rem; font-weight: 800;
+    }
+    .mun-tag button {
+      background: none; border: none; color: inherit; cursor: pointer;
+      padding: 0; font-size: .72rem; line-height: 1; opacity: .65;
+    }
+    .mun-tag button:hover { opacity: 1; }
+    #mfTagInput {
+      background: none; border: none; outline: none; color: var(--text);
+      font-size: .77rem; min-width: 50px; flex: 1; font-family: inherit;
+    }
+
+    .mun-score-preview {
+      display: flex; align-items: center; gap: 14px;
+      background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06);
+      border-radius: 10px; padding: 12px 16px; grid-column: 1 / -1;
+    }
+    .mun-score-circle {
+      width: 50px; height: 50px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; font-weight: 900; color: #000;
+    }
+    .mun-score-info h4 { font-size: .84rem; font-weight: 800; color: var(--text); margin: 0 0 2px; }
+    .mun-score-info p  { font-size: .67rem; color: var(--muted); margin: 0; }
+
+    .mun-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 10px; padding: 13px 22px;
+      border-top: 1px solid rgba(255,255,255,.07); flex-shrink: 0;
+    }
+    .mun-footer-left { font-size: .68rem; color: var(--muted); }
+    .mun-footer-right { display: flex; gap: 8px; }
+    .mun-btn-sec {
+      background: rgba(255,255,255,.06); border: 1px solid var(--border);
+      color: var(--muted); border-radius: 8px; padding: 7px 16px;
+      font-size: .77rem; font-weight: 600; cursor: pointer;
+      transition: background .15s, color .15s;
+    }
+    .mun-btn-sec:hover { background: rgba(255,255,255,.1); color: var(--text); }
+    .mun-btn-pri {
+      background: var(--blue); color: #000; border: none; border-radius: 8px;
+      padding: 7px 20px; font-size: .77rem; font-weight: 800; cursor: pointer;
+      box-shadow: 0 0 14px rgba(77,166,255,.3); transition: filter .15s, transform .15s;
+    }
+    .mun-btn-pri:hover { filter: brightness(1.12); transform: translateY(-1px); }
+
+    /* ─ Library ─ */
+    .lib-tools { display: flex; align-items: center; gap: 7px; }
+    .lib-search {
+      background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08);
+      border-radius: 7px; color: var(--text); padding: 5px 10px;
+      font-size: .74rem; font-family: inherit; width: 170px; transition: border-color .15s;
+    }
+    .lib-search:focus { outline: none; border-color: var(--blue); }
+    .lib-cmp-btn {
+      background: rgba(204,93,232,.12); border: 1px solid rgba(204,93,232,.25);
+      color: #cc5de8; border-radius: 8px; padding: 5px 13px;
+      font-size: .73rem; font-weight: 700; cursor: pointer; white-space: nowrap;
+      transition: background .15s;
+    }
+    .lib-cmp-btn:hover:not(:disabled) { background: rgba(204,93,232,.22); }
+    .lib-cmp-btn:disabled { opacity: .38; cursor: default; }
+    #libCards { flex: 1; overflow-y: auto; padding: 14px 22px 18px; }
+    .lib-empty { text-align: center; padding: 52px 24px; color: var(--muted); line-height: 1.7; }
+    .lib-empty-icon { font-size: 2.5rem; display: block; margin-bottom: 12px; opacity: .4; }
+    .lib-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+
+    .lib-card {
+      background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.07);
+      border-radius: 12px; padding: 13px 13px 10px;
+      transition: border-color .2s, background .2s;
+    }
+    .lib-card:hover { background: rgba(255,255,255,.055); border-color: rgba(255,255,255,.12); }
+    .lib-card.selected { border-color: rgba(204,93,232,.55); background: rgba(204,93,232,.04); }
+    .lib-card-top { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 9px; }
+    .lib-card-top input[type="checkbox"] {
+      cursor: pointer; accent-color: #cc5de8; width: 14px; height: 14px;
+      margin-top: 3px; flex-shrink: 0;
+    }
+    .lib-card-info { flex: 1; min-width: 0; }
+    .lib-card-title {
+      font-size: .83rem; font-weight: 800; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .lib-card-sub { font-size: .65rem; color: var(--muted); margin-top: 2px; }
+    .lib-card-acts { display: flex; gap: 4px; flex-shrink: 0; }
+    .lib-act {
+      background: none; border: 1px solid rgba(255,255,255,.08);
+      color: var(--muted); border-radius: 6px; width: 24px; height: 24px;
+      cursor: pointer; font-size: .7rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .13s, color .13s;
+    }
+    .lib-act.edit:hover { background: rgba(77,166,255,.15); color: var(--blue); }
+    .lib-act.del:hover  { background: rgba(255,80,80,.15); color: #ff6b6b; }
+    .lib-card-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px; }
+    .lib-sl { font-size: .58rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+    .lib-sv { font-size: .76rem; font-weight: 700; color: var(--text); }
+    .lib-score-row { grid-column: 1 / -1; margin-top: 4px; }
+    .lib-score-bar  { height: 4px; border-radius: 2px; background: rgba(255,255,255,.07); margin-top: 3px; }
+    .lib-score-fill { height: 100%; border-radius: 2px; }
+    .lib-card-date  { font-size: .57rem; color: var(--muted); text-align: right; margin-top: 7px; }
+
+    /* ─ Comparison ─ */
+    #cmpTable { flex: 1; overflow: auto; padding: 14px 20px; }
+    .cmp-hint { font-size: .72rem; color: var(--muted); text-align: center; margin-bottom: 12px; }
+    .cmp-table { width: 100%; border-collapse: collapse; font-size: .76rem; }
+    .cmp-table th, .cmp-table td {
+      padding: 7px 16px; border-bottom: 1px solid rgba(255,255,255,.05); text-align: right;
+    }
+    .cmp-table th:first-child, .cmp-table td:first-child {
+      text-align: left; color: var(--muted); font-size: .67rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: .06em;
+      position: sticky; left: 0; background: #0c1018; z-index: 1;
+      padding-right: 22px; white-space: nowrap;
+    }
+    .cmp-table th { background: rgba(255,255,255,.03); color: var(--text); font-weight: 800; font-size: .79rem; }
+    .cmp-table th .cmp-sub { font-size: .61rem; color: var(--muted); font-weight: 500; display: block; }
+    .cmp-best  { color: #51cf66 !important; background: rgba(81,207,102,.06) !important; font-weight: 800 !important; }
+    .cmp-worst { color: #ff6b6b !important; background: rgba(255,107,107,.05) !important; }
+    .cmp-bar-wrap { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
+    .cmp-bar { height: 4px; border-radius: 2px; background: var(--blue); flex-shrink: 0; }
+    .cmp-grp td { background: rgba(255,255,255,.025); color: var(--blue); font-size: .63rem;
+                  font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
+                  padding-top: 12px; padding-bottom: 4px; }
+    .cmp-grp td:first-child { color: var(--blue); }
+
     /* ─── Tutorial Overlay ─── */
     @keyframes tutFadeIn  { from{opacity:0}          to{opacity:1} }
     @keyframes tutFadeOut { from{opacity:1}          to{opacity:0} }
@@ -637,6 +870,236 @@
   </div>
 </div>
 
+<!-- ════════ MUNITIONS FORM MODAL ════════ -->
+<div id="munModal" class="mun-overlay mun-hidden">
+  <div class="mun-box mun-form-box">
+
+    <div class="mun-hdr">
+      <h2>📋 Fiche munition</h2>
+      <div class="mun-hdr-tools">
+        <button class="mun-close" id="btnMunClose">✕</button>
+      </div>
+    </div>
+
+    <div class="mun-tabs">
+      <button class="mun-tab active" data-tab="cartouche">🎯 Cartouche</button>
+      <button class="mun-tab" data-tab="balistique">📊 Balistique</button>
+      <button class="mun-tab" data-tab="notes">📝 Notes</button>
+    </div>
+
+    <div class="mun-panes">
+
+      <!-- ── Onglet 1 : Cartouche ── -->
+      <div class="mun-pane active" id="pane-cartouche">
+        <div class="mun-fg">
+          <div class="mun-section">Identification</div>
+          <div class="mun-field">
+            <label>Fabricant</label>
+            <input type="text" id="mf-fabricant" placeholder="Ex: Baschieri & Pellagri">
+          </div>
+          <div class="mun-field">
+            <label>Distributeur</label>
+            <input type="text" id="mf-distributeur" placeholder="Ex: Akah, Frankonia…">
+          </div>
+          <div class="mun-field">
+            <label>Calibre</label>
+            <select id="mf-calibre">
+              <option value="">— Sélectionner —</option>
+              <option>12/70</option><option>12/76 (Magnum)</option>
+              <option>16/70</option><option>20/70</option>
+              <option>28/70</option><option>.410</option>
+            </select>
+          </div>
+          <div class="mun-field">
+            <label>Prix public (€)</label>
+            <input type="number" id="mf-prix" placeholder="Ex: 18.50" min="0" step="0.01">
+          </div>
+
+          <div class="mun-section">Composition</div>
+          <div class="mun-field mun-fg-full">
+            <label>Tailles de billes disponibles <span style="opacity:.6;font-weight:500">(Entrée pour ajouter)</span></label>
+            <div class="mun-tags" id="mfTagsWrap">
+              <input type="text" id="mfTagInput" placeholder="Ex: 3  puis Entrée…" maxlength="4">
+            </div>
+            <span class="mun-auto-lbl">Toutes les tailles proposées pour cette référence</span>
+          </div>
+          <div class="mun-field">
+            <label>Taille de bille testée</label>
+            <input type="text" id="mf-taille-testee" placeholder="Ex: 5">
+          </div>
+          <div class="mun-field">
+            <label>Vitesse officielle (m/s)</label>
+            <input type="number" id="mf-vitesse-officielle" placeholder="Ex: 395" min="0">
+          </div>
+          <div class="mun-field">
+            <label>Bourre</label>
+            <input type="text" id="mf-bourre" placeholder="Ex: Plastique segmentée">
+          </div>
+          <div class="mun-field">
+            <label>Douille</label>
+            <input type="text" id="mf-douille" placeholder="Ex: Plastique 70mm">
+          </div>
+          <div class="mun-field mun-fg-full">
+            <label>Poudre</label>
+            <input type="text" id="mf-poudre" placeholder="Ex: Vihtavuori N320">
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Onglet 2 : Balistique ── -->
+      <div class="mun-pane" id="pane-balistique">
+        <div class="mun-fg">
+          <div class="mun-section">Conditions du test</div>
+          <div class="mun-field">
+            <label>Distance (m)</label>
+            <select id="mf-distance">
+              <option value="45">45 m</option>
+              <option value="35">35 m</option>
+              <option value="25">25 m</option>
+              <option value="autre">Autre</option>
+            </select>
+          </div>
+          <div class="mun-field">
+            <label>Choke</label>
+            <select id="mf-choke">
+              <option value="Full">Full</option>
+              <option value="Improved Modified">Improved Modified</option>
+              <option value="Modified">Modified</option>
+              <option value="Improved Cylinder">Improved Cylinder</option>
+              <option value="Cylinder">Cylinder</option>
+            </select>
+          </div>
+          <div class="mun-field">
+            <label>Fusil</label>
+            <input type="text" id="mf-fusil" value="ATA Arms — canon 76 cm">
+          </div>
+          <div class="mun-field">
+            <label>Vitesse mesurée @ 2.5 m (m/s)</label>
+            <input type="number" id="mf-vitesse-mesuree" placeholder="Ex: 362" min="0">
+          </div>
+
+          <div class="mun-section">Résultats de la gerbe — ∅ 50 cm &amp; 100 cm (auto)</div>
+          <div class="mun-score-preview">
+            <div class="mun-score-circle" id="mfScoreCircle">—</div>
+            <div class="mun-score-info">
+              <h4 id="mfScoreLabel">Aucune analyse chargée</h4>
+              <p id="mfScoreDetail">Placez le centre et les impacts sur l'image pour remplir automatiquement ces champs.</p>
+            </div>
+          </div>
+          <div class="mun-field">
+            <label>Total impacts</label>
+            <input type="number" id="mf-total-impacts" readonly placeholder="—">
+            <span class="mun-auto-lbl">✦ Rempli par l'analyse</span>
+          </div>
+          <div class="mun-field">
+            <label>Impacts dans ∅ 50 cm</label>
+            <input type="number" id="mf-impacts-50" readonly placeholder="—">
+            <span class="mun-auto-lbl">✦ Rempli par l'analyse</span>
+          </div>
+          <div class="mun-field">
+            <label>Impacts dans ∅ 100 cm</label>
+            <input type="number" id="mf-impacts-100" readonly placeholder="—">
+            <span class="mun-auto-lbl">✦ Zone 1 + Zone 2</span>
+          </div>
+          <div class="mun-field">
+            <label>% ∅ 50 cm</label>
+            <input type="text" id="mf-pct-50" readonly placeholder="—">
+            <span class="mun-auto-lbl">✦ Rempli par l'analyse</span>
+          </div>
+          <div class="mun-field">
+            <label>% ∅ 100 cm</label>
+            <input type="text" id="mf-pct-100" readonly placeholder="—">
+            <span class="mun-auto-lbl">✦ Rempli par l'analyse</span>
+          </div>
+          <div class="mun-field">
+            <label>Dispersion moyenne (cm)</label>
+            <input type="text" id="mf-disp-moy" readonly placeholder="—">
+            <span class="mun-auto-lbl">✦ Distance moyenne au centre</span>
+          </div>
+          <div class="mun-field">
+            <label>R90 — rayon 90 % (cm)</label>
+            <input type="text" id="mf-r90" readonly placeholder="—">
+            <span class="mun-auto-lbl">✦ Rempli par l'analyse</span>
+          </div>
+          <div class="mun-field">
+            <label>Score de groupement</label>
+            <input type="number" id="mf-score" readonly placeholder="—">
+            <span class="mun-auto-lbl">✦ Rempli par l'analyse</span>
+          </div>
+
+          <div class="mun-section">Mesures terrain</div>
+          <div class="mun-field">
+            <label>Pénétration gel balistique @ 45 m (cm)</label>
+            <input type="number" id="mf-penetration" placeholder="Ex: 22" min="0" step="0.5">
+          </div>
+          <div class="mun-field"></div>
+        </div>
+      </div>
+
+      <!-- ── Onglet 3 : Notes ── -->
+      <div class="mun-pane" id="pane-notes">
+        <div class="mun-fg">
+          <div class="mun-field mun-fg-full">
+            <label>Nom de la référence / Modèle</label>
+            <input type="text" id="mf-nom" placeholder="Ex: BP FK7 Speed Magnum No5">
+          </div>
+          <div class="mun-field mun-fg-full">
+            <label>Observations &amp; remarques</label>
+            <textarea id="mf-notes" placeholder="Conditions météo, comportement à l'impact, groupe de test, remarques sur la régularité…"></textarea>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="mun-footer">
+      <div class="mun-footer-left" id="mfEditInfo"></div>
+      <div class="mun-footer-right">
+        <button class="mun-btn-sec" id="btnMunCancel">Annuler</button>
+        <button class="mun-btn-pri" id="btnMunSave">💾 Enregistrer</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════ LIBRARY MODAL ════════ -->
+<div id="libModal" class="mun-overlay mun-hidden">
+  <div class="mun-box mun-lib-box">
+
+    <div class="mun-hdr">
+      <h2>📚 Bibliothèque des munitions</h2>
+      <div class="lib-tools">
+        <input type="text" class="lib-search" id="libSearch" placeholder="🔍  Rechercher…">
+        <button class="lib-cmp-btn" id="btnCmpStart" disabled>
+          ⚖️ Comparer (<span id="cmpCount">0</span>)
+        </button>
+        <button class="mun-close" id="btnLibClose">✕</button>
+      </div>
+    </div>
+
+    <div id="libCards"><!-- rendu par JS --></div>
+
+  </div>
+</div>
+
+<!-- ════════ COMPARISON MODAL ════════ -->
+<div id="cmpModal" class="mun-overlay mun-hidden">
+  <div class="mun-box mun-cmp-box">
+
+    <div class="mun-hdr">
+      <h2>⚖️ Comparaison des munitions</h2>
+      <div class="mun-hdr-tools">
+        <button class="mun-btn-sec" id="btnCmpBack">← Bibliothèque</button>
+        <button class="mun-close" id="btnCmpClose">✕</button>
+      </div>
+    </div>
+
+    <div id="cmpTable"><!-- rendu par JS --></div>
+
+  </div>
+</div>
+
 <!-- ════════ HEADER ════════ -->
 <header>
   <div class="logo">🎯</div>
@@ -780,6 +1243,17 @@
       </div>
       <button class="tb-btn" id="btnZoomFit">
         <span class="icon">⊡</span> Ajuster à l'écran
+      </button>
+    </div>
+
+    <!-- ── Munitions DB ── -->
+    <div class="tb-section">
+      <h3>Munitions</h3>
+      <button class="tb-btn" id="btnMunNew" style="border-color:rgba(77,166,255,.3);color:var(--blue);">
+        <span class="icon">💾</span> Sauvegarder l'analyse
+      </button>
+      <button class="tb-btn" id="btnLibOpen">
+        <span class="icon">📚</span> Bibliothèque
       </button>
     </div>
 
@@ -1820,6 +2294,464 @@ exportConfirm.addEventListener('click', () => {
 
 // ── Init ─────────────────────────────────────
 resizeCanvas();
+
+// ══════════════════════════════════════════════
+//  MUNITIONS DATABASE
+// ══════════════════════════════════════════════
+
+/* ── Storage CRUD ──────────────────────────── */
+const MunDB = (() => {
+  const KEY = 'balistique_munitions_v1';
+  const all   = () => { try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { return []; } };
+  const save  = r  => localStorage.setItem(KEY, JSON.stringify(r));
+  const add   = r  => { const rows = all(); r.id = Date.now().toString(36) + Math.random().toString(36).slice(2,6); r.createdAt = new Date().toISOString(); rows.push(r); save(rows); return r.id; };
+  const upd   = (id, d) => { const rows = all(); const i = rows.findIndex(r => r.id === id); if (i < 0) return; rows[i] = {...rows[i], ...d, updatedAt: new Date().toISOString()}; save(rows); };
+  const del   = id => save(all().filter(r => r.id !== id));
+  const get   = id => all().find(r => r.id === id) || null;
+  return { all, add, upd, del, get };
+})();
+
+/* ── Helpers ───────────────────────────────── */
+function munOpenOverlay(id) {
+  const el = document.getElementById(id);
+  el.classList.remove('mun-hidden', 'mun-closing');
+}
+function munCloseOverlay(id) {
+  const el = document.getElementById(id);
+  el.classList.add('mun-closing');
+  setTimeout(() => el.classList.add('mun-hidden'), 230);
+}
+
+function scoreColorFor(s) {
+  if (s >= 80) return '#51cf66';
+  if (s >= 60) return '#f59f00';
+  if (s >= 40) return '#ff9f43';
+  return '#ff6b6b';
+}
+function scoreLabelFor(s) {
+  if (s >= 80) return 'Excellent groupement';
+  if (s >= 60) return 'Bon groupement';
+  if (s >= 40) return 'Groupement moyen';
+  return 'Groupement dispersé';
+}
+
+function fmtDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return d.toLocaleDateString('fr-FR', { day:'2-digit', month:'short', year:'numeric' });
+}
+
+/* ── Snapshot from current analysis ─────────── */
+function getSnapshot() {
+  const n = state.impacts.length;
+  if (!state.center || n === 0) return null;
+  const distances = state.impacts.map(p => distPx(p, state.center));
+  let z1 = 0, z2 = 0, z3 = 0;
+  distances.forEach(d => { if (d <= state.r1) z1++; else if (d <= state.r2) z2++; else z3++; });
+  const mean = distances.reduce((a,b) => a+b, 0) / n;
+  const variance = distances.reduce((s,d) => s+(d-mean)**2, 0) / n;
+  const sortedD = [...distances].sort((a,b) => a-b);
+  const r90 = pxToCm(sortedD[Math.min(Math.ceil(0.9*n)-1, sortedD.length-1)]);
+  const rawScore = (z1*100 + z2*60 + z3*10) / (n*100) * 100;
+  const pct = (v, t) => t > 0 ? (v/t*100).toFixed(1)+'%' : '0%';
+  return {
+    nbImpacts     : n,
+    impacts50cm   : z1,
+    impacts100cm  : z1 + z2,
+    impactsHors   : z3,
+    pct50cm       : pct(z1, n),
+    pct100cm      : pct(z1+z2, n),
+    dispMoy       : +pxToCm(mean).toFixed(1),
+    r90           : +r90.toFixed(1),
+    score         : Math.round(rawScore),
+  };
+}
+
+/* ── Tag-input (tailles de billes) ──────────── */
+(function() {
+  const wrap = document.getElementById('mfTagsWrap');
+  const inp  = document.getElementById('mfTagInput');
+  function addTag(val) {
+    val = val.trim().replace(/[^0-9A-Za-z\/\.\-]/g,'');
+    if (!val) return;
+    const t = document.createElement('span');
+    t.className = 'mun-tag';
+    t.dataset.val = val;
+    t.innerHTML = val + '<button type="button" title="Supprimer">×</button>';
+    t.querySelector('button').onclick = () => t.remove();
+    wrap.insertBefore(t, inp);
+    inp.value = '';
+  }
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addTag(inp.value); }
+    if (e.key === 'Backspace' && !inp.value) {
+      const tags = wrap.querySelectorAll('.mun-tag');
+      if (tags.length) tags[tags.length-1].remove();
+    }
+  });
+  inp.addEventListener('blur', () => { if (inp.value) addTag(inp.value); });
+  wrap.addEventListener('click', () => inp.focus());
+
+  // expose for external set/get
+  window._munTagsGet = () => [...wrap.querySelectorAll('.mun-tag')].map(t => t.dataset.val);
+  window._munTagsSet = arr => {
+    wrap.querySelectorAll('.mun-tag').forEach(t => t.remove());
+    (arr||[]).forEach(v => addTag(v));
+  };
+})();
+
+/* ── Tab navigation ──────────────────────────── */
+document.querySelectorAll('.mun-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const target = tab.dataset.tab;
+    document.querySelectorAll('.mun-tab').forEach(t => t.classList.toggle('active', t === tab));
+    document.querySelectorAll('.mun-pane').forEach(p => p.classList.toggle('active', p.id === 'pane-'+target));
+  });
+});
+
+/* ── Form: fill from snapshot & record ──────── */
+function munFormReset() {
+  ['mf-fabricant','mf-distributeur','mf-calibre','mf-prix','mf-taille-testee',
+   'mf-vitesse-officielle','mf-bourre','mf-douille','mf-poudre','mf-distance',
+   'mf-choke','mf-fusil','mf-vitesse-mesuree','mf-penetration','mf-nom','mf-notes'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = el.tagName === 'SELECT' ? el.options[0]?.value || '' : '';
+  });
+  window._munTagsSet([]);
+  document.getElementById('mf-fusil').value = 'ATA Arms — canon 76 cm';
+  document.getElementById('mf-choke').value = 'Full';
+  document.getElementById('mf-distance').value = '45';
+  munFormFillSnapshot(null);
+  document.getElementById('mfEditInfo').textContent = '';
+  document.getElementById('munModal').dataset.editId = '';
+  // reset to first tab
+  document.querySelectorAll('.mun-tab')[0].click();
+}
+
+function munFormFillSnapshot(snap) {
+  const ids = {
+    'mf-total-impacts' : snap?.nbImpacts   ?? '',
+    'mf-impacts-50'    : snap?.impacts50cm ?? '',
+    'mf-impacts-100'   : snap?.impacts100cm?? '',
+    'mf-pct-50'        : snap?.pct50cm     ?? '',
+    'mf-pct-100'       : snap?.pct100cm    ?? '',
+    'mf-disp-moy'      : snap?.dispMoy     ?? '',
+    'mf-r90'           : snap?.r90         ?? '',
+    'mf-score'         : snap?.score       ?? '',
+  };
+  Object.entries(ids).forEach(([id, v]) => { document.getElementById(id).value = v; });
+  const sc = document.getElementById('mfScoreCircle');
+  const sl = document.getElementById('mfScoreLabel');
+  const sd = document.getElementById('mfScoreDetail');
+  if (snap && snap.score !== undefined) {
+    const c = scoreColorFor(snap.score);
+    sc.textContent = snap.score;
+    sc.style.background = c;
+    sc.style.boxShadow  = `0 0 18px ${c}66`;
+    sl.textContent = scoreLabelFor(snap.score);
+    sd.textContent = `${snap.nbImpacts} impacts · ∅50 cm: ${snap.pct50cm} · ∅100 cm: ${snap.pct100cm} · R90: ${snap.r90} cm`;
+  } else {
+    sc.textContent = '—'; sc.style.background = '#333'; sc.style.boxShadow = 'none';
+    sl.textContent = 'Aucune analyse chargée';
+    sd.textContent = 'Placez le centre et les impacts sur l\'image pour remplir automatiquement.';
+  }
+}
+
+function munFormFillRecord(rec) {
+  const set = (id, v) => { const el = document.getElementById(id); if (el && v !== undefined && v !== null) el.value = v; };
+  set('mf-fabricant', rec.fabricant); set('mf-distributeur', rec.distributeur);
+  set('mf-calibre', rec.calibre); set('mf-prix', rec.prix);
+  set('mf-taille-testee', rec.tailleTestee); set('mf-vitesse-officielle', rec.vitesseOfficielle);
+  set('mf-bourre', rec.bourre); set('mf-douille', rec.douille); set('mf-poudre', rec.poudre);
+  set('mf-distance', rec.distance); set('mf-choke', rec.choke); set('mf-fusil', rec.fusil);
+  set('mf-vitesse-mesuree', rec.vitesseMesuree); set('mf-penetration', rec.penetration);
+  set('mf-nom', rec.nom); set('mf-notes', rec.notes);
+  window._munTagsSet(rec.taillesDispo || []);
+  munFormFillSnapshot(rec.snap || null);
+}
+
+function munFormCollect() {
+  const g = id => document.getElementById(id)?.value?.trim() || '';
+  const gn = id => { const v = parseFloat(document.getElementById(id)?.value); return isNaN(v) ? null : v; };
+  const snapRaw = {
+    nbImpacts  : parseInt(document.getElementById('mf-total-impacts')?.value) || null,
+    impacts50cm: parseInt(document.getElementById('mf-impacts-50')?.value)    || null,
+    impacts100cm:parseInt(document.getElementById('mf-impacts-100')?.value)   || null,
+    pct50cm    : document.getElementById('mf-pct-50')?.value  || null,
+    pct100cm   : document.getElementById('mf-pct-100')?.value || null,
+    dispMoy    : parseFloat(document.getElementById('mf-disp-moy')?.value) || null,
+    r90        : parseFloat(document.getElementById('mf-r90')?.value)      || null,
+    score      : parseInt(document.getElementById('mf-score')?.value)      || null,
+  };
+  return {
+    nom              : g('mf-nom'),
+    fabricant        : g('mf-fabricant'),
+    distributeur     : g('mf-distributeur'),
+    calibre          : g('mf-calibre'),
+    prix             : gn('mf-prix'),
+    taillesDispo     : window._munTagsGet(),
+    tailleTestee     : g('mf-taille-testee'),
+    vitesseOfficielle: gn('mf-vitesse-officielle'),
+    bourre           : g('mf-bourre'),
+    douille          : g('mf-douille'),
+    poudre           : g('mf-poudre'),
+    distance         : g('mf-distance'),
+    choke            : g('mf-choke'),
+    fusil            : g('mf-fusil'),
+    vitesseMesuree   : gn('mf-vitesse-mesuree'),
+    penetration      : gn('mf-penetration'),
+    notes            : g('mf-notes'),
+    snap             : snapRaw,
+  };
+}
+
+/* ── Open form (new or edit) ─────────────────── */
+function munOpenForm(editId) {
+  munFormReset();
+  if (editId) {
+    const rec = MunDB.get(editId);
+    if (rec) {
+      munFormFillRecord(rec);
+      document.getElementById('munModal').dataset.editId = editId;
+      document.getElementById('mfEditInfo').textContent = 'Modification — ' + fmtDate(rec.createdAt);
+    }
+  } else {
+    const snap = getSnapshot();
+    munFormFillSnapshot(snap);
+    document.getElementById('mfEditInfo').textContent = snap ? 'Stats auto depuis l\'analyse en cours' : '';
+  }
+  munOpenOverlay('munModal');
+}
+
+/* ── Save ────────────────────────────────────── */
+document.getElementById('btnMunSave').addEventListener('click', () => {
+  const data = munFormCollect();
+  const editId = document.getElementById('munModal').dataset.editId;
+  if (editId) {
+    MunDB.upd(editId, data);
+  } else {
+    MunDB.add(data);
+  }
+  munCloseOverlay('munModal');
+  libRender();
+});
+
+document.getElementById('btnMunNew').addEventListener('click', () => munOpenForm(null));
+document.getElementById('btnMunCancel').addEventListener('click', () => munCloseOverlay('munModal'));
+document.getElementById('btnMunClose').addEventListener('click', () => munCloseOverlay('munModal'));
+
+/* ══════════════════════════════════════════════
+   LIBRARY
+══════════════════════════════════════════════ */
+let cmpSelected = new Set();
+
+function libRender(filter) {
+  const records = MunDB.all();
+  const q = (filter ?? document.getElementById('libSearch').value).toLowerCase().trim();
+  const filtered = q
+    ? records.filter(r =>
+        [r.fabricant, r.nom, r.calibre, r.tailleTestee, r.distributeur]
+          .some(v => (v||'').toLowerCase().includes(q)))
+    : records;
+
+  const wrap = document.getElementById('libCards');
+
+  if (!filtered.length) {
+    wrap.innerHTML = `<div class="lib-empty">
+      <span class="lib-empty-icon">📭</span>
+      ${q ? 'Aucune munition ne correspond à la recherche.' :
+            'Aucune munition enregistrée.<br>Cliquez sur <strong>💾 Sauvegarder l\'analyse</strong> pour commencer.'}
+    </div>`;
+    cmpSelected.clear(); libUpdateCmp();
+    return;
+  }
+
+  const grid = document.createElement('div');
+  grid.className = 'lib-grid';
+
+  filtered.forEach(rec => {
+    const snap = rec.snap || {};
+    const score = snap.score ?? null;
+    const sc = score !== null ? scoreColorFor(score) : '#555';
+    const card = document.createElement('div');
+    card.className = 'lib-card' + (cmpSelected.has(rec.id) ? ' selected' : '');
+    const title = [rec.fabricant, rec.nom].filter(Boolean).join(' — ') || 'Sans nom';
+    const sub   = [rec.calibre, rec.tailleTestee ? 'N°'+rec.tailleTestee : '', rec.choke, rec.distance ? rec.distance+'m' : ''].filter(Boolean).join(' · ');
+    card.innerHTML = `
+      <div class="lib-card-top">
+        <input type="checkbox" title="Sélectionner pour comparer" ${cmpSelected.has(rec.id) ? 'checked' : ''}>
+        <div class="lib-card-info">
+          <div class="lib-card-title" title="${title}">${title}</div>
+          <div class="lib-card-sub">${sub || '—'}</div>
+        </div>
+        <div class="lib-card-acts">
+          <button class="lib-act edit" title="Modifier">✏️</button>
+          <button class="lib-act del"  title="Supprimer">🗑</button>
+        </div>
+      </div>
+      <div class="lib-card-stats">
+        <div><div class="lib-sl">Impacts ∅50 cm</div><div class="lib-sv">${snap.impacts50cm ?? '—'} / ${snap.nbImpacts ?? '—'}</div></div>
+        <div><div class="lib-sl">% ∅ 100 cm</div><div class="lib-sv">${snap.pct100cm ?? '—'}</div></div>
+        <div><div class="lib-sl">Pénétration gel</div><div class="lib-sv">${rec.penetration != null ? rec.penetration+' cm' : '—'}</div></div>
+        <div><div class="lib-sl">V mesurée</div><div class="lib-sv">${rec.vitesseMesuree != null ? rec.vitesseMesuree+' m/s' : '—'}</div></div>
+        <div class="lib-score-row">
+          <div class="lib-sl">Score de groupement</div>
+          <div class="lib-score-bar"><div class="lib-score-fill" style="width:${score ?? 0}%;background:${sc}"></div></div>
+          <div class="lib-sv" style="color:${sc};margin-top:2px">${score !== null ? score+' / 100' : '—'}</div>
+        </div>
+      </div>
+      <div class="lib-card-date">${fmtDate(rec.updatedAt || rec.createdAt)}</div>`;
+
+    card.querySelector('input[type="checkbox"]').addEventListener('change', e => {
+      if (e.target.checked) {
+        if (cmpSelected.size >= 4) { e.target.checked = false; return; }
+        cmpSelected.add(rec.id);
+      } else {
+        cmpSelected.delete(rec.id);
+      }
+      card.classList.toggle('selected', cmpSelected.has(rec.id));
+      libUpdateCmp();
+    });
+    card.querySelector('.lib-act.edit').addEventListener('click', () => {
+      munCloseOverlay('libModal');
+      setTimeout(() => munOpenForm(rec.id), 80);
+    });
+    card.querySelector('.lib-act.del').addEventListener('click', () => {
+      if (!confirm(`Supprimer la fiche "${title}" ?`)) return;
+      cmpSelected.delete(rec.id);
+      MunDB.del(rec.id);
+      libRender();
+    });
+    grid.appendChild(card);
+  });
+  wrap.innerHTML = '';
+  wrap.appendChild(grid);
+}
+
+function libUpdateCmp() {
+  const n = cmpSelected.size;
+  document.getElementById('cmpCount').textContent = n;
+  document.getElementById('btnCmpStart').disabled = n < 2;
+}
+
+document.getElementById('btnLibOpen').addEventListener('click', () => {
+  libRender();
+  munOpenOverlay('libModal');
+});
+document.getElementById('btnLibClose').addEventListener('click', () => munCloseOverlay('libModal'));
+document.getElementById('libSearch').addEventListener('input', e => libRender(e.target.value));
+
+/* ══════════════════════════════════════════════
+   COMPARISON
+══════════════════════════════════════════════ */
+function cmpRender() {
+  const recs = [...cmpSelected].map(id => MunDB.get(id)).filter(Boolean);
+  if (recs.length < 2) return;
+
+  const rows = [
+    { label:'Calibre',            key: r => r.calibre || '—',                    numeric: false },
+    { label:'Taille bille testée',key: r => r.tailleTestee ? 'N°'+r.tailleTestee : '—', numeric: false },
+    { label:'Prix public',        key: r => r.prix != null ? r.prix.toFixed(2)+' €' : '—', numeric: false },
+    { label:'Vitesse officielle', key: r => r.vitesseOfficielle != null ? r.vitesseOfficielle+' m/s' : '—', raw: r => r.vitesseOfficielle, unit:'m/s', hi: true },
+    { label:'Vitesse mesurée',    key: r => r.vitesseMesuree != null ? r.vitesseMesuree+' m/s' : '—',    raw: r => r.vitesseMesuree,   unit:'m/s', hi: true },
+    { label:'Bourre',             key: r => r.bourre || '—',  numeric: false },
+    { label:'Douille',            key: r => r.douille || '—', numeric: false },
+    { label:'Poudre',             key: r => r.poudre || '—',  numeric: false },
+  ];
+  const snapRows = [
+    { label:'Total impacts',    raw: r => r.snap?.nbImpacts,    fmt: v => v != null ? String(v) : '—', hi: false },
+    { label:'Impacts ∅ 50 cm',  raw: r => r.snap?.impacts50cm,  fmt: v => v != null ? String(v) : '—', hi: true  },
+    { label:'Impacts ∅ 100 cm', raw: r => r.snap?.impacts100cm, fmt: v => v != null ? String(v) : '—', hi: true  },
+    { label:'% dans ∅ 50 cm',   raw: r => parseFloat(r.snap?.pct50cm)  || null, fmt: v => v != null ? v.toFixed(1)+'%' : '—', hi: true, bar: true },
+    { label:'% dans ∅ 100 cm',  raw: r => parseFloat(r.snap?.pct100cm) || null, fmt: v => v != null ? v.toFixed(1)+'%' : '—', hi: true, bar: true },
+    { label:'Dispersion moy.',   raw: r => r.snap?.dispMoy,  fmt: v => v != null ? v+' cm' : '—', hi: false },
+    { label:'R90 (90% des imp)', raw: r => r.snap?.r90,      fmt: v => v != null ? v+' cm' : '—', hi: false },
+    { label:'Score groupement',  raw: r => r.snap?.score,    fmt: v => v != null ? v+' / 100' : '—', hi: true, bar: true, maxV: 100 },
+  ];
+  const terrainRows = [
+    { label:'Pénétration gel @ 45m', raw: r => r.penetration, fmt: v => v != null ? v+' cm' : '—', hi: true },
+  ];
+
+  function buildSection(label, srows) {
+    let html = `<tr class="cmp-grp"><td colspan="${recs.length+1}">${label}</td></tr>`;
+    srows.forEach(({label: lbl, raw, fmt, hi, bar, maxV}) => {
+      const vals = recs.map(r => raw(r));
+      const nums = vals.map(v => typeof v === 'number' ? v : null);
+      const validNums = nums.filter(v => v !== null);
+      const maxNum = validNums.length ? Math.max(...validNums) : null;
+      const minNum = validNums.length ? Math.min(...validNums) : null;
+      const maxBar = maxV || maxNum || 1;
+      html += `<tr><td>${lbl}</td>`;
+      recs.forEach((r, i) => {
+        const v = vals[i]; const n = nums[i];
+        let cls = '';
+        if (n !== null && validNums.length > 1) {
+          if (hi  && n === maxNum) cls = 'cmp-best';
+          if (!hi && n === minNum) cls = 'cmp-best';
+          if (hi  && n === minNum && minNum !== maxNum) cls = 'cmp-worst';
+          if (!hi && n === maxNum && minNum !== maxNum) cls = 'cmp-worst';
+        }
+        const display = fmt ? fmt(v) : (v != null ? v : '—');
+        const barHtml = bar && n !== null ? `<div class="cmp-bar" style="width:${Math.round(n/maxBar*80)}px"></div>` : '';
+        html += `<td class="${cls}"><div class="cmp-bar-wrap">${barHtml}${display}</div></td>`;
+      });
+      html += '</tr>';
+    });
+    return html;
+  }
+
+  let thead = '<tr><th></th>';
+  recs.forEach(r => {
+    const title = [r.fabricant, r.nom].filter(Boolean).join(' ') || 'Sans nom';
+    const sub   = [r.calibre, r.tailleTestee ? 'N°'+r.tailleTestee : ''].filter(Boolean).join(' · ');
+    thead += `<th>${title}<span class="cmp-sub">${sub}</span></th>`;
+  });
+  thead += '</tr>';
+
+  let infoRows = '<tr><td>Fabricant</td>' + recs.map(r => `<td>${r.fabricant||'—'}</td>`).join('') + '</tr>';
+  infoRows += '<tr><td>Distributeur</td>' + recs.map(r => `<td>${r.distributeur||'—'}</td>`).join('') + '</tr>';
+
+  const table = `
+    <p class="cmp-hint">Meilleure valeur en <span style="color:#51cf66;font-weight:700">vert</span> · Moins bonne en <span style="color:#ff6b6b;font-weight:700">rouge</span> · Max. 4 munitions</p>
+    <table class="cmp-table">
+      <thead>${thead}</thead>
+      <tbody>
+        <tr class="cmp-grp"><td colspan="${recs.length+1}">Identification</td></tr>
+        ${infoRows}
+        ${buildSection('Cartouche', rows.slice(0,7))}
+        ${buildSection('Gerbe — ∅ 50 cm &amp; 100 cm à 45 m', snapRows)}
+        ${buildSection('Mesures terrain', terrainRows)}
+      </tbody>
+    </table>`;
+
+  document.getElementById('cmpTable').innerHTML = table;
+}
+
+document.getElementById('btnCmpStart').addEventListener('click', () => {
+  cmpRender();
+  munCloseOverlay('libModal');
+  munOpenOverlay('cmpModal');
+});
+document.getElementById('btnCmpClose').addEventListener('click', () => munCloseOverlay('cmpModal'));
+document.getElementById('btnCmpBack').addEventListener('click', () => {
+  munCloseOverlay('cmpModal');
+  setTimeout(() => { libRender(); munOpenOverlay('libModal'); }, 80);
+});
+
+/* Close on backdrop click */
+['munModal','libModal','cmpModal'].forEach(id => {
+  document.getElementById(id).addEventListener('click', e => {
+    if (e.target.id === id) munCloseOverlay(id);
+  });
+});
+/* Escape closes topmost open modal */
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  ['cmpModal','libModal','munModal'].find(id => {
+    const el = document.getElementById(id);
+    if (!el.classList.contains('mun-hidden')) { munCloseOverlay(id); return true; }
+  });
+});
 
 // ── Tutorial ─────────────────────────────────
 (function () {
