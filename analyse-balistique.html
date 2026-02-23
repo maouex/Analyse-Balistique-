@@ -889,7 +889,7 @@
 <body>
 
 <!-- ════════ TUTORIAL OVERLAY ════════ -->
-<div id="tutOverlay">
+<div id="tutOverlay" class="tut-hidden">
   <div class="tut-modal">
 
     <div class="tut-header">
@@ -2920,10 +2920,8 @@ document.addEventListener('keydown', e => {
     if (skipCheck.checked) localStorage.setItem(LS_KEY, '1');
   }
 
-  // Afficher uniquement si l'utilisateur n'a pas coché "Ne plus afficher"
-  if (localStorage.getItem(LS_KEY)) {
-    overlay.classList.add('tut-hidden');
-  }
+  window.openTutorial = openTutorial;
+  window._tutLsKey    = LS_KEY;
 
   btnStart.addEventListener('click', closeTutorial);
   btnHelp.addEventListener('click', openTutorial);
@@ -2951,6 +2949,10 @@ document.addEventListener('keydown', e => {
     homeScreen.style.display = 'none';
     mainApp.classList.remove('app-hidden');
     btnHome.classList.add('visible');
+    // Afficher le tuto à la première visite dans l'analyse
+    if (!localStorage.getItem(window._tutLsKey)) {
+      openTutorial();
+    }
   }
 
   function goHome() {
