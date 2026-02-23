@@ -2680,14 +2680,14 @@ function cmpRender() {
   if (recs.length < 2) return;
 
   const rows = [
-    { label:'Calibre',            key: r => r.calibre || '—',                    numeric: false },
-    { label:'Taille bille testée',key: r => r.tailleTestee ? 'N°'+r.tailleTestee : '—', numeric: false },
-    { label:'Prix public',        key: r => r.prix != null ? r.prix.toFixed(2)+' €' : '—', numeric: false },
-    { label:'Vitesse officielle', key: r => r.vitesseOfficielle != null ? r.vitesseOfficielle+' m/s' : '—', raw: r => r.vitesseOfficielle, unit:'m/s', hi: true },
-    { label:'Vitesse mesurée',    key: r => r.vitesseMesuree != null ? r.vitesseMesuree+' m/s' : '—',    raw: r => r.vitesseMesuree,   unit:'m/s', hi: true },
-    { label:'Bourre',             key: r => r.bourre || '—',  numeric: false },
-    { label:'Douille',            key: r => r.douille || '—', numeric: false },
-    { label:'Poudre',             key: r => r.poudre || '—',  numeric: false },
+    { label:'Calibre',            raw: r => r.calibre            || null, fmt: v => v || '—' },
+    { label:'Taille bille testée',raw: r => r.tailleTestee       || null, fmt: v => v ? 'N°'+v : '—' },
+    { label:'Prix public',        raw: r => r.prix               ?? null, fmt: v => v != null ? v.toFixed(2)+' €' : '—' },
+    { label:'Vitesse officielle', raw: r => r.vitesseOfficielle  ?? null, fmt: v => v != null ? v+' m/s' : '—', hi: true },
+    { label:'Vitesse mesurée',    raw: r => r.vitesseMesuree     ?? null, fmt: v => v != null ? v+' m/s' : '—', hi: true },
+    { label:'Bourre',             raw: r => r.bourre             || null, fmt: v => v || '—' },
+    { label:'Douille',            raw: r => r.douille            || null, fmt: v => v || '—' },
+    { label:'Poudre',             raw: r => r.poudre             || null, fmt: v => v || '—' },
   ];
   const snapRows = [
     { label:'Total impacts',    raw: r => r.snap?.nbImpacts,    fmt: v => v != null ? String(v) : '—', hi: false },
@@ -2749,7 +2749,7 @@ function cmpRender() {
       <tbody>
         <tr class="cmp-grp"><td colspan="${recs.length+1}">Identification</td></tr>
         ${infoRows}
-        ${buildSection('Cartouche', rows.slice(0,7))}
+        ${buildSection('Cartouche', rows)}
         ${buildSection('Gerbe — ∅ 50 cm &amp; 100 cm à 45 m', snapRows)}
         ${buildSection('Mesures terrain', terrainRows)}
       </tbody>
