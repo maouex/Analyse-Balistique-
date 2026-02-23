@@ -787,6 +787,91 @@
       box-shadow: 0 4px 20px rgba(0,0,0,.5);
     }
 
+    /* ─── Home Screen ─── */
+    #homeScreen {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 48px;
+      background: var(--bg);
+      background-image:
+        radial-gradient(ellipse at 50% 40%, rgba(200,134,10,.08) 0%, transparent 60%),
+        linear-gradient(rgba(255,255,255,.009) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.009) 1px, transparent 1px);
+      background-size: 100% 100%, 44px 44px, 44px 44px;
+      overflow: hidden;
+    }
+    .home-hero { text-align: center; }
+    .home-hero h2 {
+      font-size: 1.9rem; font-weight: 800;
+      background: linear-gradient(135deg, var(--accent2) 20%, #fff 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      letter-spacing: -.6px; margin-bottom: 10px;
+    }
+    .home-hero p { font-size: .88rem; color: var(--muted); line-height: 1.6; }
+    .home-cards { display: flex; gap: 28px; flex-wrap: wrap; justify-content: center; }
+    .home-card {
+      width: 280px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 36px 28px 28px;
+      cursor: pointer;
+      transition: transform .22s, box-shadow .22s, border-color .22s, background .22s;
+      text-align: center;
+      display: flex; flex-direction: column; align-items: center; gap: 14px;
+      user-select: none;
+    }
+    .home-card:hover {
+      border-color: var(--accent);
+      background: linear-gradient(135deg, rgba(200,134,10,.1) 0%, rgba(200,134,10,.03) 100%);
+      box-shadow: 0 8px 48px rgba(200,134,10,.18);
+      transform: translateY(-4px);
+    }
+    .home-card:active { transform: translateY(-1px); }
+    .hc-icon {
+      font-size: 2.6rem;
+      width: 72px; height: 72px;
+      background: linear-gradient(135deg, rgba(200,134,10,.15) 0%, rgba(240,160,48,.05) 100%);
+      border: 1px solid rgba(200,134,10,.22);
+      border-radius: 18px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 20px rgba(200,134,10,.1);
+    }
+    .home-card h3 { font-size: 1.1rem; font-weight: 700; color: var(--accent2); }
+    .home-card p  { font-size: .78rem; color: var(--muted); line-height: 1.55; }
+    .hc-btn {
+      margin-top: 6px;
+      padding: 10px 28px;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+      color: #fff; border: none; border-radius: var(--radius);
+      font-size: .82rem; font-weight: 700; font-family: inherit;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(200,134,10,.3);
+      transition: box-shadow .2s, transform .2s;
+      letter-spacing: .2px;
+    }
+    .hc-btn:hover { box-shadow: 0 6px 22px rgba(200,134,10,.5); transform: translateY(-1px); }
+
+    /* App masquée sur l'écran d'accueil */
+    .app.app-hidden { display: none !important; }
+
+    /* Bouton retour dans le header */
+    #btnHome {
+      display: none;
+      align-items: center; gap: 6px;
+      padding: 6px 14px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--muted); font-size: .78rem; font-family: inherit;
+      cursor: pointer; transition: all .17s;
+    }
+    #btnHome.visible { display: flex; }
+    #btnHome:hover { color: var(--text); border-color: var(--muted); background: rgba(255,255,255,.07); }
+
     /* ─── Responsive ─── */
     @media (max-width: 900px) {
       .stats-panel { width: 240px; }
@@ -796,6 +881,8 @@
       .app { flex-direction: column; }
       .toolbar { width: 100%; flex-direction: row; overflow-x: auto; }
       .stats-panel { width: 100%; max-height: 220px; }
+      .home-cards { flex-direction: column; }
+      .home-card { width: 85vw; max-width: 320px; }
     }
   </style>
 </head>
@@ -1108,13 +1195,39 @@
     <p>Outil d'analyse de tirs — Journal de Chasse</p>
   </div>
   <div class="header-right">
+    <button id="btnHome" title="Retour à l'accueil">← Accueil</button>
     <button id="btnTutHelp" title="Guide d'utilisation">?</button>
     <span class="version-tag">v2.0</span>
   </div>
 </header>
 
+<!-- ════════ HOME SCREEN ════════ -->
+<div id="homeScreen">
+  <div class="home-hero">
+    <h2>Analyse Balistique</h2>
+    <p>Journal de chasse — Gérez vos munitions et analysez vos tirs</p>
+  </div>
+  <div class="home-cards">
+
+    <div class="home-card" id="homeCardAnalyse">
+      <div class="hc-icon">🎯</div>
+      <h3>Analyse Balistique</h3>
+      <p>Chargez une photo de cible, placez le centre et les impacts, et obtenez une analyse complète de votre groupement.</p>
+      <button class="hc-btn">Lancer l'analyse</button>
+    </div>
+
+    <div class="home-card" id="homeCardLib">
+      <div class="hc-icon">📚</div>
+      <h3>Bibliothèque</h3>
+      <p>Gérez vos munitions, enregistrez vos résultats de tir et comparez les performances de vos cartouches.</p>
+      <button class="hc-btn">Ouvrir la bibliothèque</button>
+    </div>
+
+  </div>
+</div>
+
 <!-- ════════ MAIN APP ════════ -->
-<div class="app">
+<div class="app app-hidden">
 
   <!-- ── Toolbar ── -->
   <aside class="toolbar">
@@ -2824,6 +2937,36 @@ document.addEventListener('keydown', e => {
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && !overlay.classList.contains('tut-hidden')) closeTutorial();
   });
+}());
+
+/* ══════════════════════════════════════════════
+   NAVIGATION — Écran d'accueil
+══════════════════════════════════════════════ */
+(function() {
+  const homeScreen  = document.getElementById('homeScreen');
+  const mainApp     = document.querySelector('.app');
+  const btnHome     = document.getElementById('btnHome');
+
+  function goAnalyse() {
+    homeScreen.style.display = 'none';
+    mainApp.classList.remove('app-hidden');
+    btnHome.classList.add('visible');
+  }
+
+  function goHome() {
+    mainApp.classList.add('app-hidden');
+    homeScreen.style.display = '';
+    btnHome.classList.remove('visible');
+  }
+
+  document.getElementById('homeCardAnalyse').addEventListener('click', goAnalyse);
+
+  document.getElementById('homeCardLib').addEventListener('click', () => {
+    libRender();
+    munOpenOverlay('libModal');
+  });
+
+  btnHome.addEventListener('click', goHome);
 }());
 </script>
 </body>
