@@ -171,32 +171,28 @@ function drawImpact(
 function drawEllipse(
   ctx: CanvasRenderingContext2D,
   ellipse: CovarianceEllipse,
-  pixelsPerCm: number,
-  center: Point,
+  _pixelsPerCm: number,
+  _center: Point,
   view: ViewState,
   color: string
 ): void {
-  const cx = ellipse.centerX * pixelsPerCm;
-  const cy = ellipse.centerY * pixelsPerCm;
-  const a = ellipse.semiMajor * pixelsPerCm * view.zoom;
-  const b = ellipse.semiMinor * pixelsPerCm * view.zoom;
-
-  // ellipse center is in cm from origin, convert back
-  const impacts_mean_px: Point = { x: cx + center.x, y: cy + center.y };
-  const screenCenter = imageToCanvas({ x: impacts_mean_px.x, y: impacts_mean_px.y }, view);
+  // ellipse.centerX/Y are in image pixel coordinates
+  // ellipse.semiMajor/Minor are in pixels
+  const screenCenter = imageToCanvas({ x: ellipse.centerX, y: ellipse.centerY }, view);
+  const a = ellipse.semiMajor * view.zoom;
+  const b = ellipse.semiMinor * view.zoom;
 
   ctx.save();
-  ctx.globalAlpha = 0.25;
-  ctx.fillStyle = color;
   ctx.strokeStyle = color;
+  ctx.fillStyle = color;
   ctx.lineWidth = 2;
-  ctx.globalAlpha = 0.4;
 
+  ctx.globalAlpha = 0.5;
   ctx.beginPath();
   ctx.ellipse(screenCenter.x, screenCenter.y, a, b, ellipse.angle, 0, Math.PI * 2);
   ctx.stroke();
 
-  ctx.globalAlpha = 0.1;
+  ctx.globalAlpha = 0.08;
   ctx.fill();
   ctx.restore();
 }
@@ -239,7 +235,6 @@ function drawCrosshair(ctx: CanvasRenderingContext2D, p: Point): void {
 // ─── Export Rendering ───────────────────────────────────────
 
 export interface ExportRenderOptions {
-  image: HTMLImageElement;
   center: Point;
   impacts: Impact[];
   circle1: CircleConfig;
@@ -259,7 +254,7 @@ export interface ExportRenderOptions {
 }
 
 export function renderExport(options: ExportRenderOptions): HTMLCanvasElement {
-  const { image, center, impacts } = options;
+  const { center, impacts } = options;
   const margin = 30;
   const r2 = Math.max(options.circle1.radiusPx, options.circle2.radiusPx);
   const size = r2 * 2 + margin * 2;
@@ -269,16 +264,12 @@ export function renderExport(options: ExportRenderOptions): HTMLCanvasElement {
   canvas.height = size;
   const ctx = canvas.getContext('2d')!;
 
-  ctx.fillStyle = '#0a0c14';
-  ctx.fillRect(0, 0, size, size);
+  // Transparent background — no image, no fill
+  ctx.clearRect(0, 0, size, size);
 
+  // Offset so center of target = center of canvas
   const offsetX = size / 2 - center.x;
   const offsetY = size / 2 - center.y;
-
-  ctx.save();
-  ctx.translate(offsetX, offsetY);
-  ctx.drawImage(image, 0, 0);
-  ctx.restore();
 
   const cc = { x: size / 2, y: size / 2 };
 

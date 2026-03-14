@@ -106,13 +106,15 @@ export function calculateDispersionCenter(
 
 export function calculateCovarianceEllipse(
   impacts: Impact[],
-  pixelsPerCm: number
+  _pixelsPerCm: number
 ): CovarianceEllipse | null {
   if (impacts.length < 3) return null;
 
+  // Mean position in pixel coordinates
   const meanX = impacts.reduce((s, p) => s + p.x, 0) / impacts.length;
   const meanY = impacts.reduce((s, p) => s + p.y, 0) / impacts.length;
 
+  // Covariance matrix in pixel space
   let cxx = 0, cyy = 0, cxy = 0;
   for (const p of impacts) {
     const dx = p.x - meanX;
@@ -132,13 +134,16 @@ export function calculateCovarianceEllipse(
   const lambda1 = trace / 2 + disc;
   const lambda2 = trace / 2 - disc;
 
-  const semiMajor = pxToCm(Math.sqrt(Math.max(0, lambda1)), pixelsPerCm);
-  const semiMinor = pxToCm(Math.sqrt(Math.max(0, lambda2)), pixelsPerCm);
+  // Semi-axes in pixels (not cm) — conversion happens at render time
+  const semiMajor = Math.sqrt(Math.max(0, lambda1));
+  const semiMinor = Math.sqrt(Math.max(0, lambda2));
   const angle = Math.atan2(2 * cxy, cxx - cyy) / 2;
 
   return {
-    centerX: pxToCm(meanX, pixelsPerCm),
-    centerY: pxToCm(meanY, pixelsPerCm),
+    // Center in image pixel coordinates
+    centerX: meanX,
+    centerY: meanY,
+    // Semi-axes in pixels
     semiMajor,
     semiMinor,
     angle,

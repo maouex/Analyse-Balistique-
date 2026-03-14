@@ -14,6 +14,7 @@ interface ConeDispersionModeProps {
   ellipse: CovarianceEllipse | null;
   circle1RadiusCm: number;
   circle2RadiusCm: number;
+  pixelsPerCm: number | null;
 }
 
 const SCALE = 0.01; // 1cm = 0.01 unit
@@ -25,6 +26,7 @@ export function ConeDispersionMode({
   ellipse,
   circle1RadiusCm,
   circle2RadiusCm,
+  pixelsPerCm,
 }: ConeDispersionModeProps) {
   const coneRef = useRef<THREE.Mesh>(null);
   const coneHeight = distanceM * SCALE;
@@ -39,11 +41,14 @@ export function ConeDispersionMode({
 
   // Ellipse shape on the target plane
   const ellipseShape = useMemo(() => {
-    if (!ellipse) return null;
+    if (!ellipse || !pixelsPerCm) return null;
+    // Convert semi-axes from pixels to cm, then to 3D scale
+    const aCm = ellipse.semiMajor / pixelsPerCm;
+    const bCm = ellipse.semiMinor / pixelsPerCm;
     const curve = new THREE.EllipseCurve(
       0, 0,
-      ellipse.semiMajor * SCALE,
-      ellipse.semiMinor * SCALE,
+      aCm * SCALE,
+      bCm * SCALE,
       0, 2 * Math.PI,
       false,
       ellipse.angle

@@ -162,6 +162,7 @@ export function Scene3D({
                 ellipse={stats?.ellipse ?? null}
                 circle1RadiusCm={c1r}
                 circle2RadiusCm={c2r}
+                pixelsPerCm={store.scale.pixelsPerCm}
               />
             )}
 
