@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Point, Impact, ToolMode, ScaleCalibration, CircleConfig, ImpactStyle, ViewState } from '../types';
+import type { Point, Impact, ToolMode, ScaleCalibration, CircleConfig, ImpactStyle, ViewState, SavedAnalysis } from '../types';
 import { distancePx } from '../lib/ballistics';
 
 interface AnalysisState {
@@ -49,6 +49,10 @@ interface AnalysisState {
   setMousePos: (pos: Point | null) => void;
   fitToScreen: (canvasWidth: number, canvasHeight: number) => void;
   zoomAt: (delta: number, canvasX: number, canvasY: number) => void;
+
+  // Project save/restore
+  exportProject: () => SavedAnalysis | null;
+  loadProject: (project: SavedAnalysis) => Promise<void>;
 }
 
 const defaultCircle1: CircleConfig = {
@@ -228,5 +232,50 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
     const panX = canvasX - (canvasX - view.panX) * (newZoom / view.zoom);
     const panY = canvasY - (canvasY - view.panY) * (newZoom / view.zoom);
     set({ view: { zoom: newZoom, panX, panY } });
+  },
+
+  exportProject: () => {
+    const state = get();
+    if (!state.image) return null;
+
+    // Convert current image to dataURL
+    const canvas = document.createElement('canvas');
+    canvas.width = state.image.width;
+    canvas.height = state.image.height;
+    const ctx = canvas.getContext('2d')!;
+    ctx.drawImage(state.image, 0, 0);
+    const imageDataUrl = canvas.toDataURL('image/png');
+
+    return {
+      imageDataUrl,
+      center: state.center,
+      impacts: state.impacts,
+      scale: state.scale,
+      circle1: state.circle1,
+      circle2: state.circle2,
+    };
+  },
+
+  loadProject: async (project) => {
+    return new Promise<void>((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        set({
+          image: img,
+          imageLoaded: true,
+          center: project.center,
+          impacts: project.impacts,
+          scale: project.scale,
+          circle1: project.circle1,
+          circle2: project.circle2,
+          scalePt1: project.scale.pt1,
+          scalePt2: project.scale.pt2,
+          activeMode: 'impact',
+          view: { zoom: 1, panX: 0, panY: 0 },
+        });
+        resolve();
+      };
+      img.src = project.imageDataUrl;
+    });
   },
 }));

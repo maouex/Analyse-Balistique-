@@ -168,7 +168,7 @@ export function AnalysisCanvas() {
         flex: 1,
         position: 'relative',
         overflow: 'hidden',
-        background: '#0a0c14',
+        background: 'var(--canvas-bg)',
       }}
     >
       <canvas

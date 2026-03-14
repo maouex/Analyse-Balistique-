@@ -1,10 +1,12 @@
-import { Crosshair, Home } from 'lucide-react';
+import { Crosshair, Home, Sun, Moon } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useThemeStore } from '../../stores/themeStore';
 
 export function Header() {
   const navigate = useNavigate();
   const location = useLocation();
   const isHome = location.pathname === '/';
+  const { mode, toggle } = useThemeStore();
 
   return (
     <header style={{
@@ -35,6 +37,15 @@ export function Header() {
           Accueil
         </button>
       )}
+
+      <button
+        className="btn btn-sm"
+        onClick={toggle}
+        title={mode === 'dark' ? 'Thème clair' : 'Thème sombre'}
+        style={{ padding: '6px 8px' }}
+      >
+        {mode === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
+      </button>
 
       <span style={{
         fontSize: 10,

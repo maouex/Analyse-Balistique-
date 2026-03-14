@@ -35,6 +35,7 @@ const emptyForm: FormData = {
   penetration: 0,
   notes: '',
   snap: null,
+  savedAnalysis: null,
 };
 
 export function MunitionForm({ onClose, editId }: MunitionFormProps) {
@@ -70,7 +71,11 @@ export function MunitionForm({ onClose, editId }: MunitionFormProps) {
 
   const handleSave = () => {
     const snap = form.snap || getSnapshot();
-    const data = { ...form, snap };
+    // Save full analysis project if we have an active analysis and not editing
+    const savedAnalysis = !editId && analysisStore.image
+      ? analysisStore.exportProject()
+      : form.savedAnalysis;
+    const data = { ...form, snap, savedAnalysis };
 
     if (editId) {
       updateMunition(editId, data);

@@ -26,7 +26,8 @@ export function render(rc: RenderContext): void {
   const { ctx, canvas, image, view, center, impacts, circle1, circle2, impactStyle } = rc;
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = '#0a0c14';
+  const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--canvas-bg').trim() || '#0a0c14';
+  ctx.fillStyle = bgColor;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   if (!image) {

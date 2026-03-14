@@ -98,6 +98,16 @@ export interface AnalysisSnapshot {
   score: number;
 }
 
+// Serializable analysis project (everything needed to restore)
+export interface SavedAnalysis {
+  imageDataUrl: string;
+  center: Point | null;
+  impacts: Impact[];
+  scale: ScaleCalibration;
+  circle1: CircleConfig;
+  circle2: CircleConfig;
+}
+
 export interface Munition {
   id: string;
   nom: string;
@@ -118,6 +128,7 @@ export interface Munition {
   penetration: number;
   notes: string;
   snap: AnalysisSnapshot | null;
+  savedAnalysis: SavedAnalysis | null;
   createdAt: string;
   updatedAt: string;
 }
