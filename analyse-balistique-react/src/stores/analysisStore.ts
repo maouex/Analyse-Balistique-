@@ -1,6 +1,7 @@
 import { create } from 'zustand';
-import type { Point, Impact, ToolMode, ScaleCalibration, CircleConfig, ImpactStyle, ViewState } from '../types';
+import type { Point, Impact, ToolMode, ScaleCalibration, CircleConfig, ImpactStyle, ViewState, SavedAnalysis } from '../types';
 import { distancePx } from '../lib/ballistics';
+import { saveImage, loadImage } from '../lib/imageDB';
 
 interface AnalysisState {
   // Image
@@ -31,6 +32,7 @@ interface AnalysisState {
   // Scale temp points
   scalePt1: Point | null;
   scalePt2: Point | null;
+  scalePromptOpen: boolean;
 
   // Actions
   setImage: (img: HTMLImageElement) => void;
@@ -38,8 +40,14 @@ interface AnalysisState {
   setMode: (mode: ToolMode) => void;
   setCenter: (point: Point) => void;
   addImpact: (point: Point) => void;
+  addImpacts: (points: Point[]) => void;
+  removeImpact: (id: string) => void;
+  removeImpactsInRadius: (center: Point, radiusPx: number) => void;
+  clearImpacts: () => void;
   undoImpact: () => void;
   setScalePoint: (point: Point) => void;
+  confirmScale: (cm: number) => void;
+  cancelScale: () => void;
   clearScale: () => void;
   setScaleReference: (cm: number) => void;
   updateCircle1: (updates: Partial<CircleConfig>) => void;
@@ -49,6 +57,10 @@ interface AnalysisState {
   setMousePos: (pos: Point | null) => void;
   fitToScreen: (canvasWidth: number, canvasHeight: number) => void;
   zoomAt: (delta: number, canvasX: number, canvasY: number) => void;
+
+  // Project save/restore
+  exportProject: () => Promise<SavedAnalysis | null>;
+  loadProject: (project: SavedAnalysis) => Promise<void>;
 }
 
 const defaultCircle1: CircleConfig = {
@@ -106,6 +118,7 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
   mousePos: null,
   scalePt1: null,
   scalePt2: null,
+  scalePromptOpen: false,
 
   setImage: (img) =>
     set({
@@ -129,6 +142,7 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
       mousePos: null,
       scalePt1: null,
       scalePt2: null,
+      scalePromptOpen: false,
     }),
 
   setMode: (mode) => set({ activeMode: mode }),
@@ -140,6 +154,38 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
       impacts: [...s.impacts, { ...point, id: crypto.randomUUID(), index: s.impacts.length + 1 }],
     })),
 
+  addImpacts: (points) =>
+    set((s) => ({
+      impacts: [
+        ...s.impacts,
+        ...points.map((p, i) => ({
+          ...p,
+          id: crypto.randomUUID(),
+          index: s.impacts.length + i + 1,
+        })),
+      ],
+    })),
+
+  removeImpact: (id) =>
+    set((s) => ({
+      impacts: s.impacts
+        .filter((imp) => imp.id !== id)
+        .map((imp, i) => ({ ...imp, index: i + 1 })),
+    })),
+
+  removeImpactsInRadius: (center, radiusPx) =>
+    set((s) => ({
+      impacts: s.impacts
+        .filter((imp) => {
+          const dx = imp.x - center.x;
+          const dy = imp.y - center.y;
+          return dx * dx + dy * dy > radiusPx * radiusPx;
+        })
+        .map((imp, i) => ({ ...imp, index: i + 1 })),
+    })),
+
+  clearImpacts: () => set({ impacts: [] }),
+
   undoImpact: () =>
     set((s) => ({ impacts: s.impacts.slice(0, -1) })),
 
@@ -148,28 +194,41 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
     if (!state.scalePt1) {
       set({ scalePt1: point });
     } else if (!state.scalePt2) {
-      const px = distancePx(state.scalePt1, point);
-      const pixelsPerCm = px / state.scale.referenceCm;
-      const newScale: ScaleCalibration = {
-        ...state.scale,
-        pt1: state.scalePt1,
-        pt2: point,
-        pixelsPerCm,
-      };
-      const circles = recalcCirclesFromScale(newScale, state.circle1, state.circle2);
-      set({
-        scalePt2: point,
-        scale: newScale,
-        ...circles,
-        activeMode: 'impact',
-      });
+      // Store 2nd point and open the prompt for real-world distance
+      set({ scalePt2: point, scalePromptOpen: true });
     }
+  },
+
+  confirmScale: (cm) => {
+    const state = get();
+    if (!state.scalePt1 || !state.scalePt2) return;
+    const px = distancePx(state.scalePt1, state.scalePt2);
+    const pixelsPerCm = px / cm;
+    const newScale: ScaleCalibration = {
+      ...state.scale,
+      referenceCm: cm,
+      pt1: state.scalePt1,
+      pt2: state.scalePt2,
+      pixelsPerCm,
+    };
+    const circles = recalcCirclesFromScale(newScale, state.circle1, state.circle2);
+    set({
+      scale: newScale,
+      ...circles,
+      scalePromptOpen: false,
+      activeMode: 'center',
+    });
+  },
+
+  cancelScale: () => {
+    set({ scalePt1: null, scalePt2: null, scalePromptOpen: false });
   },
 
   clearScale: () =>
     set({
       scalePt1: null,
       scalePt2: null,
+      scalePromptOpen: false,
       scale: { ...defaultScale },
       circle1: { ...defaultCircle1 },
       circle2: { ...defaultCircle2 },
@@ -228,5 +287,58 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
     const panX = canvasX - (canvasX - view.panX) * (newZoom / view.zoom);
     const panY = canvasY - (canvasY - view.panY) * (newZoom / view.zoom);
     set({ view: { zoom: newZoom, panX, panY } });
+  },
+
+  exportProject: async () => {
+    const state = get();
+    if (!state.image) return null;
+
+    // Generate unique ID for this image
+    const imageId = Date.now().toString(36) + Math.random().toString(16).slice(2, 8);
+
+    // Convert image to dataURL and store in IndexedDB (no size limit)
+    const canvas = document.createElement('canvas');
+    canvas.width = state.image.width;
+    canvas.height = state.image.height;
+    const ctx = canvas.getContext('2d')!;
+    ctx.drawImage(state.image, 0, 0);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+    await saveImage(imageId, dataUrl);
+
+    return {
+      imageId,
+      center: state.center,
+      impacts: state.impacts,
+      scale: state.scale,
+      circle1: state.circle1,
+      circle2: state.circle2,
+    };
+  },
+
+  loadProject: async (project) => {
+    // Load image from IndexedDB
+    const dataUrl = await loadImage(project.imageId);
+    if (!dataUrl) return;
+
+    return new Promise<void>((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        set({
+          image: img,
+          imageLoaded: true,
+          center: project.center,
+          impacts: project.impacts,
+          scale: project.scale,
+          circle1: project.circle1,
+          circle2: project.circle2,
+          scalePt1: project.scale.pt1,
+          scalePt2: project.scale.pt2,
+          activeMode: 'impact',
+          view: { zoom: 1, panX: 0, panY: 0 },
+        });
+        resolve();
+      };
+      img.src = dataUrl;
+    });
   },
 }));

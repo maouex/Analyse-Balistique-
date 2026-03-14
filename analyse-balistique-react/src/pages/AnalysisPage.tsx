@@ -6,6 +6,8 @@ import { StatsPanel } from '../components/stats/StatsPanel';
 import { ExportModal } from '../components/export/ExportModal';
 import { MunitionForm } from '../components/munitions/MunitionForm';
 import { Tutorial } from '../components/tutorial/Tutorial';
+import { WorkflowStepper } from '../components/workflow/WorkflowStepper';
+import { ScalePrompt } from '../components/ui/ScalePrompt';
 import { tutorialStorage } from '../lib/storage';
 
 export function AnalysisPage() {
@@ -21,19 +23,28 @@ export function AnalysisPage() {
 
   return (
     <>
-      <div className="app-layout" style={{
+      <div style={{
         display: 'flex',
+        flexDirection: 'column',
         height: '100%',
         overflow: 'hidden',
       }}>
-        <Toolbar />
-        <AnalysisCanvas />
-        <StatsPanel
-          onExport={() => setShowExport(true)}
-          onSaveMunition={() => setShowMunitionForm(true)}
-        />
+        <WorkflowStepper />
+        <div className="app-layout" style={{
+          display: 'flex',
+          flex: 1,
+          overflow: 'hidden',
+        }}>
+          <Toolbar />
+          <AnalysisCanvas />
+          <StatsPanel
+            onExport={() => setShowExport(true)}
+            onSaveMunition={() => setShowMunitionForm(true)}
+          />
+        </div>
       </div>
 
+      <ScalePrompt />
       {showExport && <ExportModal onClose={() => setShowExport(false)} />}
       {showMunitionForm && <MunitionForm onClose={() => setShowMunitionForm(false)} />}
 

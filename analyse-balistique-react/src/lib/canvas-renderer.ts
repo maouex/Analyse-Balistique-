@@ -26,7 +26,8 @@ export function render(rc: RenderContext): void {
   const { ctx, canvas, image, view, center, impacts, circle1, circle2, impactStyle } = rc;
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = '#0a0c14';
+  const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--canvas-bg').trim() || '#0a0c14';
+  ctx.fillStyle = bgColor;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   if (!image) {
@@ -77,8 +78,11 @@ export function render(rc: RenderContext): void {
     }
   }
 
-  // Draw crosshair cursor
-  if (rc.mousePos && rc.activeMode !== 'move') {
+  // Draw eraser cursor or crosshair
+  if (rc.mousePos && rc.activeMode === 'eraser') {
+    const mp = imageToCanvas(rc.mousePos, view);
+    drawEraserCursor(ctx, mp, 20 * view.zoom, impacts, view);
+  } else if (rc.mousePos && rc.activeMode !== 'move') {
     const mp = imageToCanvas(rc.mousePos, view);
     drawCrosshair(ctx, mp);
   }
@@ -171,32 +175,28 @@ function drawImpact(
 function drawEllipse(
   ctx: CanvasRenderingContext2D,
   ellipse: CovarianceEllipse,
-  pixelsPerCm: number,
-  center: Point,
+  _pixelsPerCm: number,
+  _center: Point,
   view: ViewState,
   color: string
 ): void {
-  const cx = ellipse.centerX * pixelsPerCm;
-  const cy = ellipse.centerY * pixelsPerCm;
-  const a = ellipse.semiMajor * pixelsPerCm * view.zoom;
-  const b = ellipse.semiMinor * pixelsPerCm * view.zoom;
-
-  // ellipse center is in cm from origin, convert back
-  const impacts_mean_px: Point = { x: cx + center.x, y: cy + center.y };
-  const screenCenter = imageToCanvas({ x: impacts_mean_px.x, y: impacts_mean_px.y }, view);
+  // ellipse.centerX/Y are in image pixel coordinates
+  // ellipse.semiMajor/Minor are in pixels
+  const screenCenter = imageToCanvas({ x: ellipse.centerX, y: ellipse.centerY }, view);
+  const a = ellipse.semiMajor * view.zoom;
+  const b = ellipse.semiMinor * view.zoom;
 
   ctx.save();
-  ctx.globalAlpha = 0.25;
-  ctx.fillStyle = color;
   ctx.strokeStyle = color;
+  ctx.fillStyle = color;
   ctx.lineWidth = 2;
-  ctx.globalAlpha = 0.4;
 
+  ctx.globalAlpha = 0.5;
   ctx.beginPath();
   ctx.ellipse(screenCenter.x, screenCenter.y, a, b, ellipse.angle, 0, Math.PI * 2);
   ctx.stroke();
 
-  ctx.globalAlpha = 0.1;
+  ctx.globalAlpha = 0.08;
   ctx.fill();
   ctx.restore();
 }
@@ -222,6 +222,55 @@ function drawScaleLine(ctx: CanvasRenderingContext2D, p1: Point, p2: Point): voi
   ctx.restore();
 }
 
+function drawEraserCursor(
+  ctx: CanvasRenderingContext2D,
+  p: Point,
+  radiusScreen: number,
+  impacts: Impact[],
+  view: ViewState,
+): void {
+  ctx.save();
+
+  // Eraser circle
+  ctx.strokeStyle = '#e05252';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([4, 3]);
+  ctx.globalAlpha = 0.8;
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, radiusScreen, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Fill with red tint
+  ctx.fillStyle = 'rgba(224, 82, 82, 0.1)';
+  ctx.setLineDash([]);
+  ctx.fill();
+
+  // Highlight impacts inside the eraser radius
+  for (const imp of impacts) {
+    const ip = imageToCanvas(imp, view);
+    const dx = ip.x - p.x;
+    const dy = ip.y - p.y;
+    if (dx * dx + dy * dy <= radiusScreen * radiusScreen) {
+      ctx.strokeStyle = '#ff4444';
+      ctx.lineWidth = 2;
+      ctx.globalAlpha = 0.9;
+      ctx.beginPath();
+      ctx.arc(ip.x, ip.y, 10, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // X mark
+      ctx.beginPath();
+      ctx.moveTo(ip.x - 5, ip.y - 5);
+      ctx.lineTo(ip.x + 5, ip.y + 5);
+      ctx.moveTo(ip.x + 5, ip.y - 5);
+      ctx.lineTo(ip.x - 5, ip.y + 5);
+      ctx.stroke();
+    }
+  }
+
+  ctx.restore();
+}
+
 function drawCrosshair(ctx: CanvasRenderingContext2D, p: Point): void {
   ctx.save();
   ctx.strokeStyle = 'rgba(255,255,255,0.4)';
@@ -239,7 +288,6 @@ function drawCrosshair(ctx: CanvasRenderingContext2D, p: Point): void {
 // ─── Export Rendering ───────────────────────────────────────
 
 export interface ExportRenderOptions {
-  image: HTMLImageElement;
   center: Point;
   impacts: Impact[];
   circle1: CircleConfig;
@@ -259,7 +307,7 @@ export interface ExportRenderOptions {
 }
 
 export function renderExport(options: ExportRenderOptions): HTMLCanvasElement {
-  const { image, center, impacts } = options;
+  const { center, impacts } = options;
   const margin = 30;
   const r2 = Math.max(options.circle1.radiusPx, options.circle2.radiusPx);
   const size = r2 * 2 + margin * 2;
@@ -269,16 +317,12 @@ export function renderExport(options: ExportRenderOptions): HTMLCanvasElement {
   canvas.height = size;
   const ctx = canvas.getContext('2d')!;
 
-  ctx.fillStyle = '#0a0c14';
-  ctx.fillRect(0, 0, size, size);
+  // Transparent background — no image, no fill
+  ctx.clearRect(0, 0, size, size);
 
+  // Offset so center of target = center of canvas
   const offsetX = size / 2 - center.x;
   const offsetY = size / 2 - center.y;
-
-  ctx.save();
-  ctx.translate(offsetX, offsetY);
-  ctx.drawImage(image, 0, 0);
-  ctx.restore();
 
   const cc = { x: size / 2, y: size / 2 };
 

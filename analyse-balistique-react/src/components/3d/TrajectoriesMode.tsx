@@ -16,11 +16,10 @@ interface TrajectoriesModeProps {
 
 const SCALE = 0.01;
 
-function Pellet({ impact, distanceM, velocityMs, delay }: {
+function Pellet({ impact, distanceM, velocityMs }: {
   impact: Impact3D;
   distanceM: number;
   velocityMs: number;
-  delay: number;
 }) {
   const meshRef = useRef<THREE.Mesh>(null);
   const trailRef = useRef<THREE.Line>(null);
@@ -40,7 +39,7 @@ function Pellet({ impact, distanceM, velocityMs, delay }: {
     if (!meshRef.current) return;
 
     progressRef.current += delta;
-    const t = Math.max(0, (progressRef.current - delay) / flightDuration);
+    const t = Math.max(0, progressRef.current / flightDuration);
 
     if (t >= 1) {
       meshRef.current.position.copy(targetPoint);
@@ -147,13 +146,12 @@ export function TrajectoriesMode({
       </Text>
 
       {/* Pellets with staggered launch */}
-      {impacts.map((imp, i) => (
+      {impacts.map((imp) => (
         <Pellet
           key={imp.index}
           impact={imp}
           distanceM={distanceM}
           velocityMs={velocityMs}
-          delay={i * 0.05}
         />
       ))}
     </group>

@@ -34,7 +34,6 @@ export function ExportModal({ onClose }: ExportModalProps) {
     );
 
     const canvas = renderExport({
-      image: store.image,
       center: store.center,
       impacts: store.impacts,
       circle1: store.circle1,

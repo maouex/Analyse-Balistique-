@@ -1,12 +1,16 @@
 import { useEffect, useState } from 'react';
-import { Search, Trash2, Edit3, GitCompare, CheckSquare, Square } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Search, Trash2, Edit3, GitCompare, CheckSquare, Square, Play } from 'lucide-react';
 import { useMunitionsStore } from '../stores/munitionsStore';
+import { useAnalysisStore } from '../stores/analysisStore';
 import { MunitionForm } from '../components/munitions/MunitionForm';
 import { ComparisonView } from '../components/munitions/ComparisonView';
 import type { Munition } from '../types';
 
 export function LibraryPage() {
   const store = useMunitionsStore();
+  const loadProject = useAnalysisStore((s) => s.loadProject);
+  const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
 
@@ -24,6 +28,12 @@ export function LibraryPage() {
   const handleCloseForm = () => {
     setShowForm(false);
     setEditId(null);
+  };
+
+  const handleResume = async (m: Munition) => {
+    if (!m.savedAnalysis) return;
+    await loadProject(m.savedAnalysis);
+    navigate('/analyse');
   };
 
   if (store.showComparison) {
@@ -94,6 +104,7 @@ export function LibraryPage() {
               onDelete={() => {
                 if (confirm(`Supprimer "${m.nom}" ?`)) store.removeMunition(m.id);
               }}
+              onResume={() => handleResume(m)}
             />
           ))}
         </div>
@@ -104,12 +115,13 @@ export function LibraryPage() {
   );
 }
 
-function MunitionCard({ munition: m, selected, onToggle, onEdit, onDelete }: {
+function MunitionCard({ munition: m, selected, onToggle, onEdit, onDelete, onResume }: {
   munition: Munition;
   selected: boolean;
   onToggle: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  onResume: () => void;
 }) {
   return (
     <div style={{
@@ -161,13 +173,28 @@ function MunitionCard({ munition: m, selected, onToggle, onEdit, onDelete }: {
       </div>
 
       {/* Actions */}
-      <div style={{ display: 'flex', gap: 6 }}>
-        <button className="btn btn-sm" onClick={onEdit} style={{ flex: 1 }}>
-          <Edit3 size={12} /> Modifier
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <button
+          className={`btn btn-sm ${m.savedAnalysis ? 'btn-primary' : ''}`}
+          onClick={onResume}
+          disabled={!m.savedAnalysis}
+          style={{
+            width: '100%',
+            opacity: m.savedAnalysis ? 1 : 0.4,
+            cursor: m.savedAnalysis ? 'pointer' : 'not-allowed',
+          }}
+          title={m.savedAnalysis ? 'Reprendre cette analyse' : 'Aucune analyse sauvegardée — re-sauvegardez depuis la page d\'analyse'}
+        >
+          <Play size={12} /> {m.savedAnalysis ? 'Reprendre l\'analyse' : 'Pas d\'analyse liée'}
         </button>
-        <button className="btn btn-sm btn-danger" onClick={onDelete}>
-          <Trash2 size={12} />
-        </button>
+        <div style={{ display: 'flex', gap: 6 }}>
+          <button className="btn btn-sm" onClick={onEdit} style={{ flex: 1 }}>
+            <Edit3 size={12} /> Modifier
+          </button>
+          <button className="btn btn-sm btn-danger" onClick={onDelete}>
+            <Trash2 size={12} />
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -18,7 +18,11 @@ export const munitionsStorage = {
   },
 
   save(munitions: Munition[]): void {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(munitions));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(munitions));
+    } catch (e) {
+      console.error('Failed to save munitions to localStorage:', e);
+    }
   },
 
   add(munition: Omit<Munition, 'id' | 'createdAt' | 'updatedAt'>): Munition {
