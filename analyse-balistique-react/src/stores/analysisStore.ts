@@ -39,6 +39,7 @@ interface AnalysisState {
   setMode: (mode: ToolMode) => void;
   setCenter: (point: Point) => void;
   addImpact: (point: Point) => void;
+  addImpacts: (points: Point[]) => void;
   undoImpact: () => void;
   setScalePoint: (point: Point) => void;
   clearScale: () => void;
@@ -143,6 +144,18 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
   addImpact: (point) =>
     set((s) => ({
       impacts: [...s.impacts, { ...point, id: crypto.randomUUID(), index: s.impacts.length + 1 }],
+    })),
+
+  addImpacts: (points) =>
+    set((s) => ({
+      impacts: [
+        ...s.impacts,
+        ...points.map((p, i) => ({
+          ...p,
+          id: crypto.randomUUID(),
+          index: s.impacts.length + i + 1,
+        })),
+      ],
     })),
 
   undoImpact: () =>

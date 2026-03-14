@@ -1,13 +1,17 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import {
   Upload, RotateCcw, Crosshair, Circle, Move, Undo2, Ruler,
-  ZoomIn, Maximize2, Eye, EyeOff, Hash, X,
+  ZoomIn, Maximize2, Eye, EyeOff, Hash, X, Wand2, Loader2,
 } from 'lucide-react';
 import { useAnalysisStore } from '../../stores/analysisStore';
+import { detectImpacts } from '../../lib/autoDetect';
 
 export function Toolbar() {
   const store = useAnalysisStore();
   const fileRef = useRef<HTMLInputElement>(null);
+  const [detecting, setDetecting] = useState(false);
+  const [sensitivity, setSensitivity] = useState(50);
+  const [lastDetectCount, setLastDetectCount] = useState<number | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -59,6 +63,79 @@ export function Toolbar() {
           <Undo2 size={13} /> Annuler dernier impact
         </button>
       </Section>
+
+      {/* Auto-detect */}
+      {store.imageLoaded && (
+        <Section title="Détection IA">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+            <label className="label" style={{ margin: 0, flex: 1, fontSize: 11 }}>
+              Sensibilité: {sensitivity}%
+            </label>
+          </div>
+          <input
+            type="range"
+            min={10}
+            max={90}
+            value={sensitivity}
+            onChange={(e) => setSensitivity(Number(e.target.value))}
+            style={{ width: '100%', marginBottom: 6 }}
+          />
+          <button
+            className="btn btn-sm btn-primary"
+            disabled={detecting || !store.image}
+            onClick={() => {
+              if (!store.image) return;
+              setDetecting(true);
+              setLastDetectCount(null);
+              // Run in next frame to let UI update with loading state
+              requestAnimationFrame(() => {
+                const thresholdOffset = 5 + (100 - sensitivity) * 0.3;
+                const minArea = Math.max(8, 30 - sensitivity * 0.25);
+                const maxArea = 2000 + sensitivity * 50;
+                const minCircularity = Math.max(0.15, 0.45 - sensitivity * 0.004);
+
+                const detected = detectImpacts(store.image!, {
+                  thresholdOffset,
+                  minArea,
+                  maxArea,
+                  minCircularity,
+                  roiCenter: store.center,
+                  roiRadius: store.center && store.scale.pixelsPerCm
+                    ? (store.circle2.diameterCm / 2 + 20) * store.scale.pixelsPerCm
+                    : null,
+                });
+
+                if (detected.length > 0) {
+                  store.addImpacts(detected);
+                }
+                setLastDetectCount(detected.length);
+                setDetecting(false);
+              });
+            }}
+            style={{ width: '100%' }}
+          >
+            {detecting ? (
+              <><Loader2 size={13} className="spin" /> Analyse...</>
+            ) : (
+              <><Wand2 size={13} /> Détecter les impacts</>
+            )}
+          </button>
+          {lastDetectCount !== null && (
+            <div style={{
+              fontSize: 11,
+              marginTop: 4,
+              color: lastDetectCount > 0 ? 'var(--green)' : 'var(--amber)',
+            }}>
+              {lastDetectCount > 0
+                ? `${lastDetectCount} impact${lastDetectCount > 1 ? 's' : ''} détecté${lastDetectCount > 1 ? 's' : ''} — corrigez si besoin`
+                : 'Aucun impact détecté. Essayez d\'augmenter la sensibilité.'}
+            </div>
+          )}
+          <div style={{ fontSize: 10, color: 'var(--muted)', marginTop: 4 }}>
+            Conseil : placez le centre et calibrez l'échelle d'abord pour limiter la zone de recherche.
+          </div>
+        </Section>
+      )}
 
       {/* Calibration */}
       <Section title="Étalonnage">
