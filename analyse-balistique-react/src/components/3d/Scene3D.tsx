@@ -133,10 +133,10 @@ export function Scene3D({
       </div>
 
       {/* 3D Canvas */}
-      <div ref={canvasContainerRef} style={{ flex: 1, background: 'var(--canvas-bg)' }}>
+      <div ref={canvasContainerRef} style={{ flex: 1, minHeight: 0, position: 'relative', background: 'var(--canvas-bg)' }}>
         <Canvas
           gl={{ preserveDrawingBuffer: true, antialias: true }}
-          style={{ width: '100%', height: '100%' }}
+          style={{ position: 'absolute', inset: 0 }}
         >
           <PerspectiveCamera makeDefault position={cameraPosition} fov={50} />
           <OrbitControls
