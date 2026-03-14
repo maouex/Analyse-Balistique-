@@ -89,16 +89,10 @@ export function Toolbar() {
               setLastDetectCount(null);
               // Run in next frame to let UI update with loading state
               requestAnimationFrame(() => {
-                const thresholdOffset = 5 + (100 - sensitivity) * 0.3;
-                const minArea = Math.max(8, 30 - sensitivity * 0.25);
-                const maxArea = 2000 + sensitivity * 50;
-                const minCircularity = Math.max(0.15, 0.45 - sensitivity * 0.004);
-
                 const detected = detectImpacts(store.image!, {
-                  thresholdOffset,
-                  minArea,
-                  maxArea,
-                  minCircularity,
+                  sensitivity,
+                  minArea: 3,
+                  maxArea: 8000,
                   roiCenter: store.center,
                   roiRadius: store.center && store.scale.pixelsPerCm
                     ? (store.circle2.diameterCm / 2 + 20) * store.scale.pixelsPerCm
