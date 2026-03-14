@@ -69,11 +69,11 @@ export function MunitionForm({ onClose, editId }: MunitionFormProps) {
     };
   }, [analysisStore]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const snap = form.snap || getSnapshot();
     // Save full analysis project if we have an active analysis and not editing
     const savedAnalysis = !editId && analysisStore.image
-      ? analysisStore.exportProject()
+      ? await analysisStore.exportProject()
       : form.savedAnalysis;
     const data = { ...form, snap, savedAnalysis };
 

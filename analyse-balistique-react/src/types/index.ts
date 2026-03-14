@@ -100,7 +100,7 @@ export interface AnalysisSnapshot {
 
 // Serializable analysis project (everything needed to restore)
 export interface SavedAnalysis {
-  imageDataUrl: string;
+  imageId: string; // reference to image in IndexedDB
   center: Point | null;
   impacts: Impact[];
   scale: ScaleCalibration;

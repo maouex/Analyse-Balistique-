@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { Point, Impact, ToolMode, ScaleCalibration, CircleConfig, ImpactStyle, ViewState, SavedAnalysis } from '../types';
 import { distancePx } from '../lib/ballistics';
+import { saveImage, loadImage } from '../lib/imageDB';
 
 interface AnalysisState {
   // Image
@@ -51,7 +52,7 @@ interface AnalysisState {
   zoomAt: (delta: number, canvasX: number, canvasY: number) => void;
 
   // Project save/restore
-  exportProject: () => SavedAnalysis | null;
+  exportProject: () => Promise<SavedAnalysis | null>;
   loadProject: (project: SavedAnalysis) => Promise<void>;
 }
 
@@ -234,20 +235,24 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
     set({ view: { zoom: newZoom, panX, panY } });
   },
 
-  exportProject: () => {
+  exportProject: async () => {
     const state = get();
     if (!state.image) return null;
 
-    // Convert current image to dataURL
+    // Generate unique ID for this image
+    const imageId = Date.now().toString(36) + Math.random().toString(16).slice(2, 8);
+
+    // Convert image to dataURL and store in IndexedDB (no size limit)
     const canvas = document.createElement('canvas');
     canvas.width = state.image.width;
     canvas.height = state.image.height;
     const ctx = canvas.getContext('2d')!;
     ctx.drawImage(state.image, 0, 0);
-    const imageDataUrl = canvas.toDataURL('image/png');
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+    await saveImage(imageId, dataUrl);
 
     return {
-      imageDataUrl,
+      imageId,
       center: state.center,
       impacts: state.impacts,
       scale: state.scale,
@@ -257,6 +262,10 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
   },
 
   loadProject: async (project) => {
+    // Load image from IndexedDB
+    const dataUrl = await loadImage(project.imageId);
+    if (!dataUrl) return;
+
     return new Promise<void>((resolve) => {
       const img = new Image();
       img.onload = () => {
@@ -275,7 +284,7 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
         });
         resolve();
       };
-      img.src = project.imageDataUrl;
+      img.src = dataUrl;
     });
   },
 }));
