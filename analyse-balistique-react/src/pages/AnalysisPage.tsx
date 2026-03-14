@@ -7,6 +7,7 @@ import { ExportModal } from '../components/export/ExportModal';
 import { MunitionForm } from '../components/munitions/MunitionForm';
 import { Tutorial } from '../components/tutorial/Tutorial';
 import { WorkflowStepper } from '../components/workflow/WorkflowStepper';
+import { ScalePrompt } from '../components/ui/ScalePrompt';
 import { tutorialStorage } from '../lib/storage';
 
 export function AnalysisPage() {
@@ -43,6 +44,7 @@ export function AnalysisPage() {
         </div>
       </div>
 
+      <ScalePrompt />
       {showExport && <ExportModal onClose={() => setShowExport(false)} />}
       {showMunitionForm && <MunitionForm onClose={() => setShowMunitionForm(false)} />}
 

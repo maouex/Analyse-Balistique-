@@ -32,6 +32,7 @@ interface AnalysisState {
   // Scale temp points
   scalePt1: Point | null;
   scalePt2: Point | null;
+  scalePromptOpen: boolean;
 
   // Actions
   setImage: (img: HTMLImageElement) => void;
@@ -45,6 +46,8 @@ interface AnalysisState {
   clearImpacts: () => void;
   undoImpact: () => void;
   setScalePoint: (point: Point) => void;
+  confirmScale: (cm: number) => void;
+  cancelScale: () => void;
   clearScale: () => void;
   setScaleReference: (cm: number) => void;
   updateCircle1: (updates: Partial<CircleConfig>) => void;
@@ -115,6 +118,7 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
   mousePos: null,
   scalePt1: null,
   scalePt2: null,
+  scalePromptOpen: false,
 
   setImage: (img) =>
     set({
@@ -138,6 +142,7 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
       mousePos: null,
       scalePt1: null,
       scalePt2: null,
+      scalePromptOpen: false,
     }),
 
   setMode: (mode) => set({ activeMode: mode }),
@@ -189,28 +194,41 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
     if (!state.scalePt1) {
       set({ scalePt1: point });
     } else if (!state.scalePt2) {
-      const px = distancePx(state.scalePt1, point);
-      const pixelsPerCm = px / state.scale.referenceCm;
-      const newScale: ScaleCalibration = {
-        ...state.scale,
-        pt1: state.scalePt1,
-        pt2: point,
-        pixelsPerCm,
-      };
-      const circles = recalcCirclesFromScale(newScale, state.circle1, state.circle2);
-      set({
-        scalePt2: point,
-        scale: newScale,
-        ...circles,
-        activeMode: 'impact',
-      });
+      // Store 2nd point and open the prompt for real-world distance
+      set({ scalePt2: point, scalePromptOpen: true });
     }
+  },
+
+  confirmScale: (cm) => {
+    const state = get();
+    if (!state.scalePt1 || !state.scalePt2) return;
+    const px = distancePx(state.scalePt1, state.scalePt2);
+    const pixelsPerCm = px / cm;
+    const newScale: ScaleCalibration = {
+      ...state.scale,
+      referenceCm: cm,
+      pt1: state.scalePt1,
+      pt2: state.scalePt2,
+      pixelsPerCm,
+    };
+    const circles = recalcCirclesFromScale(newScale, state.circle1, state.circle2);
+    set({
+      scale: newScale,
+      ...circles,
+      scalePromptOpen: false,
+      activeMode: 'center',
+    });
+  },
+
+  cancelScale: () => {
+    set({ scalePt1: null, scalePt2: null, scalePromptOpen: false });
   },
 
   clearScale: () =>
     set({
       scalePt1: null,
       scalePt2: null,
+      scalePromptOpen: false,
       scale: { ...defaultScale },
       circle1: { ...defaultCircle1 },
       circle2: { ...defaultCircle2 },

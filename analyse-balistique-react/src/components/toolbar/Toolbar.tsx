@@ -100,24 +100,10 @@ export function Toolbar() {
 
           {/* ─── ÉTALONNAGE ─── */}
           <Section title="Étalonnage">
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ fontSize: 11, color: 'var(--muted)', whiteSpace: 'nowrap' }}>Réf:</span>
-              <input
-                type="range"
-                min={5}
-                max={200}
-                value={store.scale.referenceCm}
-                onChange={(e) => store.setScaleReference(Number(e.target.value))}
-                style={{ flex: 1 }}
-              />
-              <span style={{ fontSize: 11, fontWeight: 600, minWidth: 38, textAlign: 'right' }}>
-                {store.scale.referenceCm}cm
-              </span>
-            </div>
             {hasScale ? (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 4 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <span style={{ fontSize: 11, color: 'var(--green)' }}>
-                  ✓ {store.scale.pixelsPerCm!.toFixed(1)} px/cm
+                  ✓ {store.scale.referenceCm}cm — {store.scale.pixelsPerCm!.toFixed(1)} px/cm
                 </span>
                 <button
                   className="btn btn-sm"
@@ -128,7 +114,7 @@ export function Toolbar() {
                 </button>
               </div>
             ) : (
-              <div style={{ fontSize: 10, color: 'var(--muted)', marginTop: 3 }}>
+              <div style={{ fontSize: 10, color: 'var(--muted)' }}>
                 Sélectionnez "Échelle" puis tracez 2 points
               </div>
             )}
