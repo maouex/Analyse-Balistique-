@@ -1,4 +1,4 @@
-import { Suspense, useState, useMemo } from 'react';
+import { Suspense, useState, useMemo, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { useAnalysisStore } from '../../stores/analysisStore';
@@ -24,6 +24,7 @@ export function Scene3D({
 }: Scene3DProps) {
   const [activeMode, setActiveMode] = useState<View3DMode>('cone');
   const [autoRotate, setAutoRotate] = useState(true);
+  const canvasContainerRef = useRef<HTMLDivElement>(null);
 
   const store = useAnalysisStore();
 
@@ -57,7 +58,7 @@ export function Scene3D({
     : [0.5, 0.4, 0.5];
 
   const handleScreenshot = () => {
-    const canvas = document.querySelector('canvas.scene-3d') as HTMLCanvasElement;
+    const canvas = canvasContainerRef.current?.querySelector('canvas') as HTMLCanvasElement;
     if (!canvas) return;
     const link = document.createElement('a');
     link.download = `analyse-3d-${activeMode}.png`;
@@ -132,9 +133,8 @@ export function Scene3D({
       </div>
 
       {/* 3D Canvas */}
-      <div style={{ flex: 1, background: '#0a0c14' }}>
+      <div ref={canvasContainerRef} style={{ flex: 1, background: 'var(--canvas-bg)' }}>
         <Canvas
-          className="scene-3d"
           gl={{ preserveDrawingBuffer: true, antialias: true }}
           style={{ width: '100%', height: '100%' }}
         >
