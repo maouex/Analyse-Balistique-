@@ -1,0 +1,199 @@
+import { Suspense, useState, useMemo } from 'react';
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
+import { useAnalysisStore } from '../../stores/analysisStore';
+import { computeFullAnalysis } from '../../lib/ballistics';
+import { impactsTo3D, getDistanceMeters, VIEW_3D_MODES } from '../../lib/3d-utils';
+import type { View3DMode } from '../../lib/3d-utils';
+import { ConeDispersionMode } from './ConeDispersionMode';
+import { HeatmapMode } from './HeatmapMode';
+import { TrajectoriesMode } from './TrajectoriesMode';
+import { PenetrationMode } from './PenetrationMode';
+import { Camera, RotateCcw } from 'lucide-react';
+
+interface Scene3DProps {
+  distanceStr?: string;
+  velocityMs?: number;
+  penetrationCm?: number;
+}
+
+export function Scene3D({
+  distanceStr = '35m',
+  velocityMs = 400,
+  penetrationCm = 25,
+}: Scene3DProps) {
+  const [activeMode, setActiveMode] = useState<View3DMode>('cone');
+  const [autoRotate, setAutoRotate] = useState(true);
+
+  const store = useAnalysisStore();
+
+  const stats = useMemo(() =>
+    computeFullAnalysis(
+      store.impacts, store.center,
+      store.circle1.diameterCm, store.circle2.diameterCm,
+      store.scale.pixelsPerCm
+    ),
+    [store.impacts, store.center, store.circle1.diameterCm, store.circle2.diameterCm, store.scale.pixelsPerCm]
+  );
+
+  const impacts3D = useMemo(() =>
+    impactsTo3D(
+      store.impacts, store.center, store.scale.pixelsPerCm,
+      store.circle1.diameterCm, store.circle2.diameterCm,
+      penetrationCm
+    ),
+    [store.impacts, store.center, store.scale.pixelsPerCm, store.circle1.diameterCm, store.circle2.diameterCm, penetrationCm]
+  );
+
+  const distanceM = getDistanceMeters(distanceStr);
+  const r90 = stats?.dispersion.r90 ?? 20;
+  const c1r = store.circle1.diameterCm / 2;
+  const c2r = store.circle2.diameterCm / 2;
+
+  const cameraPosition: [number, number, number] = activeMode === 'penetration'
+    ? [0.5, 0.2, 0.8]
+    : activeMode === 'trajectories'
+    ? [0.8, distanceM * 0.005 + 0.3, 0.8]
+    : [0.5, 0.4, 0.5];
+
+  const handleScreenshot = () => {
+    const canvas = document.querySelector('canvas.scene-3d') as HTMLCanvasElement;
+    if (!canvas) return;
+    const link = document.createElement('a');
+    link.download = `analyse-3d-${activeMode}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  };
+
+  if (impacts3D.length === 0) {
+    return (
+      <div style={{
+        height: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'var(--muted)',
+        fontSize: 14,
+        flexDirection: 'column',
+        gap: 12,
+      }}>
+        <p>Effectuez d'abord une analyse avec des impacts pour activer la vue 3D.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      {/* Mode selector toolbar */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 6,
+        padding: '8px 16px',
+        borderBottom: '1px solid var(--border)',
+        background: 'var(--surface)',
+        flexWrap: 'wrap',
+      }}>
+        {VIEW_3D_MODES.map((mode) => (
+          <button
+            key={mode.mode}
+            className={`btn btn-sm ${activeMode === mode.mode ? 'active' : ''}`}
+            onClick={() => setActiveMode(mode.mode)}
+            title={mode.description}
+          >
+            <span>{mode.icon}</span> {mode.label}
+          </button>
+        ))}
+        <div style={{ flex: 1 }} />
+        <button
+          className={`btn btn-sm ${autoRotate ? 'active' : ''}`}
+          onClick={() => setAutoRotate(!autoRotate)}
+          title="Rotation automatique"
+        >
+          <RotateCcw size={12} /> Auto
+        </button>
+        <button className="btn btn-sm" onClick={handleScreenshot} title="Capture d'écran 3D">
+          <Camera size={12} /> Capture
+        </button>
+      </div>
+
+      {/* Mode description */}
+      <div style={{
+        padding: '6px 16px',
+        fontSize: 11,
+        color: 'var(--muted)',
+        background: 'var(--bg)',
+        borderBottom: '1px solid var(--border)',
+      }}>
+        {VIEW_3D_MODES.find((m) => m.mode === activeMode)?.description}
+        <span style={{ marginLeft: 12, color: 'var(--text-secondary)' }}>
+          Souris: orbite | Molette: zoom | Clic droit: pan
+        </span>
+      </div>
+
+      {/* 3D Canvas */}
+      <div style={{ flex: 1, background: '#0a0c14' }}>
+        <Canvas
+          className="scene-3d"
+          gl={{ preserveDrawingBuffer: true, antialias: true }}
+          style={{ width: '100%', height: '100%' }}
+        >
+          <PerspectiveCamera makeDefault position={cameraPosition} fov={50} />
+          <OrbitControls
+            autoRotate={autoRotate}
+            autoRotateSpeed={1.5}
+            enableDamping
+            dampingFactor={0.05}
+            maxPolarAngle={Math.PI * 0.85}
+          />
+
+          {/* Lighting */}
+          <ambientLight intensity={0.4} />
+          <directionalLight position={[5, 10, 5]} intensity={0.8} />
+          <directionalLight position={[-3, 8, -3]} intensity={0.3} color="#4dabf7" />
+          <pointLight position={[0, 2, 0]} intensity={0.5} color="#f0a030" />
+
+          <Suspense fallback={null}>
+            {activeMode === 'cone' && (
+              <ConeDispersionMode
+                impacts={impacts3D}
+                distanceM={distanceM}
+                r90Cm={r90}
+                ellipse={stats?.ellipse ?? null}
+                circle1RadiusCm={c1r}
+                circle2RadiusCm={c2r}
+              />
+            )}
+
+            {activeMode === 'heatmap' && (
+              <HeatmapMode
+                impacts={impacts3D}
+                circle1RadiusCm={c1r}
+                circle2RadiusCm={c2r}
+              />
+            )}
+
+            {activeMode === 'trajectories' && (
+              <TrajectoriesMode
+                impacts={impacts3D}
+                distanceM={distanceM}
+                circle1RadiusCm={c1r}
+                circle2RadiusCm={c2r}
+                velocityMs={velocityMs}
+              />
+            )}
+
+            {activeMode === 'penetration' && (
+              <PenetrationMode
+                impacts={impacts3D}
+                penetrationCm={penetrationCm}
+                circle1RadiusCm={c1r}
+                circle2RadiusCm={c2r}
+              />
+            )}
+          </Suspense>
+        </Canvas>
+      </div>
+    </div>
+  );
+}

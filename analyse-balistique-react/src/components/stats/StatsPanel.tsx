@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
-import { Download, Save } from 'lucide-react';
+import { Download, Save, Box } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useAnalysisStore } from '../../stores/analysisStore';
 import { computeFullAnalysis, distancePx, pxToCm, classifyZone } from '../../lib/ballistics';
 import { ScoreGauge } from './ScoreGauge';
@@ -11,6 +12,7 @@ interface StatsPanelProps {
 }
 
 export function StatsPanel({ onExport, onSaveMunition }: StatsPanelProps) {
+  const navigate = useNavigate();
   const { impacts, center, circle1, circle2, scale } = useAnalysisStore();
 
   const stats: AnalysisStats | null = useMemo(() =>
@@ -120,13 +122,28 @@ export function StatsPanel({ onExport, onSaveMunition }: StatsPanelProps) {
       )}
 
       {/* Actions */}
-      <div style={{ display: 'flex', gap: 6, marginTop: 'auto' }}>
-        <button className="btn btn-sm" onClick={onSaveMunition} style={{ flex: 1 }}>
-          <Save size={13} /> Sauvegarder
-        </button>
-        <button className="btn btn-sm btn-primary" onClick={onExport} style={{ flex: 1 }}>
-          <Download size={13} /> Exporter PNG
-        </button>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 'auto' }}>
+        {stats && (
+          <button
+            className="btn btn-sm"
+            onClick={() => navigate('/3d')}
+            style={{
+              width: '100%',
+              background: 'linear-gradient(135deg, rgba(75, 0, 130, 0.3), rgba(200, 134, 10, 0.2))',
+              borderColor: 'var(--accent)',
+            }}
+          >
+            <Box size={13} /> Modélisation 3D
+          </button>
+        )}
+        <div style={{ display: 'flex', gap: 6 }}>
+          <button className="btn btn-sm" onClick={onSaveMunition} style={{ flex: 1 }}>
+            <Save size={13} /> Sauvegarder
+          </button>
+          <button className="btn btn-sm btn-primary" onClick={onExport} style={{ flex: 1 }}>
+            <Download size={13} /> Exporter PNG
+          </button>
+        </div>
       </div>
     </div>
   );
