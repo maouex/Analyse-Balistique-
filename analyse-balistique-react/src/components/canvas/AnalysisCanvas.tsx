@@ -11,6 +11,7 @@ export function AnalysisCanvas() {
   const containerRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
   const isErasing = useRef(false);
+  const isRightDragging = useRef(false);
   const lastMouse = useRef<Point>({ x: 0, y: 0 });
 
   const store = useAnalysisStore();
@@ -33,6 +34,15 @@ export function AnalysisCanvas() {
     ro.observe(container);
     return () => ro.disconnect();
   }, []);
+
+  // Auto-fit image when it changes
+  useEffect(() => {
+    if (!store.image || !canvasRef.current) return;
+    const canvas = canvasRef.current;
+    if (canvas.width > 0 && canvas.height > 0) {
+      store.fitToScreen(canvas.width, canvas.height);
+    }
+  }, [store.image]);
 
   // Render loop
   useEffect(() => {
@@ -74,6 +84,13 @@ export function AnalysisCanvas() {
     const cx = e.clientX - rect.left;
     const cy = e.clientY - rect.top;
 
+    // Right-click or middle-click → always pan (regardless of active tool)
+    if (e.button === 2 || e.button === 1) {
+      isRightDragging.current = true;
+      lastMouse.current = { x: cx, y: cy };
+      return;
+    }
+
     if (store.activeMode === 'move') {
       isDragging.current = true;
       lastMouse.current = { x: cx, y: cy };
@@ -87,7 +104,7 @@ export function AnalysisCanvas() {
         store.setCenter(imgPos);
         break;
       case 'impact':
-        if (store.center) store.addImpact(imgPos);
+        store.addImpact(imgPos);
         break;
       case 'scale':
         store.setScalePoint(imgPos);
@@ -104,6 +121,18 @@ export function AnalysisCanvas() {
     if (!rect) return;
     const cx = e.clientX - rect.left;
     const cy = e.clientY - rect.top;
+
+    // Right-click pan
+    if (isRightDragging.current) {
+      const dx = cx - lastMouse.current.x;
+      const dy = cy - lastMouse.current.y;
+      store.setView({
+        panX: store.view.panX + dx,
+        panY: store.view.panY + dy,
+      });
+      lastMouse.current = { x: cx, y: cy };
+      return;
+    }
 
     if (isDragging.current) {
       const dx = cx - lastMouse.current.x;
@@ -128,6 +157,7 @@ export function AnalysisCanvas() {
   const handleMouseUp = useCallback(() => {
     isDragging.current = false;
     isErasing.current = false;
+    isRightDragging.current = false;
   }, []);
 
   const handleWheel = useCallback((e: React.WheelEvent<HTMLCanvasElement>) => {
@@ -150,10 +180,6 @@ export function AnalysisCanvas() {
       const img = new Image();
       img.onload = () => {
         store.setImage(img);
-        const canvas = canvasRef.current;
-        if (canvas) {
-          store.fitToScreen(canvas.width, canvas.height);
-        }
       };
       img.src = ev.target?.result as string;
     };
@@ -169,10 +195,10 @@ export function AnalysisCanvas() {
     if (!store.imageLoaded) return 'Chargez une image pour commencer l\'analyse';
     switch (store.activeMode) {
       case 'center': return 'Cliquez pour placer le centre de la cible';
-      case 'impact': return store.center ? 'Cliquez pour ajouter un impact' : 'Placez d\'abord le centre de la cible';
+      case 'impact': return 'Cliquez pour ajouter un impact — Clic droit: déplacer';
       case 'scale': return !store.scalePt1 ? 'Cliquez le 1er point de référence' : 'Cliquez le 2ème point de référence';
       case 'move': return 'Glissez pour déplacer, molette pour zoomer';
-      case 'eraser': return 'Cliquez ou glissez sur les impacts à supprimer';
+      case 'eraser': return 'Cliquez ou glissez sur les impacts à supprimer — Clic droit: déplacer';
     }
   };
 
@@ -199,8 +225,9 @@ export function AnalysisCanvas() {
         style={{
           width: '100%',
           height: '100%',
-          cursor: store.activeMode === 'move'
-            ? (isDragging.current ? 'grabbing' : 'grab')
+          cursor: (isDragging.current || isRightDragging.current)
+            ? 'grabbing'
+            : store.activeMode === 'move' ? 'grab'
             : store.activeMode === 'eraser' ? 'none' : 'crosshair',
         }}
       />
