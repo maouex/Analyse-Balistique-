@@ -10,7 +10,7 @@ export interface Impact extends Point {
   index: number;
 }
 
-export type ToolMode = 'center' | 'impact' | 'move' | 'scale';
+export type ToolMode = 'center' | 'impact' | 'move' | 'scale' | 'eraser';
 
 export interface ScaleCalibration {
   pt1: Point | null;

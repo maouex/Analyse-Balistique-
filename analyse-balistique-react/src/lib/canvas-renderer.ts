@@ -78,8 +78,11 @@ export function render(rc: RenderContext): void {
     }
   }
 
-  // Draw crosshair cursor
-  if (rc.mousePos && rc.activeMode !== 'move') {
+  // Draw eraser cursor or crosshair
+  if (rc.mousePos && rc.activeMode === 'eraser') {
+    const mp = imageToCanvas(rc.mousePos, view);
+    drawEraserCursor(ctx, mp, 20 * view.zoom, impacts, view);
+  } else if (rc.mousePos && rc.activeMode !== 'move') {
     const mp = imageToCanvas(rc.mousePos, view);
     drawCrosshair(ctx, mp);
   }
@@ -216,6 +219,55 @@ function drawScaleLine(ctx: CanvasRenderingContext2D, p1: Point, p2: Point): voi
     ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
     ctx.fill();
   }
+  ctx.restore();
+}
+
+function drawEraserCursor(
+  ctx: CanvasRenderingContext2D,
+  p: Point,
+  radiusScreen: number,
+  impacts: Impact[],
+  view: ViewState,
+): void {
+  ctx.save();
+
+  // Eraser circle
+  ctx.strokeStyle = '#e05252';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([4, 3]);
+  ctx.globalAlpha = 0.8;
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, radiusScreen, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Fill with red tint
+  ctx.fillStyle = 'rgba(224, 82, 82, 0.1)';
+  ctx.setLineDash([]);
+  ctx.fill();
+
+  // Highlight impacts inside the eraser radius
+  for (const imp of impacts) {
+    const ip = imageToCanvas(imp, view);
+    const dx = ip.x - p.x;
+    const dy = ip.y - p.y;
+    if (dx * dx + dy * dy <= radiusScreen * radiusScreen) {
+      ctx.strokeStyle = '#ff4444';
+      ctx.lineWidth = 2;
+      ctx.globalAlpha = 0.9;
+      ctx.beginPath();
+      ctx.arc(ip.x, ip.y, 10, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // X mark
+      ctx.beginPath();
+      ctx.moveTo(ip.x - 5, ip.y - 5);
+      ctx.lineTo(ip.x + 5, ip.y + 5);
+      ctx.moveTo(ip.x + 5, ip.y - 5);
+      ctx.lineTo(ip.x - 5, ip.y + 5);
+      ctx.stroke();
+    }
+  }
+
   ctx.restore();
 }
 

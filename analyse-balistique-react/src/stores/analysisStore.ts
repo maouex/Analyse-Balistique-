@@ -40,6 +40,9 @@ interface AnalysisState {
   setCenter: (point: Point) => void;
   addImpact: (point: Point) => void;
   addImpacts: (points: Point[]) => void;
+  removeImpact: (id: string) => void;
+  removeImpactsInRadius: (center: Point, radiusPx: number) => void;
+  clearImpacts: () => void;
   undoImpact: () => void;
   setScalePoint: (point: Point) => void;
   clearScale: () => void;
@@ -157,6 +160,26 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
         })),
       ],
     })),
+
+  removeImpact: (id) =>
+    set((s) => ({
+      impacts: s.impacts
+        .filter((imp) => imp.id !== id)
+        .map((imp, i) => ({ ...imp, index: i + 1 })),
+    })),
+
+  removeImpactsInRadius: (center, radiusPx) =>
+    set((s) => ({
+      impacts: s.impacts
+        .filter((imp) => {
+          const dx = imp.x - center.x;
+          const dy = imp.y - center.y;
+          return dx * dx + dy * dy > radiusPx * radiusPx;
+        })
+        .map((imp, i) => ({ ...imp, index: i + 1 })),
+    })),
+
+  clearImpacts: () => set({ impacts: [] }),
 
   undoImpact: () =>
     set((s) => ({ impacts: s.impacts.slice(0, -1) })),

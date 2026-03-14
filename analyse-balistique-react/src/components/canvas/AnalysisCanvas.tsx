@@ -4,10 +4,13 @@ import { render } from '../../lib/canvas-renderer';
 import { computeFullAnalysis } from '../../lib/ballistics';
 import type { Point } from '../../types';
 
+const ERASER_RADIUS_PX = 20; // eraser radius in image pixels
+
 export function AnalysisCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
+  const isErasing = useRef(false);
   const lastMouse = useRef<Point>({ x: 0, y: 0 });
 
   const store = useAnalysisStore();
@@ -89,6 +92,10 @@ export function AnalysisCanvas() {
       case 'scale':
         store.setScalePoint(imgPos);
         break;
+      case 'eraser':
+        isErasing.current = true;
+        store.removeImpactsInRadius(imgPos, ERASER_RADIUS_PX);
+        break;
     }
   }, [store, canvasToImage]);
 
@@ -109,11 +116,18 @@ export function AnalysisCanvas() {
       return;
     }
 
-    store.setMousePos(canvasToImage(cx, cy));
+    const imgPos = canvasToImage(cx, cy);
+    store.setMousePos(imgPos);
+
+    // Drag-erase: continuously remove impacts while dragging in eraser mode
+    if (isErasing.current && store.activeMode === 'eraser') {
+      store.removeImpactsInRadius(imgPos, ERASER_RADIUS_PX);
+    }
   }, [store, canvasToImage]);
 
   const handleMouseUp = useCallback(() => {
     isDragging.current = false;
+    isErasing.current = false;
   }, []);
 
   const handleWheel = useCallback((e: React.WheelEvent<HTMLCanvasElement>) => {
@@ -158,6 +172,7 @@ export function AnalysisCanvas() {
       case 'impact': return store.center ? 'Cliquez pour ajouter un impact' : 'Placez d\'abord le centre de la cible';
       case 'scale': return !store.scalePt1 ? 'Cliquez le 1er point de référence' : 'Cliquez le 2ème point de référence';
       case 'move': return 'Glissez pour déplacer, molette pour zoomer';
+      case 'eraser': return 'Cliquez ou glissez sur les impacts à supprimer';
     }
   };
 
@@ -184,7 +199,9 @@ export function AnalysisCanvas() {
         style={{
           width: '100%',
           height: '100%',
-          cursor: store.activeMode === 'move' ? (isDragging.current ? 'grabbing' : 'grab') : 'crosshair',
+          cursor: store.activeMode === 'move'
+            ? (isDragging.current ? 'grabbing' : 'grab')
+            : store.activeMode === 'eraser' ? 'none' : 'crosshair',
         }}
       />
 

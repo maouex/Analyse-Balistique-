@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import {
   Upload, RotateCcw, Crosshair, Circle, Move, Undo2, Ruler,
   ZoomIn, Maximize2, Eye, EyeOff, Hash, X, Wand2, Loader2,
+  Eraser, Trash2,
 } from 'lucide-react';
 import { useAnalysisStore } from '../../stores/analysisStore';
 import { detectImpacts } from '../../lib/autoDetect';
@@ -58,10 +59,25 @@ export function Toolbar() {
           <ToolBtn icon={<Circle size={13} />} label="Impacts" active={store.activeMode === 'impact'} onClick={() => store.setMode('impact')} />
           <ToolBtn icon={<Move size={13} />} label="Déplacer" active={store.activeMode === 'move'} onClick={() => store.setMode('move')} />
           <ToolBtn icon={<Ruler size={13} />} label="Échelle" active={store.activeMode === 'scale'} onClick={() => store.setMode('scale')} />
+          <ToolBtn icon={<Eraser size={13} />} label="Gomme" active={store.activeMode === 'eraser'} onClick={() => store.setMode('eraser')} />
         </div>
-        <button className="btn btn-sm" onClick={store.undoImpact} style={{ width: '100%', marginTop: 4 }}>
-          <Undo2 size={13} /> Annuler dernier impact
-        </button>
+        <div style={{ display: 'flex', gap: 4, marginTop: 4 }}>
+          <button className="btn btn-sm" onClick={store.undoImpact} style={{ flex: 1 }}>
+            <Undo2 size={13} /> Annuler
+          </button>
+          <button
+            className="btn btn-sm btn-danger"
+            onClick={() => {
+              if (store.impacts.length > 0 && confirm(`Supprimer les ${store.impacts.length} impacts ?`)) {
+                store.clearImpacts();
+              }
+            }}
+            style={{ flex: 1 }}
+            disabled={store.impacts.length === 0}
+          >
+            <Trash2 size={13} /> Tout effacer
+          </button>
+        </div>
       </Section>
 
       {/* Auto-detect */}
