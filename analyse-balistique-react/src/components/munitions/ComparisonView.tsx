@@ -1,4 +1,4 @@
-import { Component, useState, Fragment, lazy, Suspense } from 'react';
+import { Component, useState, useMemo, Fragment, lazy, Suspense } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { useMunitionsStore } from '../../stores/munitionsStore';
@@ -144,7 +144,13 @@ function buildSections(): SectionDef[] {
 // ─── Main Inner Component ────────────────────────────────────
 
 function ComparisonViewInner({ onBack }: ComparisonViewProps) {
-  const selected = useMunitionsStore((s) => s.selectedMunitions());
+  // Use stable selectors — NEVER call functions inside Zustand selectors
+  const allMunitions = useMunitionsStore((s) => s.munitions);
+  const selectedIds = useMunitionsStore((s) => s.selectedIds);
+  const selected = useMemo(
+    () => allMunitions.filter((m) => selectedIds.has(m.id)),
+    [allMunitions, selectedIds]
+  );
   const [tab, setTab] = useState<Tab>('table');
   const [sortKey, setSortKey] = useState<SortKey | null>(null);
   const [sortDir, setSortDir] = useState<SortDir>('desc');
