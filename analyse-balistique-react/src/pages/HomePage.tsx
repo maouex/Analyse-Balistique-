@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Crosshair, BookOpen, Target, Database } from 'lucide-react';
+import { Crosshair, BookOpen, Target, Database, Box } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export function HomePage() {
@@ -89,6 +89,30 @@ export function HomePage() {
           <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 8 }}>Bibliothèque</h2>
           <p style={{ fontSize: 12, color: 'var(--muted)', lineHeight: 1.5 }}>
             Consultez et comparez vos fiches munitions enregistrées.
+          </p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          onClick={() => navigate('/3d')}
+          style={{
+            width: 260,
+            padding: 28,
+            background: 'linear-gradient(135deg, rgba(75, 0, 130, 0.15), var(--surface))',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-lg)',
+            cursor: 'pointer',
+            textAlign: 'center',
+            transition: 'all 0.2s ease',
+          }}
+          whileHover={{ scale: 1.03, borderColor: '#c084fc' }}
+        >
+          <Box size={32} color="#c084fc" style={{ marginBottom: 16 }} />
+          <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 8 }}>Modélisation 3D</h2>
+          <p style={{ fontSize: 12, color: 'var(--muted)', lineHeight: 1.5 }}>
+            4 modes de visualisation : cône, heatmap, trajectoires et pénétration.
           </p>
         </motion.div>
       </div>
