@@ -6,7 +6,7 @@ import { LibraryPage } from './pages/LibraryPage';
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/Analyse-Balistique-">
       <Routes>
         <Route element={<AppLayout />}>
           <Route path="/" element={<HomePage />} />
