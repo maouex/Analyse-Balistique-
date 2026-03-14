@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { Component, useState } from 'react';
+import type { ErrorInfo, ReactNode } from 'react';
 import { ArrowLeft, Table2, Radar, Layers, ArrowUpDown } from 'lucide-react';
 import { useMunitionsStore } from '../../stores/munitionsStore';
 import { getScoreColor } from '../../lib/ballistics';
@@ -33,7 +34,36 @@ const FILTER_SECTIONS: { key: FilterSection; label: string }[] = [
   { key: 'terrain', label: 'Terrain' },
 ];
 
+// Error boundary to prevent white screen
+class ComparisonErrorBoundary extends Component<{ children: ReactNode; onBack: () => void }, { error: Error | null }> {
+  state = { error: null as Error | null };
+  static getDerivedStateFromError(error: Error) { return { error }; }
+  componentDidCatch(error: Error, info: ErrorInfo) { console.error('ComparisonView error:', error, info); }
+  render() {
+    if (this.state.error) {
+      return (
+        <div style={{ padding: 24 }}>
+          <button className="btn btn-sm" onClick={this.props.onBack}><ArrowLeft size={14} /> Retour</button>
+          <div style={{ marginTop: 20, padding: 16, background: 'rgba(224,82,82,0.1)', borderRadius: 8, border: '1px solid var(--red)' }}>
+            <div style={{ fontWeight: 700, color: 'var(--red)', marginBottom: 8 }}>Erreur d'affichage</div>
+            <pre style={{ fontSize: 11, color: 'var(--muted)', whiteSpace: 'pre-wrap' }}>{this.state.error.message}</pre>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 export function ComparisonView({ onBack }: ComparisonViewProps) {
+  return (
+    <ComparisonErrorBoundary onBack={onBack}>
+      <ComparisonViewInner onBack={onBack} />
+    </ComparisonErrorBoundary>
+  );
+}
+
+function ComparisonViewInner({ onBack }: ComparisonViewProps) {
   const selected = useMunitionsStore((s) => s.selectedMunitions());
   const [tab, setTab] = useState<Tab>('table');
   const [sortKey, setSortKey] = useState<SortKey>(null);
@@ -173,10 +203,10 @@ function TableTab({ munitions, sortKey, sortDir, onSort, filterSection, onFilter
       rows: [
         { label: 'Score', getValue: (m) => m.snap?.score ?? '—', higherIsBetter: true, sortable: 'score' },
         { label: 'Impacts', getValue: (m) => m.snap?.nbImpacts ?? '—', higherIsBetter: true, sortable: 'nbImpacts' },
-        { label: 'Dans ∅50cm', getValue: (m) => m.snap ? `${m.snap.pct50cm}%` : '—', higherIsBetter: true, sortable: 'pct50' },
-        { label: 'Dans ∅100cm', getValue: (m) => m.snap ? `${m.snap.pct100cm}%` : '—', higherIsBetter: true, sortable: 'pct100' },
-        { label: 'R90', getValue: (m) => m.snap ? `${m.snap.r90.toFixed(1)}cm` : '—', higherIsBetter: false, sortable: 'r90' },
-        { label: 'Disp. moyenne', getValue: (m) => m.snap ? `${m.snap.dispMoy.toFixed(1)}cm` : '—', higherIsBetter: false, sortable: 'dispMoy' },
+        { label: 'Dans ∅50cm', getValue: (m) => m.snap?.pct50cm != null ? `${m.snap.pct50cm}%` : '—', higherIsBetter: true, sortable: 'pct50' },
+        { label: 'Dans ∅100cm', getValue: (m) => m.snap?.pct100cm != null ? `${m.snap.pct100cm}%` : '—', higherIsBetter: true, sortable: 'pct100' },
+        { label: 'R90', getValue: (m) => m.snap?.r90 != null ? `${Number(m.snap.r90).toFixed(1)}cm` : '—', higherIsBetter: false, sortable: 'r90' },
+        { label: 'Disp. moyenne', getValue: (m) => m.snap?.dispMoy != null ? `${Number(m.snap.dispMoy).toFixed(1)}cm` : '—', higherIsBetter: false, sortable: 'dispMoy' },
       ],
     },
     {
