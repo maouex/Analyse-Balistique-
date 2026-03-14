@@ -173,22 +173,28 @@ function MunitionCard({ munition: m, selected, onToggle, onEdit, onDelete, onRes
       </div>
 
       {/* Actions */}
-      <div style={{ display: 'flex', gap: 6 }}>
-        {m.savedAnalysis && (
-          <button
-            className="btn btn-sm btn-primary"
-            onClick={onResume}
-            style={{ flex: 1 }}
-          >
-            <Play size={12} /> Reprendre
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <button
+          className={`btn btn-sm ${m.savedAnalysis ? 'btn-primary' : ''}`}
+          onClick={onResume}
+          disabled={!m.savedAnalysis}
+          style={{
+            width: '100%',
+            opacity: m.savedAnalysis ? 1 : 0.4,
+            cursor: m.savedAnalysis ? 'pointer' : 'not-allowed',
+          }}
+          title={m.savedAnalysis ? 'Reprendre cette analyse' : 'Aucune analyse sauvegardée — re-sauvegardez depuis la page d\'analyse'}
+        >
+          <Play size={12} /> {m.savedAnalysis ? 'Reprendre l\'analyse' : 'Pas d\'analyse liée'}
+        </button>
+        <div style={{ display: 'flex', gap: 6 }}>
+          <button className="btn btn-sm" onClick={onEdit} style={{ flex: 1 }}>
+            <Edit3 size={12} /> Modifier
           </button>
-        )}
-        <button className="btn btn-sm" onClick={onEdit} style={{ flex: 1 }}>
-          <Edit3 size={12} /> Modifier
-        </button>
-        <button className="btn btn-sm btn-danger" onClick={onDelete}>
-          <Trash2 size={12} />
-        </button>
+          <button className="btn btn-sm btn-danger" onClick={onDelete}>
+            <Trash2 size={12} />
+          </button>
+        </div>
       </div>
     </div>
   );
