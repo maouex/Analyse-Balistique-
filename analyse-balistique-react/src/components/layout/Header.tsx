@@ -1,19 +1,20 @@
-import { Crosshair, Home, Sun, Moon, ChevronRight } from 'lucide-react';
+import { Crosshair, Sun, Moon, Scan, BookOpen, Box } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useThemeStore } from '../../stores/themeStore';
+import { useAnalysisStore } from '../../stores/analysisStore';
 
-const NAV_LABELS: Record<string, string> = {
-  '/analyse': 'Analyse',
-  '/bibliotheque': 'Bibliothèque',
-  '/3d': 'Modélisation 3D',
-};
+const NAV_ITEMS = [
+  { path: '/analyse', label: 'Analyse', icon: Scan, shortLabel: 'Analyse' },
+  { path: '/bibliotheque', label: 'Bibliothèque', icon: BookOpen, shortLabel: 'Biblio.' },
+  { path: '/3d', label: 'Vue 3D', icon: Box, shortLabel: '3D' },
+];
 
 export function Header() {
   const navigate = useNavigate();
   const location = useLocation();
-  const isHome = location.pathname === '/';
   const { mode, toggle } = useThemeStore();
-  const pageLabel = NAV_LABELS[location.pathname];
+  const hasAnalysis = useAnalysisStore((s) => s.impacts.length > 0);
+  const impactCount = useAnalysisStore((s) => s.impacts.length);
 
   return (
     <header style={{
@@ -24,13 +25,13 @@ export function Header() {
       borderBottom: '1px solid var(--border)',
       display: 'flex',
       alignItems: 'center',
-      padding: '0 20px',
-      gap: 10,
+      padding: '0 16px',
+      gap: 6,
       flexShrink: 0,
       zIndex: 100,
       position: 'relative',
     }}>
-      {/* Subtle bottom glow line */}
+      {/* Subtle bottom glow */}
       <div style={{
         position: 'absolute',
         bottom: -1,
@@ -38,6 +39,7 @@ export function Header() {
         right: '10%',
         height: 1,
         background: 'linear-gradient(90deg, transparent, var(--accent-glow), transparent)',
+        pointerEvents: 'none',
       }} />
 
       {/* Logo */}
@@ -46,25 +48,26 @@ export function Header() {
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: 10,
+          gap: 9,
           cursor: 'pointer',
-          transition: 'opacity var(--transition-fast)',
+          marginRight: 8,
+          flexShrink: 0,
         }}
       >
         <div style={{
-          width: 32,
-          height: 32,
+          width: 30,
+          height: 30,
           borderRadius: 8,
           background: 'linear-gradient(135deg, var(--accent), var(--accent2))',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          boxShadow: '0 2px 12px var(--accent-glow)',
+          boxShadow: '0 2px 10px var(--accent-glow)',
         }}>
-          <Crosshair size={17} color="#fff" strokeWidth={2.5} />
+          <Crosshair size={15} color="#fff" strokeWidth={2.5} />
         </div>
         <span style={{
-          fontSize: 15,
+          fontSize: 14,
           fontWeight: 800,
           letterSpacing: '-0.4px',
           color: 'var(--text)',
@@ -73,78 +76,126 @@ export function Header() {
         </span>
       </div>
 
-      {/* Breadcrumb */}
-      {!isHome && pageLabel && (
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 6,
-          marginLeft: 4,
-        }}>
-          <ChevronRight size={13} color="var(--muted)" />
-          <span style={{
-            fontSize: 13,
-            fontWeight: 600,
-            color: 'var(--text-secondary)',
-          }}>
-            {pageLabel}
-          </span>
-        </div>
-      )}
+      {/* Navigation tabs */}
+      <nav style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 2,
+        flex: 1,
+        justifyContent: 'center',
+      }}>
+        {NAV_ITEMS.map((item) => {
+          const isActive = location.pathname === item.path;
+          const Icon = item.icon;
+          const show3dBadge = item.path === '/3d' && hasAnalysis;
 
-      {/* Spacer */}
-      <div style={{ flex: 1 }} />
+          return (
+            <button
+              key={item.path}
+              onClick={() => navigate(item.path)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '7px 16px',
+                borderRadius: 8,
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: 13,
+                fontWeight: isActive ? 700 : 500,
+                color: isActive ? 'var(--accent2)' : 'var(--text-secondary)',
+                background: isActive ? 'var(--accent-glow)' : 'transparent',
+                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                position: 'relative',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              <Icon size={15} strokeWidth={isActive ? 2.2 : 1.8} />
+              {item.label}
 
-      {/* Navigation */}
-      {!isHome && (
+              {/* Active indicator dot */}
+              {isActive && (
+                <div style={{
+                  position: 'absolute',
+                  bottom: -2,
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: 16,
+                  height: 2,
+                  borderRadius: 1,
+                  background: 'var(--accent2)',
+                }} />
+              )}
+
+              {/* Badge for 3D if analysis data exists */}
+              {show3dBadge && !isActive && (
+                <span style={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: '50%',
+                  background: 'var(--green)',
+                  boxShadow: '0 0 6px var(--green)',
+                  flexShrink: 0,
+                }} />
+              )}
+            </button>
+          );
+        })}
+      </nav>
+
+      {/* Right side: status + theme + version */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+        {/* Active analysis indicator */}
+        {hasAnalysis && location.pathname !== '/analyse' && (
+          <button
+            onClick={() => navigate('/analyse')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 5,
+              padding: '5px 10px',
+              borderRadius: 6,
+              border: '1px solid var(--border-glow)',
+              background: 'var(--accent-glow)',
+              cursor: 'pointer',
+              color: 'var(--accent2)',
+              fontSize: 11,
+              fontWeight: 700,
+              transition: 'all var(--transition-fast)',
+            }}
+          >
+            <span style={{
+              width: 6,
+              height: 6,
+              borderRadius: '50%',
+              background: 'var(--accent2)',
+              animation: 'pulse 2s ease-in-out infinite',
+            }} />
+            {impactCount} impacts
+          </button>
+        )}
+
+        {/* Theme toggle */}
         <button
-          className="btn btn-sm"
-          onClick={() => navigate('/')}
+          onClick={toggle}
+          title={mode === 'dark' ? 'Thème clair' : 'Thème sombre'}
           style={{
-            background: 'transparent',
+            width: 32,
+            height: 32,
+            borderRadius: 'var(--radius-sm)',
             border: '1px solid var(--border)',
-            gap: 5,
+            background: 'var(--surface2)',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'var(--text-secondary)',
+            transition: 'all var(--transition-fast)',
           }}
         >
-          <Home size={13} />
-          <span style={{ fontSize: 12 }}>Accueil</span>
+          {mode === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
         </button>
-      )}
-
-      {/* Theme toggle */}
-      <button
-        onClick={toggle}
-        title={mode === 'dark' ? 'Thème clair' : 'Thème sombre'}
-        style={{
-          width: 34,
-          height: 34,
-          borderRadius: 'var(--radius-sm)',
-          border: '1px solid var(--border)',
-          background: 'var(--surface2)',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'var(--text-secondary)',
-          transition: 'all var(--transition-fast)',
-        }}
-      >
-        {mode === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
-      </button>
-
-      {/* Version badge */}
-      <span style={{
-        fontSize: 9,
-        fontWeight: 700,
-        color: 'var(--accent2)',
-        background: 'var(--accent-glow)',
-        padding: '4px 10px',
-        borderRadius: 20,
-        letterSpacing: '0.8px',
-        border: '1px solid var(--border-glow)',
-      }}>
-        v3.0
-      </span>
+      </div>
     </header>
   );
 }

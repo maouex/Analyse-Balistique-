@@ -9,7 +9,8 @@ import { ConeDispersionMode } from './ConeDispersionMode';
 import { HeatmapMode } from './HeatmapMode';
 import { TrajectoriesMode } from './TrajectoriesMode';
 import { PenetrationMode } from './PenetrationMode';
-import { Camera, RotateCcw } from 'lucide-react';
+import { Camera, RotateCcw, ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface Scene3DProps {
   distanceStr?: string;
@@ -22,6 +23,7 @@ export function Scene3D({
   velocityMs = 400,
   penetrationCm = 25,
 }: Scene3DProps) {
+  const navigate = useNavigate();
   const [activeMode, setActiveMode] = useState<View3DMode>('cone');
   const [autoRotate, setAutoRotate] = useState(true);
   const canvasContainerRef = useRef<HTMLDivElement>(null);
@@ -95,6 +97,10 @@ export function Scene3D({
         background: 'var(--surface)',
         flexWrap: 'wrap',
       }}>
+        <button className="btn btn-sm" onClick={() => navigate('/analyse')} style={{ gap: 5, marginRight: 4 }}>
+          <ArrowLeft size={13} /> Analyse
+        </button>
+        <div style={{ width: 1, height: 20, background: 'var(--border)', marginRight: 2 }} />
         {VIEW_3D_MODES.map((mode) => (
           <button
             key={mode.mode}

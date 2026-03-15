@@ -1,11 +1,10 @@
 import { Component, useState, useMemo, Fragment, lazy, Suspense } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Table2, Radar, Layers } from 'lucide-react';
 import { useMunitionsStore } from '../../stores/munitionsStore';
 import { getScoreColor } from '../../lib/ballistics';
 import type { Munition } from '../../types';
 
-// Lazy-load heavy sub-components to isolate errors
 const RadarChart = lazy(() => import('./RadarChart').then((m) => ({ default: m.RadarChart })));
 const ImpactOverlay = lazy(() => import('./ImpactOverlay').then((m) => ({ default: m.ImpactOverlay })));
 
@@ -16,8 +15,6 @@ type SortDir = 'asc' | 'desc';
 interface ComparisonViewProps {
   onBack: () => void;
 }
-
-// ─── Error Boundary ──────────────────────────────────────────
 
 class ComparisonErrorBoundary extends Component<
   { children: ReactNode; onBack: () => void },
@@ -37,12 +34,10 @@ class ComparisonErrorBoundary extends Component<
           <button className="btn btn-sm" onClick={this.props.onBack}>
             <ArrowLeft size={14} /> Retour
           </button>
-          <div style={{ marginTop: 20, padding: 16, background: 'rgba(224,82,82,0.1)', borderRadius: 8, border: '1px solid var(--red)' }}>
+          <div style={{ marginTop: 20, padding: 16, background: 'var(--red-glow)', borderRadius: 8, border: '1px solid var(--red)' }}>
             <div style={{ fontWeight: 700, color: 'var(--red)', marginBottom: 8 }}>Erreur</div>
             <pre style={{ fontSize: 11, color: 'var(--muted)', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
               {String(this.state.error.message)}
-              {'\n\n'}
-              {String(this.state.error.stack || '')}
             </pre>
           </div>
         </div>
@@ -60,17 +55,13 @@ export function ComparisonView({ onBack }: ComparisonViewProps) {
   );
 }
 
-// ─── Safe renderer ───────────────────────────────────────────
-
 function safe(val: unknown): string {
-  if (val === null || val === undefined || val === '') return '—';
+  if (val === null || val === undefined || val === '') return '\u2014';
   if (typeof val === 'string') return val;
   if (typeof val === 'number') return String(val);
   if (typeof val === 'boolean') return String(val);
   return JSON.stringify(val);
 }
-
-// ─── Sort Config ─────────────────────────────────────────────
 
 const SORT_OPTS: { key: SortKey; label: string; getValue: (m: Munition) => number; defDir: SortDir }[] = [
   { key: 'score', label: 'Score', getValue: (m) => Number(m.snap?.score) || -1, defDir: 'desc' },
@@ -82,19 +73,8 @@ const SORT_OPTS: { key: SortKey; label: string; getValue: (m: Munition) => numbe
   { key: 'prix', label: 'Prix', getValue: (m) => Number(m.prix) || 999, defDir: 'asc' },
 ];
 
-// ─── Row definitions ─────────────────────────────────────────
-
-interface RowDef {
-  label: string;
-  get: (m: Munition) => string;
-  better?: 'high' | 'low';
-}
-
-interface SectionDef {
-  id: string;
-  title: string;
-  rows: RowDef[];
-}
+interface RowDef { label: string; get: (m: Munition) => string; better?: 'high' | 'low'; }
+interface SectionDef { id: string; title: string; rows: RowDef[]; }
 
 function buildSections(): SectionDef[] {
   return [
@@ -104,7 +84,7 @@ function buildSections(): SectionDef[] {
         { label: 'Nom', get: (m) => safe(m.nom) },
         { label: 'Fabricant', get: (m) => safe(m.fabricant) },
         { label: 'Calibre', get: (m) => safe(m.calibre) },
-        { label: 'Prix', get: (m) => m.prix ? String(m.prix) + '\u20AC' : '—' },
+        { label: 'Prix', get: (m) => m.prix ? String(m.prix) + '\u20AC' : '\u2014' },
       ],
     },
     {
@@ -119,12 +99,12 @@ function buildSections(): SectionDef[] {
     {
       id: 'gerbe', title: 'Gerbe',
       rows: [
-        { label: 'Score', get: (m) => m.snap ? String(Number(m.snap.score) || 0) : '—', better: 'high' },
-        { label: 'Impacts', get: (m) => m.snap ? String(Number(m.snap.nbImpacts) || 0) : '—', better: 'high' },
-        { label: 'Dans 50cm', get: (m) => m.snap && m.snap.pct50cm != null ? String(m.snap.pct50cm) + '%' : '—', better: 'high' },
-        { label: 'Dans 100cm', get: (m) => m.snap && m.snap.pct100cm != null ? String(m.snap.pct100cm) + '%' : '—', better: 'high' },
-        { label: 'R90', get: (m) => m.snap && m.snap.r90 != null ? Number(m.snap.r90).toFixed(1) + 'cm' : '—', better: 'low' },
-        { label: 'Disp. moy.', get: (m) => m.snap && m.snap.dispMoy != null ? Number(m.snap.dispMoy).toFixed(1) + 'cm' : '—', better: 'low' },
+        { label: 'Score', get: (m) => m.snap ? String(Number(m.snap.score) || 0) : '\u2014', better: 'high' },
+        { label: 'Impacts', get: (m) => m.snap ? String(Number(m.snap.nbImpacts) || 0) : '\u2014', better: 'high' },
+        { label: 'Dans 50cm', get: (m) => m.snap?.pct50cm != null ? String(m.snap.pct50cm) + '%' : '\u2014', better: 'high' },
+        { label: 'Dans 100cm', get: (m) => m.snap?.pct100cm != null ? String(m.snap.pct100cm) + '%' : '\u2014', better: 'high' },
+        { label: 'R90', get: (m) => m.snap?.r90 != null ? Number(m.snap.r90).toFixed(1) + 'cm' : '\u2014', better: 'low' },
+        { label: 'Disp. moy.', get: (m) => m.snap?.dispMoy != null ? Number(m.snap.dispMoy).toFixed(1) + 'cm' : '\u2014', better: 'low' },
       ],
     },
     {
@@ -133,18 +113,21 @@ function buildSections(): SectionDef[] {
         { label: 'Distance', get: (m) => safe(m.distance) },
         { label: 'Choke', get: (m) => safe(m.choke) },
         { label: 'Fusil', get: (m) => safe(m.fusil) },
-        { label: 'V. officielle', get: (m) => m.vitesseOfficielle ? String(m.vitesseOfficielle) + ' m/s' : '—' },
-        { label: 'V. mesur\u00E9e', get: (m) => m.vitesseMesuree ? String(m.vitesseMesuree) + ' m/s' : '—' },
-        { label: 'P\u00E9n\u00E9tration', get: (m) => m.penetration ? String(m.penetration) + ' cm' : '—' },
+        { label: 'V. officielle', get: (m) => m.vitesseOfficielle ? String(m.vitesseOfficielle) + ' m/s' : '\u2014' },
+        { label: 'V. mesur\u00E9e', get: (m) => m.vitesseMesuree ? String(m.vitesseMesuree) + ' m/s' : '\u2014' },
+        { label: 'P\u00E9n\u00E9tration', get: (m) => m.penetration ? String(m.penetration) + ' cm' : '\u2014' },
       ],
     },
   ];
 }
 
-// ─── Main Inner Component ────────────────────────────────────
+const TABS: { key: Tab; label: string; icon: typeof Table2 }[] = [
+  { key: 'table', label: 'Tableau', icon: Table2 },
+  { key: 'radar', label: 'Radar', icon: Radar },
+  { key: 'overlay', label: 'Superposition', icon: Layers },
+];
 
 function ComparisonViewInner({ onBack }: ComparisonViewProps) {
-  // Use stable selectors — NEVER call functions inside Zustand selectors
   const allMunitions = useMunitionsStore((s) => s.munitions);
   const selectedIds = useMunitionsStore((s) => s.selectedIds);
   const selected = useMemo(
@@ -159,12 +142,11 @@ function ComparisonViewInner({ onBack }: ComparisonViewProps) {
   if (selected.length < 2) {
     return (
       <div style={{ padding: 24 }}>
-        <button className="btn btn-sm" onClick={onBack}>
-          <ArrowLeft size={14} />
-          {' Retour'}
+        <button className="btn btn-sm" onClick={onBack} style={{ gap: 6 }}>
+          <ArrowLeft size={14} /> Retour à la bibliothèque
         </button>
         <p style={{ marginTop: 20, color: 'var(--muted)' }}>
-          {"S\u00E9lectionnez au moins 2 munitions."}
+          S{'\u00E9'}lectionnez au moins 2 munitions depuis la bibliothèque.
         </p>
       </div>
     );
@@ -206,45 +188,59 @@ function ComparisonViewInner({ onBack }: ComparisonViewProps) {
       gap: 16,
       overflowY: 'auto',
     }}>
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <button className="btn btn-sm" onClick={onBack}>
-          <ArrowLeft size={14} />
-          {' Retour'}
+      {/* Header with back + title + tabs */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+        <button className="btn btn-sm" onClick={onBack} style={{ gap: 5 }}>
+          <ArrowLeft size={14} /> Bibliothèque
         </button>
-        <h2 style={{ fontSize: 18, fontWeight: 700 }}>
-          {'Comparaison (' + String(selected.length) + ' munitions)'}
+        <h2 style={{ fontSize: 18, fontWeight: 800, letterSpacing: '-0.2px' }}>
+          Comparaison
         </h2>
+        <span style={{
+          fontSize: 11,
+          fontWeight: 700,
+          color: 'var(--accent2)',
+          background: 'var(--accent-glow)',
+          padding: '3px 10px',
+          borderRadius: 20,
+        }}>
+          {selected.length} munitions
+        </span>
+
+        {/* Tabs */}
+        <div style={{ marginLeft: 'auto', display: 'flex', gap: 2, background: 'var(--surface2)', borderRadius: 8, padding: 2 }}>
+          {TABS.map((t) => {
+            const Icon = t.icon;
+            return (
+              <button
+                key={t.key}
+                onClick={() => setTab(t.key)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 5,
+                  padding: '6px 12px',
+                  borderRadius: 6,
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: 12,
+                  fontWeight: tab === t.key ? 700 : 500,
+                  color: tab === t.key ? 'var(--accent2)' : 'var(--text-secondary)',
+                  background: tab === t.key ? 'var(--accent-glow)' : 'transparent',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                <Icon size={13} />
+                {t.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Tabs - plain text, no lucide icons */}
-      <div style={{ display: 'flex', gap: 4, borderBottom: '1px solid var(--border)' }}>
-        {[
-          { key: 'table' as Tab, label: 'Tableau' },
-          { key: 'radar' as Tab, label: 'Radar' },
-          { key: 'overlay' as Tab, label: 'Superposition' },
-        ].map((t) => (
-          <button
-            key={t.key}
-            className="btn btn-sm"
-            onClick={() => setTab(t.key)}
-            style={{
-              borderRadius: '6px 6px 0 0',
-              borderBottom: tab === t.key ? '2px solid var(--accent2)' : '2px solid transparent',
-              background: tab === t.key ? 'var(--surface2)' : 'transparent',
-              color: tab === t.key ? 'var(--accent2)' : 'var(--muted)',
-              fontWeight: tab === t.key ? 700 : 500,
-            }}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
-
-      {/* ─── TABLE TAB ─── */}
+      {/* TABLE TAB */}
       {tab === 'table' && (
         <Fragment>
-          {/* Filter + Sort bar */}
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
             {['all', 'identification', 'cartouche', 'gerbe', 'terrain'].map((f) => (
               <button
@@ -261,8 +257,7 @@ function ComparisonViewInner({ onBack }: ComparisonViewProps) {
                 {f === 'all' ? 'Tout' : f.charAt(0).toUpperCase() + f.slice(1)}
               </button>
             ))}
-
-            <span style={{ fontSize: 10, color: 'var(--muted)', marginLeft: 8 }}>{'Tri:'}</span>
+            <span style={{ fontSize: 10, color: 'var(--muted)', marginLeft: 8 }}>Tri:</span>
             {SORT_OPTS.map((opt) => (
               <button
                 key={opt.key}
@@ -280,12 +275,11 @@ function ComparisonViewInner({ onBack }: ComparisonViewProps) {
             ))}
           </div>
 
-          {/* Table */}
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
               <thead>
                 <tr>
-                  <th style={thStyle}>{"Crit\u00E8re"}</th>
+                  <th style={thStyle}>Crit{'\u00E8'}re</th>
                   {munitions.map((m) => (
                     <th key={m.id} style={{ ...thStyle, minWidth: 140 }}>
                       <div style={{ fontWeight: 700 }}>{safe(m.nom)}</div>
@@ -312,25 +306,20 @@ function ComparisonViewInner({ onBack }: ComparisonViewProps) {
                     {section.rows.map((row) => {
                       const vals = munitions.map((m) => row.get(m));
                       const nums = vals.map((v) => parseFloat(v)).filter((v) => !isNaN(v));
-
                       let bestIdx = -1;
                       if (nums.length >= 2 && row.better) {
                         const best = row.better === 'high' ? Math.max(...nums) : Math.min(...nums);
                         bestIdx = nums.indexOf(best);
                       }
-
                       return (
                         <tr key={row.label}>
                           <td style={{ ...tdStyle, color: 'var(--muted)', fontWeight: 500 }}>{row.label}</td>
                           {vals.map((val, i) => (
-                            <td
-                              key={i}
-                              style={{
-                                ...tdStyle,
-                                fontWeight: i === bestIdx ? 700 : 400,
-                                color: i === bestIdx ? 'var(--green)' : 'var(--text)',
-                              }}
-                            >
+                            <td key={i} style={{
+                              ...tdStyle,
+                              fontWeight: i === bestIdx ? 700 : 400,
+                              color: i === bestIdx ? 'var(--green)' : 'var(--text)',
+                            }}>
                               {val}
                             </td>
                           ))}
@@ -343,31 +332,27 @@ function ComparisonViewInner({ onBack }: ComparisonViewProps) {
             </table>
           </div>
 
-          {/* Score bars */}
           {munitions.some((m) => m.snap && m.snap.score != null) && (
             <div style={{ marginTop: 8 }}>
-              <div style={{
-                fontSize: 10, fontWeight: 700, color: 'var(--muted)',
-                textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 10,
-              }}>
-                {'Comparaison des scores'}
-              </div>
+              <div className="section-label">Comparaison des scores</div>
               <div style={{ display: 'flex', gap: 12, alignItems: 'flex-end' }}>
                 {munitions.map((m) => {
                   const score = Number(m.snap?.score) || 0;
+                  const color = getScoreColor(score);
                   return (
                     <div key={m.id} style={{ flex: 1, textAlign: 'center' }}>
                       <div style={{
-                        height: Math.max(20, score * 1.5),
-                        background: getScoreColor(score),
-                        borderRadius: '6px 6px 0 0',
-                        transition: 'height 0.3s ease',
+                        height: Math.max(24, score * 1.5),
+                        background: `linear-gradient(to top, ${color}, ${color}aa)`,
+                        borderRadius: '8px 8px 0 0',
+                        transition: 'height 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                         display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
-                        paddingTop: 6, fontWeight: 700, fontSize: 13, color: '#fff',
+                        paddingTop: 6, fontWeight: 800, fontSize: 14, color: '#fff',
+                        boxShadow: `0 4px 16px ${color}44`,
                       }}>
                         {String(score)}
                       </div>
-                      <div style={{ fontSize: 10, color: 'var(--muted)', marginTop: 6 }}>
+                      <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 6, fontWeight: 600 }}>
                         {safe(m.nom)}
                       </div>
                     </div>
@@ -379,24 +364,20 @@ function ComparisonViewInner({ onBack }: ComparisonViewProps) {
         </Fragment>
       )}
 
-      {/* ─── RADAR TAB ─── */}
       {tab === 'radar' && (
-        <Suspense fallback={<div style={{ color: 'var(--muted)', padding: 20 }}>{"Chargement..."}</div>}>
+        <Suspense fallback={<div style={{ color: 'var(--muted)', padding: 20 }}>Chargement...</div>}>
           <RadarChart munitions={selected} />
         </Suspense>
       )}
 
-      {/* ─── OVERLAY TAB ─── */}
       {tab === 'overlay' && (
-        <Suspense fallback={<div style={{ color: 'var(--muted)', padding: 20 }}>{"Chargement..."}</div>}>
+        <Suspense fallback={<div style={{ color: 'var(--muted)', padding: 20 }}>Chargement...</div>}>
           <ImpactOverlay munitions={selected} />
         </Suspense>
       )}
     </div>
   );
 }
-
-// ─── Styles ──────────────────────────────────────────────────
 
 const thStyle: React.CSSProperties = {
   padding: '10px',

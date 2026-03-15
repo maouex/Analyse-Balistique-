@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Trash2, Edit3, GitCompare, CheckSquare, Square, Play, Database } from 'lucide-react';
+import { Search, Trash2, Edit3, GitCompare, CheckSquare, Square, Play, Database, Plus, X, Crosshair } from 'lucide-react';
 import { useMunitionsStore } from '../stores/munitionsStore';
 import { useAnalysisStore } from '../stores/analysisStore';
 import { MunitionForm } from '../components/munitions/MunitionForm';
@@ -36,8 +36,31 @@ export function LibraryPage() {
     navigate('/analyse');
   };
 
+  // Comparison is now a modal overlay
   if (store.showComparison) {
-    return <ComparisonView onBack={() => store.setShowComparison(false)} />;
+    return (
+      <div style={{ height: '100%', position: 'relative' }}>
+        {/* Dimmed library behind */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'var(--bg)',
+          opacity: 0.5,
+          zIndex: 1,
+        }} />
+        {/* Comparison panel */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: 2,
+          overflowY: 'auto',
+          background: 'var(--bg)',
+          animation: 'slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+        }}>
+          <ComparisonView onBack={() => store.setShowComparison(false)} />
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -50,7 +73,7 @@ export function LibraryPage() {
       overflowY: 'auto',
     }}>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{
             width: 36,
@@ -67,23 +90,49 @@ export function LibraryPage() {
           <div>
             <h2 style={{ fontSize: 20, fontWeight: 800, letterSpacing: '-0.3px' }}>Bibliothèque</h2>
             <span style={{ fontSize: 11, color: 'var(--muted)' }}>
-              {store.munitions.length} munition{store.munitions.length !== 1 ? 's' : ''}
+              {store.munitions.length} munition{store.munitions.length !== 1 ? 's' : ''} enregistr{'\u00E9'}e{store.munitions.length !== 1 ? 's' : ''}
             </span>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {/* New analysis button */}
+          <button className="btn btn-sm" onClick={() => navigate('/analyse')} style={{ gap: 5 }}>
+            <Plus size={13} /> Nouvelle analyse
+          </button>
+
+          {/* Comparison button */}
           {store.selectedIds.size >= 2 && (
             <button className="btn btn-sm btn-primary" onClick={() => store.setShowComparison(true)}>
               <GitCompare size={13} /> Comparer ({store.selectedIds.size})
             </button>
           )}
           {store.selectedIds.size > 0 && (
-            <button className="btn btn-sm" onClick={() => store.clearSelection()}>
-              Désélectionner
+            <button className="btn btn-sm" onClick={() => store.clearSelection()} style={{ gap: 4 }}>
+              <X size={12} /> D{'\u00E9'}s{'\u00E9'}lectionner
             </button>
           )}
         </div>
       </div>
+
+      {/* Selection hint */}
+      {store.munitions.length >= 2 && store.selectedIds.size < 2 && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          padding: '8px 14px',
+          background: 'var(--blue-glow)',
+          border: '1px solid rgba(96,165,250,0.15)',
+          borderRadius: 'var(--radius-sm)',
+          fontSize: 11,
+          color: 'var(--blue)',
+          fontWeight: 600,
+        }}>
+          <GitCompare size={12} />
+          S{'\u00E9'}lectionnez 2 à 4 munitions pour les comparer
+          {store.selectedIds.size === 1 && ' — encore 1 minimum'}
+        </div>
+      )}
 
       {/* Search */}
       <div style={{ position: 'relative', maxWidth: 440 }}>
@@ -101,16 +150,31 @@ export function LibraryPage() {
       {filtered.length === 0 ? (
         <div style={{
           textAlign: 'center',
-          padding: 60,
+          padding: 48,
           color: 'var(--muted)',
           fontSize: 14,
           background: 'var(--surface2)',
           borderRadius: 'var(--radius-lg)',
           border: '1px dashed var(--border)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 14,
         }}>
-          {store.munitions.length === 0
-            ? 'Aucune munition enregistrée. Lancez une analyse pour en ajouter.'
-            : 'Aucun résultat trouvé.'}
+          {store.munitions.length === 0 ? (
+            <>
+              <Database size={32} color="var(--border-light)" />
+              <div>
+                <div style={{ fontWeight: 700, marginBottom: 4 }}>Bibliothèque vide</div>
+                <div style={{ fontSize: 12 }}>Lancez une analyse et sauvegardez-la pour la retrouver ici.</div>
+              </div>
+              <button className="btn btn-sm btn-primary" onClick={() => navigate('/analyse')} style={{ gap: 5 }}>
+                <Crosshair size={12} /> Lancer une analyse
+              </button>
+            </>
+          ) : (
+            'Aucun résultat trouvé.'
+          )}
         </div>
       ) : (
         <div style={{
@@ -154,6 +218,7 @@ function MunitionCard({ munition: m, selected, onToggle, onEdit, onDelete, onRes
         padding: 18,
         borderColor: selected ? 'var(--accent)' : undefined,
         boxShadow: selected ? '0 0 20px var(--accent-glow)' : undefined,
+        transition: 'all 0.2s ease',
       }}
     >
       {/* Header */}
@@ -166,6 +231,7 @@ function MunitionCard({ munition: m, selected, onToggle, onEdit, onDelete, onRes
         </div>
         <button
           onClick={onToggle}
+          title="S\u00E9lectionner pour comparer"
           style={{
             background: 'none',
             border: 'none',
@@ -221,7 +287,7 @@ function MunitionCard({ munition: m, selected, onToggle, onEdit, onDelete, onRes
           }}
           title={m.savedAnalysis ? 'Reprendre cette analyse' : 'Aucune analyse sauvegardée'}
         >
-          <Play size={12} /> {m.savedAnalysis ? "Reprendre l'analyse" : "Pas d'analyse liée"}
+          <Play size={12} /> {m.savedAnalysis ? "Reprendre l'analyse" : "Pas d'analyse li\u00E9e"}
         </button>
         <div style={{ display: 'flex', gap: 6 }}>
           <button className="btn btn-sm" onClick={onEdit} style={{ flex: 1, justifyContent: 'center' }}>
