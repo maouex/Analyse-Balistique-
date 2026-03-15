@@ -1,6 +1,6 @@
 import type { Impact, Point } from '../types';
 
-export type View3DMode = 'cone' | 'heatmap' | 'energy' | 'trajectories' | 'cloud' | 'penetration' | 'multiDistance';
+export type View3DMode = 'cone' | 'heatmap' | 'energy' | 'trajectories' | 'cloud' | 'penetration' | 'multiDistance' | 'simulation';
 
 export interface View3DConfig {
   mode: View3DMode;
@@ -51,6 +51,12 @@ export const VIEW_3D_MODES: View3DConfig[] = [
     label: 'Multi-distance',
     description: 'Comparaison du pattern à 3 distances différentes côte à côte.',
     icon: '📏',
+  },
+  {
+    mode: 'simulation',
+    label: 'Simulation',
+    description: 'Simulation réaliste avec vue latérale, échelles 1:1 et timeline interactive.',
+    icon: '🎬',
   },
 ];
 

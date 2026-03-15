@@ -1,11 +1,11 @@
-import { Suspense, useState, useMemo, useRef } from 'react';
+import { Suspense, useState, useMemo, useRef, useCallback } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { useAnalysisStore } from '../../stores/analysisStore';
 import { computeFullAnalysis } from '../../lib/ballistics';
 import { impactsTo3D, getDistanceMeters, VIEW_3D_MODES } from '../../lib/3d-utils';
 import type { View3DMode } from '../../lib/3d-utils';
-import type { BallisticParams } from '../../lib/ballistics-sim';
+import type { BallisticParams, DenseSimulationResult } from '../../lib/ballistics-sim';
 import { useBallisticsWorker } from '../../lib/useBallisticsWorker';
 import { ConeDispersionMode } from './ConeDispersionMode';
 import { HeatmapMode } from './HeatmapMode';
@@ -14,6 +14,9 @@ import { TrajectoriesMode } from './TrajectoriesMode';
 import { DispersionCloudMode } from './DispersionCloudMode';
 import { PenetrationMode } from './PenetrationMode';
 import { MultiDistanceMode } from './MultiDistanceMode';
+import { RealisticSimulationMode } from './RealisticSimulationMode';
+import type { SimulationTimeState } from './RealisticSimulationMode';
+import { TimelineControls } from './TimelineControls';
 import { EnhancedBallisticsPanel } from './EnhancedBallisticsPanel';
 import { Camera, RotateCcw, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -34,6 +37,14 @@ export function Scene3D({
   const [autoRotate, setAutoRotate] = useState(true);
   const [ballisticParams, setBallisticParams] = useState<BallisticParams | null>(null);
   const canvasContainerRef = useRef<HTMLDivElement>(null);
+
+  // Simulation timeline state
+  const [simTimeState, setSimTimeState] = useState<SimulationTimeState>({
+    currentTime: 0,
+    playing: false,
+    speed: 0.01, // 100× slow-mo by default
+  });
+  const [denseSim, setDenseSim] = useState<DenseSimulationResult | null>(null);
 
   const store = useAnalysisStore();
 
@@ -60,20 +71,18 @@ export function Scene3D({
   const c1r = store.circle1.diameterCm / 2;
   const c2r = store.circle2.diameterCm / 2;
 
-  // Impact positions (stable reference for worker)
+  // Impact positions for worker
   const impactPositionsCm = useMemo(
     () => impacts3D.map(imp => ({ x: imp.x, y: imp.y })),
     [impacts3D]
   );
 
-  // Simulation runs in Web Worker (non-blocking)
+  // Standard sim (Web Worker)
   const { simResult, computing } = useBallisticsWorker(ballisticParams, distanceM, impactPositionsCm);
 
-  // Effective velocity and penetration
   const effectiveVelocity = ballisticParams?.muzzleVelocity ?? velocityMs;
   const effectivePenetration = simResult?.avgPenetration ?? penetrationCm;
 
-  // Enhanced impacts3D with per-pellet penetration
   const enhancedImpacts3D = useMemo(() => {
     if (!simResult) return impacts3D;
     return impacts3D.map((imp, i) => {
@@ -83,11 +92,44 @@ export function Scene3D({
     });
   }, [impacts3D, simResult]);
 
+  const isSimMode = activeMode === 'simulation';
+
+  // Camera config per mode
   const cameraPosition: [number, number, number] =
-    activeMode === 'penetration' ? [0.5, 0.2, 0.8]
+    isSimMode ? [0, 2.5, -4] // side view, slightly elevated
+    : activeMode === 'penetration' ? [0.5, 0.2, 0.8]
     : activeMode === 'trajectories' || activeMode === 'cloud' ? [0.8, distanceM * 0.005 + 0.3, 0.8]
     : activeMode === 'multiDistance' ? [0, 1.5, 2.5]
     : [0.5, 0.4, 0.5];
+
+  const cameraFov = isSimMode ? 60 : 50;
+  const cameraTarget: [number, number, number] | undefined =
+    isSimMode ? [0, 1.2, distanceM / 2] : undefined;
+
+  // Simulation callbacks
+  const handleTimeUpdate = useCallback((t: number) => {
+    setSimTimeState(prev => ({ ...prev, currentTime: t }));
+  }, []);
+
+  const handleSimReady = useCallback((sim: DenseSimulationResult) => {
+    setDenseSim(sim);
+  }, []);
+
+  const handlePlay = useCallback(() => {
+    setSimTimeState(prev => ({ ...prev, playing: true }));
+  }, []);
+
+  const handlePause = useCallback(() => {
+    setSimTimeState(prev => ({ ...prev, playing: false }));
+  }, []);
+
+  const handleReset = useCallback(() => {
+    setSimTimeState(prev => ({ ...prev, currentTime: 0, playing: false }));
+  }, []);
+
+  const handleSpeedChange = useCallback((speed: number) => {
+    setSimTimeState(prev => ({ ...prev, speed }));
+  }, []);
 
   const handleScreenshot = () => {
     const canvas = canvasContainerRef.current?.querySelector('canvas') as HTMLCanvasElement;
@@ -97,6 +139,14 @@ export function Scene3D({
     link.href = canvas.toDataURL('image/png');
     link.click();
   };
+
+  // Reset sim time when switching to/from sim mode
+  const handleModeChange = useCallback((mode: View3DMode) => {
+    setActiveMode(mode);
+    if (mode === 'simulation') {
+      setSimTimeState({ currentTime: 0, playing: false, speed: 0.01 });
+    }
+  }, []);
 
   if (impacts3D.length === 0) {
     return (
@@ -127,9 +177,16 @@ export function Scene3D({
           <button
             key={mode.mode}
             className={`btn btn-sm ${activeMode === mode.mode ? 'active' : ''}`}
-            onClick={() => setActiveMode(mode.mode)}
+            onClick={() => handleModeChange(mode.mode)}
             title={mode.description}
-            style={{ fontSize: 11, padding: '4px 8px' }}
+            style={{
+              fontSize: 11, padding: '4px 8px',
+              ...(mode.mode === 'simulation' ? {
+                background: activeMode === 'simulation' ? 'var(--purple-glow)' : undefined,
+                color: activeMode === 'simulation' ? 'var(--purple)' : undefined,
+                fontWeight: activeMode === 'simulation' ? 700 : undefined,
+              } : {}),
+            }}
           >
             <span style={{ fontSize: 12 }}>{mode.icon}</span> {mode.label}
           </button>
@@ -142,13 +199,15 @@ export function Scene3D({
           distanceM={distanceM}
         />
         <div style={{ width: 1, height: 20, background: 'var(--border)' }} />
-        <button
-          className={`btn btn-sm ${autoRotate ? 'active' : ''}`}
-          onClick={() => setAutoRotate(!autoRotate)}
-          title="Rotation automatique"
-        >
-          <RotateCcw size={12} /> Auto
-        </button>
+        {!isSimMode && (
+          <button
+            className={`btn btn-sm ${autoRotate ? 'active' : ''}`}
+            onClick={() => setAutoRotate(!autoRotate)}
+            title="Rotation automatique"
+          >
+            <RotateCcw size={12} /> Auto
+          </button>
+        )}
         <button className="btn btn-sm" onClick={handleScreenshot} title="Capture d'écran 3D">
           <Camera size={12} /> Capture
         </button>
@@ -163,9 +222,11 @@ export function Scene3D({
       }}>
         <span>
           {VIEW_3D_MODES.find((m) => m.mode === activeMode)?.description}
-          <span style={{ marginLeft: 12, color: 'var(--text-secondary)' }}>
-            Souris: orbite | Molette: zoom | Clic droit: pan
-          </span>
+          {!isSimMode && (
+            <span style={{ marginLeft: 12, color: 'var(--text-secondary)' }}>
+              Souris: orbite | Molette: zoom | Clic droit: pan
+            </span>
+          )}
         </span>
         {computing && (
           <span style={{
@@ -176,7 +237,7 @@ export function Scene3D({
             Simulation...
           </span>
         )}
-        {simResult && !computing && (
+        {simResult && !computing && !isSimMode && (
           <span style={{
             fontSize: 10, fontWeight: 600, color: 'var(--purple)',
             background: 'var(--purple-glow)', padding: '2px 8px', borderRadius: 6,
@@ -188,25 +249,39 @@ export function Scene3D({
         )}
       </div>
 
-      {/* 3D Canvas */}
-      <div ref={canvasContainerRef} style={{ flex: 1, minHeight: 0, position: 'relative', background: 'var(--canvas-bg)' }}>
+      {/* 3D Canvas + Timeline */}
+      <div ref={canvasContainerRef} style={{ flex: 1, minHeight: 0, position: 'relative', background: isSimMode ? '#0a0c12' : 'var(--canvas-bg)' }}>
         <Canvas
           gl={{ preserveDrawingBuffer: true, antialias: true }}
           style={{ position: 'absolute', inset: 0 }}
+          shadows={isSimMode}
         >
-          <PerspectiveCamera makeDefault position={cameraPosition} fov={50} />
+          <PerspectiveCamera
+            makeDefault
+            position={cameraPosition}
+            fov={cameraFov}
+          />
           <OrbitControls
-            autoRotate={autoRotate}
+            autoRotate={!isSimMode && autoRotate}
             autoRotateSpeed={1.5}
             enableDamping
             dampingFactor={0.05}
             maxPolarAngle={Math.PI * 0.85}
+            target={cameraTarget}
           />
 
-          <ambientLight intensity={0.4} />
-          <directionalLight position={[5, 10, 5]} intensity={0.8} />
-          <directionalLight position={[-3, 8, -3]} intensity={0.3} color="#4dabf7" />
-          <pointLight position={[0, 2, 0]} intensity={0.5} color="#f0a030" />
+          {!isSimMode && (
+            <>
+              <ambientLight intensity={0.4} />
+              <directionalLight position={[5, 10, 5]} intensity={0.8} />
+              <directionalLight position={[-3, 8, -3]} intensity={0.3} color="#4dabf7" />
+              <pointLight position={[0, 2, 0]} intensity={0.5} color="#f0a030" />
+            </>
+          )}
+
+          {isSimMode && (
+            <ambientLight intensity={0.25} />
+          )}
 
           <Suspense fallback={null}>
             {activeMode === 'cone' && (
@@ -285,8 +360,36 @@ export function Scene3D({
                 ballisticParams={ballisticParams}
               />
             )}
+
+            {isSimMode && (
+              <RealisticSimulationMode
+                impacts={enhancedImpacts3D}
+                distanceM={distanceM}
+                circle1RadiusCm={c1r}
+                circle2RadiusCm={c2r}
+                ballisticParams={ballisticParams}
+                timeState={simTimeState}
+                onTimeUpdate={handleTimeUpdate}
+                onSimReady={handleSimReady}
+              />
+            )}
           </Suspense>
         </Canvas>
+
+        {/* Timeline overlay (only in simulation mode) */}
+        {isSimMode && (
+          <TimelineControls
+            timeState={simTimeState}
+            denseSim={denseSim}
+            ballisticParams={ballisticParams}
+            distanceM={distanceM}
+            onPlay={handlePlay}
+            onPause={handlePause}
+            onReset={handleReset}
+            onTimeChange={handleTimeUpdate}
+            onSpeedChange={handleSpeedChange}
+          />
+        )}
       </div>
     </div>
   );

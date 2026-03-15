@@ -257,6 +257,126 @@ export function simulateSpread(
   };
 }
 
+// ─── High-resolution simulation for realistic timeline ────
+
+export interface DenseTrajectoryPoint {
+  x: number; y: number; z: number;
+  vx: number; vy: number; vz: number;
+  speed: number;
+  t: number;
+}
+
+export interface DensePelletResult {
+  points: DenseTrajectoryPoint[];
+  impactVelocity: number;
+  flightTime: number;
+  energyJoules: number;
+  penetrationCm: number;
+}
+
+export interface DenseSimulationResult {
+  pellets: DensePelletResult[];
+  maxFlightTime: number;
+  muzzleVelocity: number;
+  avgImpactVelocity: number;
+  avgEnergy: number;
+  avgPenetration: number;
+  velocityRetention: number;
+}
+
+/**
+ * High-resolution simulation with dense sampling for timeline scrubbing.
+ * Samples every `sampleDt` seconds (default 0.5ms) for smooth playback.
+ */
+export function simulateSpreadDense(
+  params: BallisticParams,
+  distanceM: number,
+  impactPositionsCm: Array<{ x: number; y: number }>,
+  sampleDt: number = 0.0005,
+): DenseSimulationResult {
+  const halfAngle = chokeHalfAngle(params.barrelDiameterMm);
+  const massKg = params.pelletMassGrams > 0
+    ? params.pelletMassGrams / 1000
+    : pelletMassFromDiameter(params.pelletDiameterMm);
+  const A = crossSection(params.pelletDiameterMm);
+  const Cd = params.dragCoefficient;
+  const v0 = params.muzzleVelocity;
+
+  const pellets: DensePelletResult[] = impactPositionsCm.map((pos) => {
+    const offsetM = Math.sqrt(pos.x * pos.x + pos.y * pos.y) / 100;
+    const azimuth = Math.atan2(pos.y, pos.x);
+    let elevation = Math.atan2(offsetM, distanceM);
+    elevation = Math.min(elevation, halfAngle * 1.5);
+
+    // Initial velocity
+    let vx = v0 * Math.sin(elevation) * Math.cos(azimuth);
+    let vy = v0 * Math.sin(elevation) * Math.sin(azimuth);
+    let vz = v0 * Math.cos(elevation);
+    let x = 0, y = 0, z = 0, t = 0;
+
+    const points: DenseTrajectoryPoint[] = [];
+    let nextSample = 0;
+
+    while (z < distanceM && t < 5.0) {
+      const speed = Math.sqrt(vx * vx + vy * vy + vz * vz);
+      if (speed < 10) break;
+
+      // Record at sample intervals
+      if (t >= nextSample) {
+        points.push({ x, y, z, vx, vy, vz, speed, t });
+        nextSample += sampleDt;
+      }
+
+      // RK2 integration
+      const aD = dragAccel(Cd, A, massKg, speed);
+      const ax = -aD * (vx / speed);
+      const ay = -aD * (vy / speed) - G;
+      const az = -aD * (vz / speed);
+
+      const vxMid = vx + ax * DT * 0.5;
+      const vyMid = vy + ay * DT * 0.5;
+      const vzMid = vz + az * DT * 0.5;
+      const speedMid = Math.sqrt(vxMid * vxMid + vyMid * vyMid + vzMid * vzMid);
+      const aDmid = dragAccel(Cd, A, massKg, speedMid);
+      const axMid = -aDmid * (vxMid / speedMid);
+      const ayMid = -aDmid * (vyMid / speedMid) - G;
+      const azMid = -aDmid * (vzMid / speedMid);
+
+      vx += axMid * DT;
+      vy += ayMid * DT;
+      vz += azMid * DT;
+      x += vx * DT;
+      y += vy * DT;
+      z += vz * DT;
+      t += DT;
+    }
+
+    // Final point
+    const impactSpeed = Math.sqrt(vx * vx + vy * vy + vz * vz);
+    points.push({ x, y, z, vx, vy, vz, speed: impactSpeed, t });
+
+    const KE = 0.5 * massKg * impactSpeed * impactSpeed;
+    const pen = estimatePenetration(massKg, impactSpeed, params.pelletDiameterMm);
+
+    return { points, impactVelocity: impactSpeed, flightTime: t, energyJoules: KE, penetrationCm: pen };
+  });
+
+  const maxT = Math.max(...pellets.map(p => p.flightTime));
+  const avgV = pellets.reduce((s, p) => s + p.impactVelocity, 0) / pellets.length;
+  const avgE = pellets.reduce((s, p) => s + p.energyJoules, 0) / pellets.length;
+  const avgPen = pellets.reduce((s, p) => s + p.penetrationCm, 0) / pellets.length;
+
+  return {
+    pellets,
+    maxFlightTime: maxT,
+    muzzleVelocity: v0,
+    avgImpactVelocity: avgV,
+    avgEnergy: avgE,
+    avgPenetration: avgPen,
+    velocityRetention: (avgV / v0) * 100,
+  };
+}
+
 /**
  * Quick single-pellet center shot for summary stats without full spread.
  */
