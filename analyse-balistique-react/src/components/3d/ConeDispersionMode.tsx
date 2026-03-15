@@ -143,20 +143,27 @@ export function ConeDispersionMode({
         </line>
       )}
 
-      {/* Impact spheres */}
-      {impacts.map((imp) => (
-        <mesh
-          key={imp.index}
-          position={[imp.x * SCALE, 0.01, -imp.y * SCALE]}
-        >
-          <sphereGeometry args={[0.012, 12, 12]} />
-          <meshStandardMaterial
-            color={getZoneColor(imp.zone)}
-            emissive={getZoneColor(imp.zone)}
-            emissiveIntensity={0.3}
-          />
-        </mesh>
-      ))}
+      {/* Impact pellets (metallic) */}
+      {impacts.map((imp) => {
+        const pelletR = enhanced
+          ? Math.max(0.006, (ballisticParams!.pelletDiameterMm / 2) * SCALE * 0.7)
+          : 0.012;
+        return (
+          <mesh
+            key={imp.index}
+            position={[imp.x * SCALE, 0.01, -imp.y * SCALE]}
+          >
+            <sphereGeometry args={[pelletR, 14, 14]} />
+            <meshStandardMaterial
+              color="#c0c0c0"
+              emissive={getZoneColor(imp.zone)}
+              emissiveIntensity={0.2}
+              metalness={0.85}
+              roughness={0.12}
+            />
+          </mesh>
+        );
+      })}
 
       {/* R90 circle */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.004, 0]}>

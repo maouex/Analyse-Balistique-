@@ -9,8 +9,11 @@ import type { BallisticParams } from '../../lib/ballistics-sim';
 import { simulateSpread } from '../../lib/ballistics-sim';
 import { ConeDispersionMode } from './ConeDispersionMode';
 import { HeatmapMode } from './HeatmapMode';
+import { EnergyHeatmapMode } from './EnergyHeatmapMode';
 import { TrajectoriesMode } from './TrajectoriesMode';
+import { DispersionCloudMode } from './DispersionCloudMode';
 import { PenetrationMode } from './PenetrationMode';
+import { MultiDistanceMode } from './MultiDistanceMode';
 import { EnhancedBallisticsPanel } from './EnhancedBallisticsPanel';
 import { Camera, RotateCcw, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -64,27 +67,24 @@ export function Scene3D({
     return simulateSpread(ballisticParams, distanceM, positions);
   }, [ballisticParams, impacts3D, distanceM]);
 
-  // Effective velocity and penetration (from simulation or defaults)
+  // Effective velocity and penetration
   const effectiveVelocity = ballisticParams?.muzzleVelocity ?? velocityMs;
   const effectivePenetration = simResult?.avgPenetration ?? penetrationCm;
 
-  // Enhanced impacts3D with per-pellet penetration from simulation
+  // Enhanced impacts3D with per-pellet penetration
   const enhancedImpacts3D = useMemo(() => {
     if (!simResult) return impacts3D;
     return impacts3D.map((imp, i) => {
       const pellet = simResult.pellets[i];
       if (!pellet) return imp;
-      return {
-        ...imp,
-        z: pellet.penetrationCm,
-      };
+      return { ...imp, z: pellet.penetrationCm };
     });
   }, [impacts3D, simResult]);
 
-  const cameraPosition: [number, number, number] = activeMode === 'penetration'
-    ? [0.5, 0.2, 0.8]
-    : activeMode === 'trajectories'
-    ? [0.8, distanceM * 0.005 + 0.3, 0.8]
+  const cameraPosition: [number, number, number] =
+    activeMode === 'penetration' ? [0.5, 0.2, 0.8]
+    : activeMode === 'trajectories' || activeMode === 'cloud' ? [0.8, distanceM * 0.005 + 0.3, 0.8]
+    : activeMode === 'multiDistance' ? [0, 1.5, 2.5]
     : [0.5, 0.4, 0.5];
 
   const handleScreenshot = () => {
@@ -99,14 +99,8 @@ export function Scene3D({
   if (impacts3D.length === 0) {
     return (
       <div style={{
-        height: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: 'var(--muted)',
-        fontSize: 14,
-        flexDirection: 'column',
-        gap: 12,
+        height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        color: 'var(--muted)', fontSize: 14, flexDirection: 'column', gap: 12,
       }}>
         <p>Effectuez d'abord une analyse avec des impacts pour activer la vue 3D.</p>
       </div>
@@ -117,10 +111,8 @@ export function Scene3D({
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       {/* Mode selector toolbar */}
       <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 6,
-        padding: '8px 16px',
+        display: 'flex', alignItems: 'center', gap: 4,
+        padding: '8px 12px',
         borderBottom: '1px solid var(--border)',
         background: 'var(--surface)',
         flexWrap: 'wrap',
@@ -128,15 +120,16 @@ export function Scene3D({
         <button className="btn btn-sm" onClick={() => navigate('/analyse')} style={{ gap: 5, marginRight: 4 }}>
           <ArrowLeft size={13} /> Analyse
         </button>
-        <div style={{ width: 1, height: 20, background: 'var(--border)', marginRight: 2 }} />
+        <div style={{ width: 1, height: 20, background: 'var(--border)', margin: '0 2px' }} />
         {VIEW_3D_MODES.map((mode) => (
           <button
             key={mode.mode}
             className={`btn btn-sm ${activeMode === mode.mode ? 'active' : ''}`}
             onClick={() => setActiveMode(mode.mode)}
             title={mode.description}
+            style={{ fontSize: 11, padding: '4px 8px' }}
           >
-            <span>{mode.icon}</span> {mode.label}
+            <span style={{ fontSize: 12 }}>{mode.icon}</span> {mode.label}
           </button>
         ))}
         <div style={{ flex: 1 }} />
@@ -161,14 +154,10 @@ export function Scene3D({
 
       {/* Mode description + ballistic status */}
       <div style={{
-        padding: '6px 16px',
-        fontSize: 11,
-        color: 'var(--muted)',
-        background: 'var(--bg)',
-        borderBottom: '1px solid var(--border)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
+        padding: '6px 12px', fontSize: 11, color: 'var(--muted)',
+        background: 'var(--bg)', borderBottom: '1px solid var(--border)',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        flexWrap: 'wrap', gap: 4,
       }}>
         <span>
           {VIEW_3D_MODES.find((m) => m.mode === activeMode)?.description}
@@ -178,16 +167,12 @@ export function Scene3D({
         </span>
         {simResult && (
           <span style={{
-            fontSize: 10, fontWeight: 600,
-            color: 'var(--purple)',
-            background: 'var(--purple-glow)',
-            padding: '2px 8px',
-            borderRadius: 6,
-            display: 'flex', alignItems: 'center', gap: 4,
+            fontSize: 10, fontWeight: 600, color: 'var(--purple)',
+            background: 'var(--purple-glow)', padding: '2px 8px', borderRadius: 6,
           }}>
-            Balistique avancée — V impact: {simResult.avgImpactVelocity.toFixed(0)} m/s
-            | Pénétration: {simResult.avgPenetration.toFixed(1)} cm
-            | Rétention: {simResult.velocityRetention.toFixed(0)}%
+            V: {simResult.avgImpactVelocity.toFixed(0)} m/s
+            | Pén: {simResult.avgPenetration.toFixed(1)} cm
+            | Rét: {simResult.velocityRetention.toFixed(0)}%
           </span>
         )}
       </div>
@@ -207,7 +192,6 @@ export function Scene3D({
             maxPolarAngle={Math.PI * 0.85}
           />
 
-          {/* Lighting */}
           <ambientLight intensity={0.4} />
           <directionalLight position={[5, 10, 5]} intensity={0.8} />
           <directionalLight position={[-3, 8, -3]} intensity={0.3} color="#4dabf7" />
@@ -236,8 +220,30 @@ export function Scene3D({
               />
             )}
 
+            {activeMode === 'energy' && (
+              <EnergyHeatmapMode
+                impacts={enhancedImpacts3D}
+                circle1RadiusCm={c1r}
+                circle2RadiusCm={c2r}
+                ballisticParams={ballisticParams}
+                simResult={simResult}
+              />
+            )}
+
             {activeMode === 'trajectories' && (
               <TrajectoriesMode
+                impacts={enhancedImpacts3D}
+                distanceM={distanceM}
+                circle1RadiusCm={c1r}
+                circle2RadiusCm={c2r}
+                velocityMs={effectiveVelocity}
+                ballisticParams={ballisticParams}
+                simResult={simResult}
+              />
+            )}
+
+            {activeMode === 'cloud' && (
+              <DispersionCloudMode
                 impacts={enhancedImpacts3D}
                 distanceM={distanceM}
                 circle1RadiusCm={c1r}
@@ -256,6 +262,16 @@ export function Scene3D({
                 circle2RadiusCm={c2r}
                 ballisticParams={ballisticParams}
                 simResult={simResult}
+              />
+            )}
+
+            {activeMode === 'multiDistance' && (
+              <MultiDistanceMode
+                impacts={enhancedImpacts3D}
+                distanceM={distanceM}
+                circle1RadiusCm={c1r}
+                circle2RadiusCm={c2r}
+                ballisticParams={ballisticParams}
               />
             )}
           </Suspense>

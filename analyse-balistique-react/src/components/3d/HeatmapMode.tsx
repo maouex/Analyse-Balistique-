@@ -168,17 +168,19 @@ export function HeatmapMode({ impacts, circle1RadiusCm, circle2RadiusCm }: Heatm
         </>
       )}
 
-      {/* Impact points on top */}
+      {/* Impact pellets (metallic) */}
       {impacts.map((imp) => (
         <mesh
           key={imp.index}
           position={[imp.x * SCALE, 0.32, -imp.y * SCALE]}
         >
-          <sphereGeometry args={[0.008, 10, 10]} />
+          <sphereGeometry args={[0.008, 12, 12]} />
           <meshStandardMaterial
-            color="#ffffff"
+            color="#c0c0c0"
             emissive="#ffffff"
-            emissiveIntensity={0.5}
+            emissiveIntensity={0.3}
+            metalness={0.85}
+            roughness={0.12}
           />
         </mesh>
       ))}
