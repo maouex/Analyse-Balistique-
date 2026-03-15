@@ -1,12 +1,11 @@
-import { Crosshair, Sun, Moon, Scan, BookOpen, Box } from 'lucide-react';
+import { Crosshair, Sun, Moon, Scan, BookOpen } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useThemeStore } from '../../stores/themeStore';
 import { useAnalysisStore } from '../../stores/analysisStore';
 
 const NAV_ITEMS = [
-  { path: '/analyse', label: 'Analyse', icon: Scan, shortLabel: 'Analyse' },
-  { path: '/bibliotheque', label: 'Bibliothèque', icon: BookOpen, shortLabel: 'Biblio.' },
-  { path: '/3d', label: 'Vue 3D', icon: Box, shortLabel: '3D' },
+  { path: '/analyse', label: 'Analyse', icon: Scan },
+  { path: '/bibliotheque', label: 'Bibliothèque', icon: BookOpen },
 ];
 
 export function Header() {
@@ -87,7 +86,6 @@ export function Header() {
         {NAV_ITEMS.map((item) => {
           const isActive = location.pathname === item.path;
           const Icon = item.icon;
-          const show3dBadge = item.path === '/3d' && hasAnalysis;
 
           return (
             <button
@@ -113,7 +111,6 @@ export function Header() {
               <Icon size={15} strokeWidth={isActive ? 2.2 : 1.8} />
               {item.label}
 
-              {/* Active indicator dot */}
               {isActive && (
                 <div style={{
                   position: 'absolute',
@@ -126,27 +123,15 @@ export function Header() {
                   background: 'var(--accent2)',
                 }} />
               )}
-
-              {/* Badge for 3D if analysis data exists */}
-              {show3dBadge && !isActive && (
-                <span style={{
-                  width: 6,
-                  height: 6,
-                  borderRadius: '50%',
-                  background: 'var(--green)',
-                  boxShadow: '0 0 6px var(--green)',
-                  flexShrink: 0,
-                }} />
-              )}
             </button>
           );
         })}
       </nav>
 
-      {/* Right side: status + theme + version */}
+      {/* Right side */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
         {/* Active analysis indicator */}
-        {hasAnalysis && location.pathname !== '/analyse' && (
+        {hasAnalysis && location.pathname !== '/analyse' && location.pathname !== '/3d' && (
           <button
             onClick={() => navigate('/analyse')}
             style={{

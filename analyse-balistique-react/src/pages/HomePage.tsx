@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Crosshair, BookOpen, Target, Database, Box, ArrowRight, Sparkles, Play, GitCompare } from 'lucide-react';
+import { Crosshair, BookOpen, Target, Database, ArrowRight, Play, GitCompare, Box } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAnalysisStore } from '../stores/analysisStore';
 import { useMunitionsStore } from '../stores/munitionsStore';
@@ -142,7 +142,7 @@ export function HomePage() {
       {/* Main action cards */}
       <div style={{
         display: 'flex',
-        gap: 16,
+        gap: 20,
         flexWrap: 'wrap',
         justifyContent: 'center',
         position: 'relative',
@@ -157,8 +157,8 @@ export function HomePage() {
           whileHover={{ y: -4, scale: 1.015 }}
           whileTap={{ scale: 0.98 }}
           style={{
-            width: 240,
-            padding: 24,
+            width: 280,
+            padding: 28,
             background: 'linear-gradient(135deg, rgba(240,160,48,0.06), rgba(212,148,10,0.02))',
             border: '1px solid var(--border)',
             borderRadius: 'var(--radius-lg)',
@@ -176,13 +176,13 @@ export function HomePage() {
           }}
         >
           <Crosshair size={28} color="var(--accent2)" strokeWidth={1.5} style={{ marginBottom: 14 }} />
-          <h2 style={{ fontSize: 15, fontWeight: 800, marginBottom: 6 }}>
-            {hasAnalysis ? 'Reprendre l\'analyse' : 'Nouvelle analyse'}
+          <h2 style={{ fontSize: 16, fontWeight: 800, marginBottom: 6 }}>
+            {hasAnalysis ? "Reprendre l'analyse" : 'Nouvelle analyse'}
           </h2>
-          <p style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: 12 }}>
+          <p style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: 14 }}>
             {hasAnalysis
               ? `${store.impacts.length} impacts plac\u00E9s — continuez votre travail.`
-              : 'Chargez une photo de cible et analysez la dispersion.'}
+              : 'Chargez une photo de cible et analysez la dispersion de vos plombs.'}
           </p>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 700, color: 'var(--accent2)' }}>
             {hasAnalysis ? 'Continuer' : 'Commencer'} <ArrowRight size={12} />
@@ -198,8 +198,8 @@ export function HomePage() {
           whileHover={{ y: -4, scale: 1.015 }}
           whileTap={{ scale: 0.98 }}
           style={{
-            width: 240,
-            padding: 24,
+            width: 280,
+            padding: 28,
             background: 'linear-gradient(135deg, rgba(96,165,250,0.06), rgba(59,130,246,0.02))',
             border: '1px solid var(--border)',
             borderRadius: 'var(--radius-lg)',
@@ -220,11 +220,11 @@ export function HomePage() {
             <Database size={24} color="var(--blue)" strokeWidth={1.5} />
             <BookOpen size={24} color="var(--blue)" strokeWidth={1.5} />
           </div>
-          <h2 style={{ fontSize: 15, fontWeight: 800, marginBottom: 6 }}>Bibliothèque</h2>
-          <p style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: 12 }}>
+          <h2 style={{ fontSize: 16, fontWeight: 800, marginBottom: 6 }}>Bibliothèque</h2>
+          <p style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: 14 }}>
             {munCount > 0
-              ? `${munCount} munition${munCount > 1 ? 's' : ''} enregistr\u00E9e${munCount > 1 ? 's' : ''}.`
-              : 'Aucune munition — sauvegardez votre premi\u00E8re analyse.'}
+              ? `${munCount} munition${munCount > 1 ? 's' : ''} enregistr\u00E9e${munCount > 1 ? 's' : ''}. Comparez, modifiez ou reprenez une analyse.`
+              : 'Sauvegardez vos analyses pour constituer votre bibliothèque de munitions.'}
           </p>
           <div style={{ display: 'flex', justifyContent: 'center', gap: 8 }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 700, color: 'var(--blue)' }}>
@@ -245,91 +245,6 @@ export function HomePage() {
                 <GitCompare size={10} /> Comparer
               </span>
             )}
-          </div>
-        </motion.div>
-
-        {/* 3D card */}
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
-          onClick={() => navigate('/3d')}
-          whileHover={{ y: -4, scale: 1.015 }}
-          whileTap={{ scale: 0.98 }}
-          style={{
-            width: 240,
-            padding: 24,
-            background: 'linear-gradient(135deg, rgba(192,132,252,0.08), rgba(168,85,247,0.02))',
-            border: '1px solid var(--border)',
-            borderRadius: 'var(--radius-lg)',
-            cursor: 'pointer',
-            textAlign: 'center',
-            transition: 'border-color 0.2s, box-shadow 0.2s',
-            position: 'relative',
-          }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLElement).style.borderColor = 'var(--purple)';
-            (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 32px var(--purple-glow)';
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)';
-            (e.currentTarget as HTMLElement).style.boxShadow = 'none';
-          }}
-        >
-          {!hasAnalysis && (
-            <span style={{
-              position: 'absolute',
-              top: 10,
-              right: 10,
-              fontSize: 9,
-              fontWeight: 700,
-              color: 'var(--muted)',
-              background: 'var(--surface2)',
-              padding: '2px 7px',
-              borderRadius: 8,
-            }}>
-              Analyse requise
-            </span>
-          )}
-          {hasAnalysis && (
-            <span style={{
-              position: 'absolute',
-              top: 10,
-              right: 10,
-              fontSize: 9,
-              fontWeight: 700,
-              color: 'var(--green)',
-              background: 'var(--green-glow)',
-              padding: '2px 7px',
-              borderRadius: 8,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 3,
-            }}>
-              <Sparkles size={9} /> Prêt
-            </span>
-          )}
-          <Box size={28} color="var(--purple)" strokeWidth={1.5} style={{ marginBottom: 14 }} />
-          <h2 style={{ fontSize: 15, fontWeight: 800, marginBottom: 6 }}>Modélisation 3D</h2>
-          <p style={{
-            fontSize: 12,
-            color: hasAnalysis ? 'var(--text-secondary)' : 'var(--muted)',
-            lineHeight: 1.5,
-            marginBottom: 12,
-          }}>
-            {hasAnalysis
-              ? 'Visualisez vos impacts en 3D : cône, heatmap, trajectoires.'
-              : 'Effectuez d\'abord une analyse pour débloquer la 3D.'}
-          </p>
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 4,
-            fontSize: 12,
-            fontWeight: 700,
-            color: hasAnalysis ? 'var(--purple)' : 'var(--muted)',
-          }}>
-            {hasAnalysis ? 'Explorer' : 'Indisponible'} <ArrowRight size={12} />
           </div>
         </motion.div>
       </div>

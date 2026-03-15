@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Trash2, Edit3, GitCompare, CheckSquare, Square, Play, Database, Plus, X, Crosshair } from 'lucide-react';
+import { Search, Trash2, Edit3, GitCompare, CheckSquare, Square, Play, Database, Plus, X, Crosshair, Box } from 'lucide-react';
 import { useMunitionsStore } from '../stores/munitionsStore';
 import { useAnalysisStore } from '../stores/analysisStore';
 import { MunitionForm } from '../components/munitions/MunitionForm';
@@ -34,6 +34,12 @@ export function LibraryPage() {
     if (!m.savedAnalysis) return;
     await loadProject(m.savedAnalysis);
     navigate('/analyse');
+  };
+
+  const handleView3D = async (m: Munition) => {
+    if (!m.savedAnalysis) return;
+    await loadProject(m.savedAnalysis);
+    navigate('/3d');
   };
 
   // Comparison is now a modal overlay
@@ -193,6 +199,7 @@ export function LibraryPage() {
                 if (confirm(`Supprimer "${m.nom}" ?`)) store.removeMunition(m.id);
               }}
               onResume={() => handleResume(m)}
+              onView3D={() => handleView3D(m)}
             />
           ))}
         </div>
@@ -203,13 +210,14 @@ export function LibraryPage() {
   );
 }
 
-function MunitionCard({ munition: m, selected, onToggle, onEdit, onDelete, onResume }: {
+function MunitionCard({ munition: m, selected, onToggle, onEdit, onDelete, onResume, onView3D }: {
   munition: Munition;
   selected: boolean;
   onToggle: () => void;
   onEdit: () => void;
   onDelete: () => void;
   onResume: () => void;
+  onView3D: () => void;
 }) {
   return (
     <div
@@ -275,20 +283,44 @@ function MunitionCard({ munition: m, selected, onToggle, onEdit, onDelete, onRes
 
       {/* Actions */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        <button
-          className={`btn btn-sm ${m.savedAnalysis ? 'btn-primary' : ''}`}
-          onClick={onResume}
-          disabled={!m.savedAnalysis}
-          style={{
-            width: '100%',
-            justifyContent: 'center',
-            opacity: m.savedAnalysis ? 1 : 0.35,
-            cursor: m.savedAnalysis ? 'pointer' : 'not-allowed',
-          }}
-          title={m.savedAnalysis ? 'Reprendre cette analyse' : 'Aucune analyse sauvegardée'}
-        >
-          <Play size={12} /> {m.savedAnalysis ? "Reprendre l'analyse" : "Pas d'analyse li\u00E9e"}
-        </button>
+        {m.savedAnalysis ? (
+          <div style={{ display: 'flex', gap: 6 }}>
+            <button
+              className="btn btn-sm btn-primary"
+              onClick={onResume}
+              style={{ flex: 1, justifyContent: 'center' }}
+            >
+              <Play size={12} /> Reprendre
+            </button>
+            <button
+              className="btn btn-sm"
+              onClick={onView3D}
+              style={{
+                justifyContent: 'center',
+                background: 'var(--purple-glow)',
+                borderColor: 'rgba(192,132,252,0.2)',
+                color: 'var(--purple)',
+                gap: 5,
+              }}
+              title="Voir en modélisation 3D"
+            >
+              <Box size={12} /> 3D
+            </button>
+          </div>
+        ) : (
+          <button
+            className="btn btn-sm"
+            disabled
+            style={{
+              width: '100%',
+              justifyContent: 'center',
+              opacity: 0.35,
+              cursor: 'not-allowed',
+            }}
+          >
+            <Play size={12} /> Pas d{"'"}analyse li{'\u00E9'}e
+          </button>
+        )}
         <div style={{ display: 'flex', gap: 6 }}>
           <button className="btn btn-sm" onClick={onEdit} style={{ flex: 1, justifyContent: 'center' }}>
             <Edit3 size={12} /> Modifier
