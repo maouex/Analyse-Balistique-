@@ -218,7 +218,7 @@ export function PenetrationMode({
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.001, 0]}>
         <planeGeometry args={[extent * 2, extent * 0.6]} />
         <meshStandardMaterial
-          color="#191c25"
+          color="#4a5468"
           transparent
           opacity={0.9}
           side={THREE.DoubleSide}

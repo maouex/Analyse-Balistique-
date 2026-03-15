@@ -54,7 +54,7 @@ function TargetAtDistance({
       <mesh rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[planeSize, planeSize]} />
         <meshStandardMaterial
-          color="#191c25"
+          color="#4a5468"
           transparent
           opacity={isActual ? 0.9 : 0.7}
           side={THREE.DoubleSide}

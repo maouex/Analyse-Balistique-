@@ -250,7 +250,7 @@ export function Scene3D({
       </div>
 
       {/* 3D Canvas + Timeline */}
-      <div ref={canvasContainerRef} style={{ flex: 1, minHeight: 0, position: 'relative', background: isSimMode ? '#141820' : 'var(--canvas-bg)' }}>
+      <div ref={canvasContainerRef} style={{ flex: 1, minHeight: 0, position: 'relative', background: isSimMode ? '#5a6478' : 'var(--canvas-bg)' }}>
         <Canvas
           gl={{ preserveDrawingBuffer: true, antialias: true }}
           style={{ position: 'absolute', inset: 0 }}

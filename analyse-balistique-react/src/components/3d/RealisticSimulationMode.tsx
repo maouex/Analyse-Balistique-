@@ -27,19 +27,19 @@ interface RealisticSimulationModeProps {
 }
 
 // ─── Color palette ──────────────────────────────────────────
-// Clean, high-contrast palette on dark blue-grey background
+// Clean, high-contrast palette on medium blue-grey background
 const COL = {
   // Background / environment
-  sky:          '#141820',   // fond principal — bleu-gris très foncé
-  fog:          '#141820',
-  ground:       '#1c1f2a',   // sol — gris ardoise foncé
-  gridMajor:    '#2a2e3c',   // grille principale
-  gridMinor:    '#21242f',   // grille secondaire
+  sky:          '#5a6478',   // fond principal — bleu-gris moyen
+  fog:          '#5a6478',
+  ground:       '#4a5468',   // sol — gris ardoise moyen
+  gridMajor:    '#3d4558',   // grille principale
+  gridMinor:    '#4e586c',   // grille secondaire
 
   // Structure / markers
-  markerPost:   '#3d4255',   // piquets de distance — gris moyen
-  markerText:   '#8892aa',   // textes distance — gris clair bleuté
-  markerLine:   '#2d3142',   // lignes au sol
+  markerPost:   '#2d3142',   // piquets de distance — gris foncé (contraste sur fond moyen)
+  markerText:   '#e0e4f0',   // textes distance — blanc bleuté (lisible)
+  markerLine:   '#3a3f52',   // lignes au sol
 
   // Scale ruler
   ruler:        '#e8e8e8',   // blanc cassé — très visible
@@ -89,7 +89,7 @@ const COL = {
 
   // Lighting
   lightSky:     '#94b8db',   // bleu doux pour la lumière du ciel
-  lightGround:  '#1c1f2a',   // même que le sol
+  lightGround:  '#4a5468',   // même que le sol
 };
 
 /** Velocity ratio → color: orange(fast) → white(mid) → bleu(slow) */
