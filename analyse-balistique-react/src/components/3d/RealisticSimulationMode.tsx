@@ -68,8 +68,9 @@ const COL = {
   wad:          '#d94040',   // rouge plastique
 
   // Pellets
-  pelletBase:   '#d4d8e0',   // argent clair — très visible sur fond sombre
-  pelletTrail:  '#6670800',  // gris translucide (opacité basse)
+  pelletBase:   '#e8ecf4',   // blanc argenté — très lumineux
+  pelletEmit:   '#ff9944',   // lueur chaude pour visibilité
+  pelletTrail:  '#667080',   // gris translucide (opacité basse)
 
   // Velocity gradient (pellets) — orange chaud → blanc → bleu glacier
   // Computed dynamically, see velColor()
@@ -309,10 +310,15 @@ function PelletCloud({ denseSim, currentTime, pelletDiamMm, muzzleVelocity }: {
   const sphereGeom = useMemo(() => new THREE.SphereGeometry(pelletR, 12, 12), [pelletR]);
   const trailGeom = useMemo(() => new THREE.SphereGeometry(pelletR * 0.5, 6, 6), [pelletR]);
   const pelletMat = useMemo(() => new THREE.MeshStandardMaterial({
-    color: COL.pelletBase, metalness: 0.92, roughness: 0.08,
+    color: COL.pelletBase,
+    metalness: 0.4,
+    roughness: 0.3,
+    emissive: new THREE.Color(COL.pelletEmit),
+    emissiveIntensity: 0.35,
   }), []);
   const trailMat = useMemo(() => new THREE.MeshStandardMaterial({
-    color: '#667080', transparent: true, opacity: 0.25,
+    color: '#99aabb', transparent: true, opacity: 0.35,
+    emissive: new THREE.Color('#667899'), emissiveIntensity: 0.2,
   }), []);
 
   const _obj = useMemo(() => new THREE.Object3D(), []);

@@ -280,7 +280,7 @@ export function Scene3D({
           )}
 
           {isSimMode && (
-            <ambientLight intensity={0.25} />
+            <ambientLight intensity={0.45} />
           )}
 
           <Suspense fallback={null}>
