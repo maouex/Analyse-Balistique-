@@ -10,9 +10,9 @@ import { simulateSpreadDense } from '../../lib/ballistics-sim';
 // ─── Types ──────────────────────────────────────────────────
 
 export interface SimulationTimeState {
-  currentTime: number;   // seconds
+  currentTime: number;
   playing: boolean;
-  speed: number;         // multiplier (0.01 = 100× slow-mo, default)
+  speed: number;
 }
 
 interface RealisticSimulationModeProps {
@@ -26,42 +26,113 @@ interface RealisticSimulationModeProps {
   onSimReady: (sim: DenseSimulationResult) => void;
 }
 
+// ─── Color palette ──────────────────────────────────────────
+// Clean, high-contrast palette on dark blue-grey background
+const COL = {
+  // Background / environment
+  sky:          '#141820',   // fond principal — bleu-gris très foncé
+  fog:          '#141820',
+  ground:       '#1c1f2a',   // sol — gris ardoise foncé
+  gridMajor:    '#2a2e3c',   // grille principale
+  gridMinor:    '#21242f',   // grille secondaire
+
+  // Structure / markers
+  markerPost:   '#3d4255',   // piquets de distance — gris moyen
+  markerText:   '#8892aa',   // textes distance — gris clair bleuté
+  markerLine:   '#2d3142',   // lignes au sol
+
+  // Scale ruler
+  ruler:        '#e8e8e8',   // blanc cassé — très visible
+  rulerText:    '#e8e8e8',
+
+  // Barrel / weapon
+  barrelMetal:  '#3a3d45',   // acier foncé
+  barrelRing:   '#555860',   // anneau de bouche
+  stock:        '#5c4433',   // bois noyer
+  barrelLabel:  '#d0d4e0',   // label "Canon" — blanc doux
+
+  // Target
+  board:        '#e8e4d8',   // carton beige clair
+  targetPost:   '#4a4030',   // poteau bois
+  targetLabel:  '#90949e',   // label distance
+  crosshair:    '#222',      // centre de cible
+  circle1:      '#34d399',   // cercle 1 — vert émeraude
+  circle2:      '#fbbf24',   // cercle 2 — jaune ambre
+
+  // Muzzle flash
+  flashColor:   '#ffc940',   // jaune chaud
+  flashEmit:    '#ff8c00',   // orange vif
+  flashLight:   '#ffaa33',
+
+  // Wad
+  wad:          '#d94040',   // rouge plastique
+
+  // Pellets
+  pelletBase:   '#d4d8e0',   // argent clair — très visible sur fond sombre
+  pelletTrail:  '#6670800',  // gris translucide (opacité basse)
+
+  // Velocity gradient (pellets) — orange chaud → blanc → bleu glacier
+  // Computed dynamically, see velColor()
+
+  // Spread ring
+  spreadRing:   '#60a5fa',   // bleu ciel — visible mais pas agressif
+
+  // Impact marks
+  impactBase:   '#1a1a1a',
+
+  // Bore axis
+  boreAxis:     '#ef4444',   // rouge net
+
+  // Time annotation
+  timeText:     '#e2e8f0',   // blanc légèrement bleuté
+
+  // Lighting
+  lightSky:     '#94b8db',   // bleu doux pour la lumière du ciel
+  lightGround:  '#1c1f2a',   // même que le sol
+};
+
+/** Velocity ratio → color: orange(fast) → white(mid) → bleu(slow) */
+function velColor(vRatio: number): [number, number, number] {
+  // vRatio 1.0 = muzzle speed, 0.0 = stopped
+  if (vRatio > 0.6) {
+    // Orange → white
+    const t = (vRatio - 0.6) / 0.4;
+    return [1.0, 0.55 + t * 0.45, 0.2 + t * 0.8]; // orange → white
+  }
+  // White → blue
+  const t = vRatio / 0.6;
+  return [0.3 + t * 0.7, 0.5 + t * 0.5, 1.0]; // blue → white
+}
+
 // ─── Constants ──────────────────────────────────────────────
 
-// Real-world scale: 1 unit = 1 meter
 const GROUND_Y = 0;
-const BARREL_HEIGHT = 1.2;   // shoulder height in meters
-const PELLET_VISUAL_SCALE = 3; // make pellets 3× larger than real for visibility
+const BARREL_HEIGHT = 1.2;
+const PELLET_VISUAL_SCALE = 3;
 
 // ─── Sub-components ────────────────────────────────────────
 
-/** Ground plane with grass-like appearance */
 function Ground({ distanceM }: { distanceM: number }) {
   const length = distanceM + 10;
   return (
     <group>
-      {/* Main ground */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, GROUND_Y - 0.01, length / 2 - 3]}>
         <planeGeometry args={[20, length]} />
-        <meshStandardMaterial color="#1a2614" side={THREE.DoubleSide} />
+        <meshStandardMaterial color={COL.ground} side={THREE.DoubleSide} />
       </mesh>
-      {/* Subtle grid on ground */}
       <gridHelper
-        args={[length, Math.ceil(length), '#2a3a20', '#1e2e18']}
+        args={[length, Math.ceil(length), COL.gridMajor, COL.gridMinor]}
         position={[0, GROUND_Y, length / 2 - 3]}
       />
     </group>
   );
 }
 
-/** Distance markers every 5m along the range */
 function DistanceMarkers({ distanceM }: { distanceM: number }) {
   const markers = useMemo(() => {
     const result: number[] = [];
     const step = distanceM <= 20 ? 2 : distanceM <= 50 ? 5 : 10;
-    for (let d = step; d <= distanceM; d += step) {
-      result.push(d);
-    }
+    for (let d = step; d <= distanceM; d += step) result.push(d);
     return result;
   }, [distanceM]);
 
@@ -69,25 +140,22 @@ function DistanceMarkers({ distanceM }: { distanceM: number }) {
     <group>
       {markers.map(d => (
         <group key={d} position={[0, 0, d]}>
-          {/* Vertical line marker */}
           <mesh position={[-3, 0.5, 0]}>
             <boxGeometry args={[0.03, 1, 0.03]} />
-            <meshStandardMaterial color="#3a4a30" />
+            <meshStandardMaterial color={COL.markerPost} />
           </mesh>
-          {/* Distance label */}
           <Text
             position={[-3.3, 0.8, 0]}
             fontSize={0.35}
-            color="#7a9a60"
+            color={COL.markerText}
             anchorX="right"
             rotation={[0, Math.PI / 2, 0]}
           >
             {`${d}m`}
           </Text>
-          {/* Ground line across range */}
           <mesh position={[0, GROUND_Y + 0.005, 0]} rotation={[-Math.PI / 2, 0, 0]}>
             <planeGeometry args={[8, 0.02]} />
-            <meshBasicMaterial color="#3a4a30" transparent opacity={0.4} />
+            <meshBasicMaterial color={COL.markerLine} transparent opacity={0.5} />
           </mesh>
         </group>
       ))}
@@ -95,118 +163,96 @@ function DistanceMarkers({ distanceM }: { distanceM: number }) {
   );
 }
 
-/** Scale ruler: real 1m reference bar */
 function ScaleRuler() {
   return (
     <group position={[-4, GROUND_Y + 0.01, -1]}>
-      {/* 1m bar */}
       <mesh position={[0, 0.5, 0]}>
         <boxGeometry args={[0.04, 1, 0.04]} />
-        <meshStandardMaterial color="#ff6b6b" />
+        <meshStandardMaterial color={COL.ruler} />
       </mesh>
-      {/* End markers */}
       <mesh position={[0, 0, 0]}>
         <boxGeometry args={[0.3, 0.04, 0.04]} />
-        <meshStandardMaterial color="#ff6b6b" />
+        <meshStandardMaterial color={COL.ruler} />
       </mesh>
       <mesh position={[0, 1, 0]}>
         <boxGeometry args={[0.3, 0.04, 0.04]} />
-        <meshStandardMaterial color="#ff6b6b" />
+        <meshStandardMaterial color={COL.ruler} />
       </mesh>
-      <Text position={[-0.3, 0.5, 0]} fontSize={0.25} color="#ff6b6b" anchorX="right" rotation={[0, Math.PI / 2, 0]}>
+      <Text position={[-0.3, 0.5, 0]} fontSize={0.25} color={COL.rulerText} anchorX="right" rotation={[0, Math.PI / 2, 0]}>
         1m
       </Text>
     </group>
   );
 }
 
-/** Realistic shotgun barrel representation */
 function Barrel({ barrelDiamMm }: { barrelDiamMm: number }) {
-  const boreDiam = barrelDiamMm / 1000; // meters
+  const boreDiam = barrelDiamMm / 1000;
   return (
     <group position={[0, BARREL_HEIGHT, 0]}>
-      {/* Barrel tube */}
       <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, 0, 0.35]}>
         <cylinderGeometry args={[boreDiam * 0.8, boreDiam * 0.7, 0.7, 16]} />
-        <meshStandardMaterial color="#2a2a2a" metalness={0.95} roughness={0.15} />
+        <meshStandardMaterial color={COL.barrelMetal} metalness={0.95} roughness={0.15} />
       </mesh>
-      {/* Stock (simplified) */}
       <mesh position={[0, -0.05, -0.25]} rotation={[0.15, 0, 0]}>
         <boxGeometry args={[0.04, 0.12, 0.5]} />
-        <meshStandardMaterial color="#4a3520" roughness={0.8} />
+        <meshStandardMaterial color={COL.stock} roughness={0.8} />
       </mesh>
-      {/* Muzzle ring */}
       <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, 0, 0.7]}>
         <torusGeometry args={[boreDiam * 0.8, 0.003, 8, 16]} />
-        <meshStandardMaterial color="#444" metalness={0.9} roughness={0.1} />
+        <meshStandardMaterial color={COL.barrelRing} metalness={0.9} roughness={0.1} />
       </mesh>
-      {/* Muzzle flash zone indicator */}
-      <Text position={[0, 0.35, 0.4]} fontSize={0.15} color="#ff6b6b" anchorX="center">
+      <Text position={[0, 0.35, 0.4]} fontSize={0.15} color={COL.barrelLabel} anchorX="center">
         Canon
       </Text>
     </group>
   );
 }
 
-/** Target board at distance */
 function TargetBoard({ distanceM, circle1RadiusCm, circle2RadiusCm }: {
   distanceM: number;
   circle1RadiusCm: number;
   circle2RadiusCm: number;
 }) {
-  const r1 = circle1RadiusCm / 100; // meters
+  const r1 = circle1RadiusCm / 100;
   const r2 = circle2RadiusCm / 100;
   const boardSize = Math.max(r2 * 3, 1.5);
 
   return (
     <group position={[0, BARREL_HEIGHT, distanceM]}>
-      {/* Board */}
       <mesh>
         <planeGeometry args={[boardSize, boardSize]} />
-        <meshStandardMaterial color="#f5f0e0" side={THREE.DoubleSide} />
+        <meshStandardMaterial color={COL.board} side={THREE.DoubleSide} />
       </mesh>
-      {/* Circle 1 */}
       <mesh position={[0, 0, 0.001]}>
         <ringGeometry args={[r1 - 0.005, r1, 64]} />
-        <meshBasicMaterial color="#2ecc71" side={THREE.DoubleSide} />
+        <meshBasicMaterial color={COL.circle1} side={THREE.DoubleSide} />
       </mesh>
-      {/* Circle 2 */}
       <mesh position={[0, 0, 0.001]}>
         <ringGeometry args={[r2 - 0.005, r2, 64]} />
-        <meshBasicMaterial color="#f59f00" side={THREE.DoubleSide} />
+        <meshBasicMaterial color={COL.circle2} side={THREE.DoubleSide} />
       </mesh>
-      {/* Center cross */}
       <mesh position={[0, 0, 0.002]}>
         <planeGeometry args={[0.01, r1 * 0.6]} />
-        <meshBasicMaterial color="#e05252" />
+        <meshBasicMaterial color={COL.crosshair} />
       </mesh>
       <mesh position={[0, 0, 0.002]}>
         <planeGeometry args={[r1 * 0.6, 0.01]} />
-        <meshBasicMaterial color="#e05252" />
+        <meshBasicMaterial color={COL.crosshair} />
       </mesh>
-      {/* Post */}
       <mesh position={[0, -boardSize / 2 - 0.3, 0]}>
         <boxGeometry args={[0.08, boardSize / 2 + BARREL_HEIGHT - 0.3, 0.08]} />
-        <meshStandardMaterial color="#5a4a3a" roughness={0.9} />
+        <meshStandardMaterial color={COL.targetPost} roughness={0.9} />
       </mesh>
-      {/* Distance label */}
-      <Text position={[boardSize / 2 + 0.2, boardSize / 2 - 0.1, 0]} fontSize={0.2} color="#666" anchorX="left">
+      <Text position={[boardSize / 2 + 0.2, boardSize / 2 - 0.1, 0]} fontSize={0.2} color={COL.targetLabel} anchorX="left">
         {`${distanceM}m`}
       </Text>
     </group>
   );
 }
 
-/** Muzzle flash effect at t=0 */
 function MuzzleFlash({ visible }: { visible: boolean }) {
   const meshRef = useRef<THREE.Mesh>(null);
-
-  useFrame(() => {
-    if (meshRef.current) {
-      meshRef.current.rotation.z += 0.3;
-    }
-  });
-
+  useFrame(() => { if (meshRef.current) meshRef.current.rotation.z += 0.3; });
   if (!visible) return null;
 
   return (
@@ -214,39 +260,34 @@ function MuzzleFlash({ visible }: { visible: boolean }) {
       <mesh ref={meshRef}>
         <sphereGeometry args={[0.15, 8, 8]} />
         <meshStandardMaterial
-          color="#ffaa00"
-          emissive="#ff6600"
+          color={COL.flashColor}
+          emissive={COL.flashEmit}
           emissiveIntensity={2}
           transparent
           opacity={0.7}
         />
       </mesh>
-      <pointLight color="#ff8800" intensity={3} distance={5} />
+      <pointLight color={COL.flashLight} intensity={3} distance={5} />
     </group>
   );
 }
 
-/** Wad / sabot that separates from pellets */
 function Wad({ simTime, distanceM }: { simTime: number; distanceM: number }) {
-  // Wad separates ~2m from barrel, decelerates quickly due to large drag
   const wadZ = useMemo(() => {
-    // Wad travels about 2-5m then falls away
     const maxWadDist = Math.min(5, distanceM * 0.15);
     if (simTime <= 0) return 0.7;
-    // Wad speed: starts at muzzle velocity, decelerates fast
-    const wadT = Math.min(simTime * 300, maxWadDist); // very rough
+    const wadT = Math.min(simTime * 300, maxWadDist);
     return 0.7 + wadT;
   }, [simTime, distanceM]);
 
-  const wadDrop = simTime * simTime * 9.81 * 0.5; // gravity
+  const wadDrop = simTime * simTime * 9.81 * 0.5;
   const visible = simTime > 0 && simTime < 0.02 && wadZ < 6;
-
   if (!visible) return null;
 
   return (
     <mesh position={[0, BARREL_HEIGHT - wadDrop, wadZ]}>
       <cylinderGeometry args={[0.009, 0.012, 0.025, 8]} />
-      <meshStandardMaterial color="#cc3333" roughness={0.8} />
+      <meshStandardMaterial color={COL.wad} roughness={0.8} />
     </mesh>
   );
 }
@@ -263,35 +304,25 @@ function PelletCloud({ denseSim, currentTime, pelletDiamMm, muzzleVelocity }: {
   const trailMeshRef = useRef<THREE.InstancedMesh>(null);
   const count = denseSim.pellets.length;
 
-  // Pellet visual radius (exaggerated for visibility but proportional)
   const pelletR = Math.max(0.003, (pelletDiamMm / 2000) * PELLET_VISUAL_SCALE);
 
   const sphereGeom = useMemo(() => new THREE.SphereGeometry(pelletR, 12, 12), [pelletR]);
   const trailGeom = useMemo(() => new THREE.SphereGeometry(pelletR * 0.5, 6, 6), [pelletR]);
   const pelletMat = useMemo(() => new THREE.MeshStandardMaterial({
-    color: '#aaaaaa', metalness: 0.92, roughness: 0.08,
+    color: COL.pelletBase, metalness: 0.92, roughness: 0.08,
   }), []);
   const trailMat = useMemo(() => new THREE.MeshStandardMaterial({
-    color: '#666', transparent: true, opacity: 0.2,
+    color: '#667080', transparent: true, opacity: 0.25,
   }), []);
 
   const _obj = useMemo(() => new THREE.Object3D(), []);
   const _color = useMemo(() => new THREE.Color(), []);
 
-  // Set zone colors once
-  useEffect(() => {
-    const mesh = meshRef.current;
-    if (!mesh) return;
-    // We'll update colors per-frame based on velocity
-  }, []);
-
-  // Interpolate pellet position at currentTime from dense trajectory
   const interpolate = useCallback((pellet: DensePelletResult, t: number) => {
     const pts = pellet.points;
     if (t <= 0 || pts.length === 0) return null;
     if (t >= pellet.flightTime) return pts[pts.length - 1];
 
-    // Binary search for the right segment
     let lo = 0, hi = pts.length - 1;
     while (lo < hi - 1) {
       const mid = (lo + hi) >> 1;
@@ -312,7 +343,6 @@ function PelletCloud({ denseSim, currentTime, pelletDiamMm, muzzleVelocity }: {
     };
   }, []);
 
-  // Update instances every frame
   useFrame(() => {
     const mesh = meshRef.current;
     const trail = trailMeshRef.current;
@@ -323,7 +353,6 @@ function PelletCloud({ denseSim, currentTime, pelletDiamMm, muzzleVelocity }: {
       const pos = interpolate(pellet, currentTime);
 
       if (!pos || currentTime <= 0) {
-        // Hide: place far away
         _obj.position.set(0, -100, 0);
         _obj.scale.setScalar(0.001);
         _obj.updateMatrix();
@@ -332,21 +361,17 @@ function PelletCloud({ denseSim, currentTime, pelletDiamMm, muzzleVelocity }: {
         continue;
       }
 
-      // Real-world coordinates: Z = downrange, X = lateral, Y = vertical
       _obj.position.set(pos.x, BARREL_HEIGHT + pos.y, pos.z);
       _obj.scale.setScalar(1);
       _obj.updateMatrix();
       mesh.setMatrixAt(i, _obj.matrix);
 
-      // Velocity-based color
+      // Velocity gradient: orange → white → blue
       const vRatio = Math.min(1, pos.speed / muzzleVelocity);
-      const r = Math.min(1, vRatio * 2);
-      const g = 0.1;
-      const b = Math.min(1, (1 - vRatio) * 2);
+      const [r, g, b] = velColor(vRatio);
       _color.setRGB(r, g, b);
       mesh.setColorAt(i, _color);
 
-      // Trail: slightly behind
       if (trail) {
         const trailPos = interpolate(pellet, Math.max(0, currentTime - 0.001));
         if (trailPos) {
@@ -371,7 +396,6 @@ function PelletCloud({ denseSim, currentTime, pelletDiamMm, muzzleVelocity }: {
   );
 }
 
-/** Real-time spread circle visualization */
 function SpreadIndicator({ denseSim, currentTime }: {
   denseSim: DenseSimulationResult;
   currentTime: number;
@@ -384,7 +408,6 @@ function SpreadIndicator({ denseSim, currentTime }: {
       return;
     }
 
-    // Compute current spread radius and mean Z position
     let maxLateral = 0;
     let meanZ = 0;
     let meanY = 0;
@@ -393,7 +416,6 @@ function SpreadIndicator({ denseSim, currentTime }: {
     for (const pellet of denseSim.pellets) {
       if (currentTime > pellet.flightTime) continue;
       const pts = pellet.points;
-      // Find approx position
       let pos = pts[0];
       for (let j = 0; j < pts.length - 1; j++) {
         if (pts[j + 1].t >= currentTime) {
@@ -414,18 +436,12 @@ function SpreadIndicator({ denseSim, currentTime }: {
       activeCount++;
     }
 
-    if (activeCount === 0) {
-      ringRef.current.visible = false;
-      return;
-    }
+    if (activeCount === 0) { ringRef.current.visible = false; return; }
 
     meanZ /= activeCount;
     meanY /= activeCount;
-
     ringRef.current.visible = true;
     ringRef.current.position.set(0, BARREL_HEIGHT + meanY, meanZ);
-
-    // Scale ring to spread radius
     const spreadR = Math.max(0.01, maxLateral);
     ringRef.current.scale.set(spreadR * 2, spreadR * 2, 1);
   });
@@ -433,12 +449,11 @@ function SpreadIndicator({ denseSim, currentTime }: {
   return (
     <mesh ref={ringRef} visible={false}>
       <ringGeometry args={[0.48, 0.5, 48]} />
-      <meshBasicMaterial color="#4dabf7" transparent opacity={0.25} side={THREE.DoubleSide} />
+      <meshBasicMaterial color={COL.spreadRing} transparent opacity={0.3} side={THREE.DoubleSide} />
     </mesh>
   );
 }
 
-/** Impact markers on target (appear when pellets arrive) */
 function ImpactMarkers({ impacts, denseSim, currentTime, distanceM }: {
   impacts: Impact3D[];
   denseSim: DenseSimulationResult;
@@ -452,16 +467,16 @@ function ImpactMarkers({ impacts, denseSim, currentTime, distanceM }: {
         if (!pellet || currentTime < pellet.flightTime) return null;
 
         const color = getZoneColor(imp.zone);
-        const x = imp.x / 100; // cm → m
+        const x = imp.x / 100;
         const y = imp.y / 100;
 
         return (
           <mesh key={imp.index} position={[x, -y, 0]}>
             <circleGeometry args={[0.008, 12]} />
             <meshStandardMaterial
-              color="#222"
+              color={COL.impactBase}
               emissive={color}
-              emissiveIntensity={0.5}
+              emissiveIntensity={0.6}
             />
           </mesh>
         );
@@ -482,7 +497,6 @@ export function RealisticSimulationMode({
   onTimeUpdate,
   onSimReady,
 }: RealisticSimulationModeProps) {
-  // Default ballistic params if none provided
   const params: BallisticParams = ballisticParams ?? {
     muzzleVelocity: 400,
     dragCoefficient: 0.47,
@@ -491,19 +505,13 @@ export function RealisticSimulationMode({
     barrelDiameterMm: 18.5,
   };
 
-  // Run dense simulation
   const denseSim = useMemo(() => {
     const positions = impacts.map(imp => ({ x: imp.x, y: imp.y }));
-    const result = simulateSpreadDense(params, distanceM, positions, 0.0005);
-    return result;
+    return simulateSpreadDense(params, distanceM, positions, 0.0005);
   }, [impacts, distanceM, params.muzzleVelocity, params.dragCoefficient, params.pelletDiameterMm, params.pelletMassGrams, params.barrelDiameterMm]);
 
-  // Notify parent of sim ready
-  useEffect(() => {
-    onSimReady(denseSim);
-  }, [denseSim, onSimReady]);
+  useEffect(() => { onSimReady(denseSim); }, [denseSim, onSimReady]);
 
-  // Auto-advance time when playing
   useFrame((_, delta) => {
     if (timeState.playing && timeState.currentTime < denseSim.maxFlightTime * 1.2) {
       onTimeUpdate(Math.min(
@@ -516,8 +524,6 @@ export function RealisticSimulationMode({
   const currentTime = timeState.currentTime;
   const showFlash = currentTime > 0 && currentTime < 0.003;
 
-  const pelletDiam = params.pelletDiameterMm;
-
   return (
     <group>
       {/* Environment */}
@@ -525,37 +531,28 @@ export function RealisticSimulationMode({
       <DistanceMarkers distanceM={distanceM} />
       <ScaleRuler />
 
-      {/* Sky color (fog) */}
-      <fog attach="fog" args={['#0a0c12', distanceM * 0.8, distanceM * 2.5]} />
+      {/* Fog matching background */}
+      <fog attach="fog" args={[COL.fog, distanceM * 0.8, distanceM * 2.5]} />
 
-      {/* Barrel */}
       <Barrel barrelDiamMm={params.barrelDiameterMm} />
-
-      {/* Muzzle flash */}
       <MuzzleFlash visible={showFlash} />
-
-      {/* Wad */}
       <Wad simTime={currentTime} distanceM={distanceM} />
 
-      {/* Target */}
       <TargetBoard
         distanceM={distanceM}
         circle1RadiusCm={circle1RadiusCm}
         circle2RadiusCm={circle2RadiusCm}
       />
 
-      {/* Pellet cloud */}
       <PelletCloud
         denseSim={denseSim}
         currentTime={currentTime}
-        pelletDiamMm={pelletDiam}
+        pelletDiamMm={params.pelletDiameterMm}
         muzzleVelocity={params.muzzleVelocity}
       />
 
-      {/* Spread indicator ring */}
       <SpreadIndicator denseSim={denseSim} currentTime={currentTime} />
 
-      {/* Impact marks on target */}
       <ImpactMarkers
         impacts={impacts}
         denseSim={denseSim}
@@ -563,27 +560,27 @@ export function RealisticSimulationMode({
         distanceM={distanceM}
       />
 
-      {/* Bore axis line (laser-like reference) */}
+      {/* Bore axis — fine, low opacity */}
       <mesh position={[0, BARREL_HEIGHT, distanceM / 2]} rotation={[Math.PI / 2, 0, 0]}>
         <cylinderGeometry args={[0.001, 0.001, distanceM, 4]} />
-        <meshBasicMaterial color="#ff0000" transparent opacity={0.08} />
+        <meshBasicMaterial color={COL.boreAxis} transparent opacity={0.06} />
       </mesh>
 
-      {/* 3D text annotations */}
+      {/* Time annotation */}
       <Text
         position={[-3, BARREL_HEIGHT + 1, distanceM / 2]}
         fontSize={0.4}
-        color="#4dabf7"
+        color={COL.timeText}
         anchorX="right"
         rotation={[0, Math.PI / 2, 0]}
       >
         {currentTime > 0 ? `t = ${(currentTime * 1000).toFixed(1)} ms` : 'Prêt'}
       </Text>
 
-      {/* Lighting for realism */}
-      <directionalLight position={[10, 20, 10]} intensity={0.6} castShadow />
-      <directionalLight position={[-5, 15, distanceM / 2]} intensity={0.3} color="#87ceeb" />
-      <hemisphereLight args={['#87ceeb', '#1a2614', 0.3]} />
+      {/* Lighting — neutral, balanced */}
+      <directionalLight position={[10, 20, 10]} intensity={0.7} castShadow />
+      <directionalLight position={[-5, 15, distanceM / 2]} intensity={0.25} color={COL.lightSky} />
+      <hemisphereLight args={[COL.lightSky, COL.lightGround, 0.35]} />
     </group>
   );
 }
