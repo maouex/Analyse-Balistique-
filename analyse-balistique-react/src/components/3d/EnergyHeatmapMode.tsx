@@ -52,6 +52,17 @@ export function EnergyHeatmapMode({
     [impacts, enhanced, simResult]
   );
 
+  // Fixed max energy reference for absolute scaling (not self-normalized)
+  const maxEnergyRef = useMemo(() => {
+    if (enhanced && simResult) {
+      // Use muzzle energy as the theoretical max for scaling
+      const maxPelletE = Math.max(...simResult.pellets.map(p => p.energyJoules), 1);
+      // Kernel accumulation can stack overlapping pellets, so allow headroom
+      return maxPelletE * 2.5;
+    }
+    return 20; // Default: 20J reference scale for non-enhanced mode
+  }, [enhanced, simResult]);
+
   const heatmapData = useMemo(() => {
     if (impacts.length === 0) return null;
 
@@ -76,38 +87,35 @@ export function EnergyHeatmapMode({
       }
     }
 
-    let maxVal = 0;
-    for (const row of grid) for (const v of row) if (v > maxVal) maxVal = v;
-    if (maxVal === 0) maxVal = 1;
-
+    // Use FIXED energy reference for bar heights — NOT self-normalized
     const cells: { x: number; z: number; height: number; intensity: number; energyJ: number }[] = [];
     for (let gy = 0; gy < GRID_RES; gy++) {
       for (let gx = 0; gx < GRID_RES; gx++) {
         const energyJ = grid[gy][gx];
-        if (energyJ < 0.1) continue;
+        if (energyJ < 0.05) continue;
         const cmX = -extent + gx * cellSize + cellSize / 2;
         const cmY = -extent + gy * cellSize + cellSize / 2;
-        const normalized = energyJ / maxVal;
+        // Absolute scaling: bar height proportional to actual energy
+        const absRatio = Math.min(energyJ / maxEnergyRef, 1);
         cells.push({
           x: cmX * WORLD_SCALE,
           z: cmY * WORLD_SCALE,
-          height: normalized * 0.35,
-          intensity: normalized,
+          height: absRatio * 0.4 + 0.005, // min visible height
+          intensity: absRatio,
           energyJ,
         });
       }
     }
 
     return { cells, cellSize: cellSize * WORLD_SCALE };
-  }, [impacts, circle1RadiusCm, circle2RadiusCm, impactEnergies]);
+  }, [impacts, circle1RadiusCm, circle2RadiusCm, impactEnergies, maxEnergyRef]);
 
-  // Color function for instanced bars: map normalized intensity to energy color
-  const energyColorFn = useCallback((intensity: number) => {
-    // Map back from normalized intensity to approximate energy threshold
-    if (intensity > 0.6) return '#ff1744';
-    if (intensity > 0.35) return '#ff9100';
-    if (intensity > 0.15) return '#ffea00';
-    return '#2979ff';
+  // Color function for instanced bars: use ACTUAL energy (Joules) for thresholds
+  const energyColorFn = useCallback((_intensity: number, energyJ: number) => {
+    if (energyJ >= LETHAL_J) return '#ff1744';      // ≥ 5J — lethal
+    if (energyJ >= WOUNDING_J) return '#ff9100';     // ≥ 2J — wounding
+    if (energyJ >= MINIMUM_J) return '#ffea00';      // ≥ 0.5J — marginal
+    return '#2979ff';                                 // < 0.5J — ineffective
   }, []);
 
   // Color function for instanced pellets

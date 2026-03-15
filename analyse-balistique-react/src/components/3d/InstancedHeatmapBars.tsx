@@ -6,12 +6,13 @@ interface HeatmapCell {
   z: number;
   height: number;
   intensity: number;
+  energyJ?: number;
 }
 
 interface InstancedHeatmapBarsProps {
   cells: HeatmapCell[];
   cellWorldSize: number;
-  colorFn: (intensity: number) => string;
+  colorFn: (intensity: number, energyJ: number) => string;
   baseOpacity?: number;
 }
 
@@ -61,8 +62,8 @@ export function InstancedHeatmapBars({
       _obj.updateMatrix();
       mesh.setMatrixAt(i, _obj.matrix);
 
-      // Color based on intensity
-      const col = colorFn(cell.intensity);
+      // Color based on energy (absolute) or intensity (fallback)
+      const col = colorFn(cell.intensity, cell.energyJ ?? 0);
       _color.set(col);
       mesh.setColorAt(i, _color);
     }

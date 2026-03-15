@@ -68,6 +68,29 @@ export function DispersionCloudMode({
   const _obj = useMemo(() => new THREE.Object3D(), []);
   const _color = useMemo(() => new THREE.Color(), []);
 
+  // Pre-compute per-pellet flight times and gravity drops from simResult
+  const pelletPhysics = useMemo(() => {
+    if (!enhanced || !simResult) return null;
+    return simResult.pellets.map(p => ({
+      flightTime: distanceM / p.impactVelocity, // approximate flight time
+      gravityDropCm: p.gravityDropCm,
+      impactVelocity: p.impactVelocity,
+      muzzleVelocity: ballisticParams!.muzzleVelocity,
+    }));
+  }, [enhanced, simResult, distanceM, ballisticParams]);
+
+  // Velocity-to-color helper
+  const velToColor = useMemo(() => {
+    const muzzleV = ballisticParams?.muzzleVelocity ?? 400;
+    return (vRatio: number) => {
+      // red (fast) → yellow (mid) → blue (slow)
+      const r = Math.min(1, vRatio * 2);
+      const g = vRatio > 0.5 ? (1 - vRatio) * 2 * 0.6 : vRatio * 2 * 0.6;
+      const b = Math.min(1, (1 - vRatio) * 2);
+      return { r, g, b, muzzleV };
+    };
+  }, [ballisticParams]);
+
   // Set initial instance colors
   useEffect(() => {
     const cloud = cloudMeshRef.current;
@@ -92,22 +115,38 @@ export function DispersionCloudMode({
       const t = ((elapsed + i * 0.02) % CYCLE_DURATION) / CYCLE_DURATION;
       const [tx, tz] = targetPositions[i];
 
+      // Use physics-based gravity drop if available
+      const pp = pelletPhysics?.[i];
+      const gravDropWorld = pp
+        ? pp.gravityDropCm * WORLD_SCALE * t * t  // realistic gravity drop
+        : t * t * distScale * 0.01;                // fallback
+
       // Main pellet
       const y = (1 - t) * distScale;
       const spread = t;
-      const gravDrop = t * t * distScale * 0.01;
       const scale = 0.7 + t * 0.3;
 
-      _obj.position.set(tx * spread, y - gravDrop, tz * spread);
+      _obj.position.set(tx * spread, y - gravDropWorld, tz * spread);
       _obj.scale.setScalar(scale);
       _obj.updateMatrix();
       cloud.setMatrixAt(i, _obj.matrix);
 
+      // Update pellet color based on velocity decay (if enhanced)
+      if (pp && cloud.instanceColor) {
+        const vRatio = 1 - t * (1 - pp.impactVelocity / pp.muzzleVelocity);
+        const c = velToColor(vRatio);
+        _color.setRGB(c.r, c.g, c.b);
+        cloud.setColorAt(i, _color);
+      }
+
       // Trail ghost (slightly behind)
       if (trail) {
         const tTrail = Math.max(0, t - 0.03);
+        const gravTrail = pp
+          ? pp.gravityDropCm * WORLD_SCALE * tTrail * tTrail
+          : tTrail * tTrail * distScale * 0.01;
         const yTrail = (1 - tTrail) * distScale;
-        _obj.position.set(tx * tTrail, yTrail - tTrail * tTrail * distScale * 0.01, tz * tTrail);
+        _obj.position.set(tx * tTrail, yTrail - gravTrail, tz * tTrail);
         _obj.scale.setScalar(1);
         _obj.updateMatrix();
         trail.setMatrixAt(i, _obj.matrix);
@@ -115,6 +154,7 @@ export function DispersionCloudMode({
     }
 
     cloud.instanceMatrix.needsUpdate = true;
+    if (cloud.instanceColor) cloud.instanceColor.needsUpdate = true;
     if (trail) trail.instanceMatrix.needsUpdate = true;
 
     // Spread ring
@@ -204,6 +244,16 @@ export function DispersionCloudMode({
       <Text position={[-circle2RadiusCm * WORLD_SCALE * 1.2, 0.02, circle2RadiusCm * WORLD_SCALE * 0.8]} fontSize={0.025} color="#a0a4b8" anchorX="left">
         {`${count} plombs | Dispersion progressive`}
       </Text>
+      {enhanced && simResult && (
+        <group position={[-circle2RadiusCm * WORLD_SCALE * 1.2, 0.02, circle2RadiusCm * WORLD_SCALE * 0.5]}>
+          <Text fontSize={0.022} color="#c084fc" anchorX="left" position={[0, 0, 0]}>
+            {`V impact: ${simResult.avgImpactVelocity.toFixed(0)} m/s (${simResult.velocityRetention.toFixed(0)}%)`}
+          </Text>
+          <Text fontSize={0.022} color="#a0a4b8" anchorX="left" position={[0, -0.03, 0]}>
+            {`É: ${simResult.avgEnergy.toFixed(2)}J | Pén: ${simResult.avgPenetration.toFixed(1)}cm`}
+          </Text>
+        </group>
+      )}
     </group>
   );
 }

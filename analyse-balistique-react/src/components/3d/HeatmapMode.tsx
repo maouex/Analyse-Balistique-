@@ -15,7 +15,7 @@ interface HeatmapModeProps {
 
 const GRID_RES = 40;
 
-function getHeatColor(intensity: number): string {
+function getHeatColor(intensity: number, _energyJ: number): string {
   if (intensity > 0.7) return '#ff2222';
   if (intensity > 0.5) return '#ff6600';
   if (intensity > 0.3) return '#ffaa00';
