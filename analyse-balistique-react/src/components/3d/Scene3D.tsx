@@ -5,10 +5,13 @@ import { useAnalysisStore } from '../../stores/analysisStore';
 import { computeFullAnalysis } from '../../lib/ballistics';
 import { impactsTo3D, getDistanceMeters, VIEW_3D_MODES } from '../../lib/3d-utils';
 import type { View3DMode } from '../../lib/3d-utils';
+import type { BallisticParams } from '../../lib/ballistics-sim';
+import { simulateSpread } from '../../lib/ballistics-sim';
 import { ConeDispersionMode } from './ConeDispersionMode';
 import { HeatmapMode } from './HeatmapMode';
 import { TrajectoriesMode } from './TrajectoriesMode';
 import { PenetrationMode } from './PenetrationMode';
+import { EnhancedBallisticsPanel } from './EnhancedBallisticsPanel';
 import { Camera, RotateCcw, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -26,6 +29,7 @@ export function Scene3D({
   const navigate = useNavigate();
   const [activeMode, setActiveMode] = useState<View3DMode>('cone');
   const [autoRotate, setAutoRotate] = useState(true);
+  const [ballisticParams, setBallisticParams] = useState<BallisticParams | null>(null);
   const canvasContainerRef = useRef<HTMLDivElement>(null);
 
   const store = useAnalysisStore();
@@ -52,6 +56,30 @@ export function Scene3D({
   const r90 = stats?.dispersion.r90 ?? 20;
   const c1r = store.circle1.diameterCm / 2;
   const c2r = store.circle2.diameterCm / 2;
+
+  // Enhanced simulation results
+  const simResult = useMemo(() => {
+    if (!ballisticParams || impacts3D.length === 0) return null;
+    const positions = impacts3D.map(imp => ({ x: imp.x, y: imp.y }));
+    return simulateSpread(ballisticParams, distanceM, positions);
+  }, [ballisticParams, impacts3D, distanceM]);
+
+  // Effective velocity and penetration (from simulation or defaults)
+  const effectiveVelocity = ballisticParams?.muzzleVelocity ?? velocityMs;
+  const effectivePenetration = simResult?.avgPenetration ?? penetrationCm;
+
+  // Enhanced impacts3D with per-pellet penetration from simulation
+  const enhancedImpacts3D = useMemo(() => {
+    if (!simResult) return impacts3D;
+    return impacts3D.map((imp, i) => {
+      const pellet = simResult.pellets[i];
+      if (!pellet) return imp;
+      return {
+        ...imp,
+        z: pellet.penetrationCm,
+      };
+    });
+  }, [impacts3D, simResult]);
 
   const cameraPosition: [number, number, number] = activeMode === 'penetration'
     ? [0.5, 0.2, 0.8]
@@ -112,6 +140,13 @@ export function Scene3D({
           </button>
         ))}
         <div style={{ flex: 1 }} />
+        <EnhancedBallisticsPanel
+          onApply={setBallisticParams}
+          onClear={() => setBallisticParams(null)}
+          activeParams={ballisticParams}
+          distanceM={distanceM}
+        />
+        <div style={{ width: 1, height: 20, background: 'var(--border)' }} />
         <button
           className={`btn btn-sm ${autoRotate ? 'active' : ''}`}
           onClick={() => setAutoRotate(!autoRotate)}
@@ -124,18 +159,37 @@ export function Scene3D({
         </button>
       </div>
 
-      {/* Mode description */}
+      {/* Mode description + ballistic status */}
       <div style={{
         padding: '6px 16px',
         fontSize: 11,
         color: 'var(--muted)',
         background: 'var(--bg)',
         borderBottom: '1px solid var(--border)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
       }}>
-        {VIEW_3D_MODES.find((m) => m.mode === activeMode)?.description}
-        <span style={{ marginLeft: 12, color: 'var(--text-secondary)' }}>
-          Souris: orbite | Molette: zoom | Clic droit: pan
+        <span>
+          {VIEW_3D_MODES.find((m) => m.mode === activeMode)?.description}
+          <span style={{ marginLeft: 12, color: 'var(--text-secondary)' }}>
+            Souris: orbite | Molette: zoom | Clic droit: pan
+          </span>
         </span>
+        {simResult && (
+          <span style={{
+            fontSize: 10, fontWeight: 600,
+            color: 'var(--purple)',
+            background: 'var(--purple-glow)',
+            padding: '2px 8px',
+            borderRadius: 6,
+            display: 'flex', alignItems: 'center', gap: 4,
+          }}>
+            Balistique avancée — V impact: {simResult.avgImpactVelocity.toFixed(0)} m/s
+            | Pénétration: {simResult.avgPenetration.toFixed(1)} cm
+            | Rétention: {simResult.velocityRetention.toFixed(0)}%
+          </span>
+        )}
       </div>
 
       {/* 3D Canvas */}
@@ -162,19 +216,21 @@ export function Scene3D({
           <Suspense fallback={null}>
             {activeMode === 'cone' && (
               <ConeDispersionMode
-                impacts={impacts3D}
+                impacts={enhancedImpacts3D}
                 distanceM={distanceM}
                 r90Cm={r90}
                 ellipse={stats?.ellipse ?? null}
                 circle1RadiusCm={c1r}
                 circle2RadiusCm={c2r}
                 pixelsPerCm={store.scale.pixelsPerCm}
+                ballisticParams={ballisticParams}
+                simResult={simResult}
               />
             )}
 
             {activeMode === 'heatmap' && (
               <HeatmapMode
-                impacts={impacts3D}
+                impacts={enhancedImpacts3D}
                 circle1RadiusCm={c1r}
                 circle2RadiusCm={c2r}
               />
@@ -182,20 +238,24 @@ export function Scene3D({
 
             {activeMode === 'trajectories' && (
               <TrajectoriesMode
-                impacts={impacts3D}
+                impacts={enhancedImpacts3D}
                 distanceM={distanceM}
                 circle1RadiusCm={c1r}
                 circle2RadiusCm={c2r}
-                velocityMs={velocityMs}
+                velocityMs={effectiveVelocity}
+                ballisticParams={ballisticParams}
+                simResult={simResult}
               />
             )}
 
             {activeMode === 'penetration' && (
               <PenetrationMode
-                impacts={impacts3D}
-                penetrationCm={penetrationCm}
+                impacts={enhancedImpacts3D}
+                penetrationCm={effectivePenetration}
                 circle1RadiusCm={c1r}
                 circle2RadiusCm={c2r}
+                ballisticParams={ballisticParams}
+                simResult={simResult}
               />
             )}
           </Suspense>

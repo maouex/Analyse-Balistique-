@@ -2,12 +2,15 @@ import * as THREE from 'three';
 import { Text } from '@react-three/drei';
 import type { Impact3D } from '../../lib/3d-utils';
 import { getZoneColor } from '../../lib/3d-utils';
+import type { BallisticParams, SimulationResult } from '../../lib/ballistics-sim';
 
 interface PenetrationModeProps {
   impacts: Impact3D[];
   penetrationCm: number;
   circle1RadiusCm: number;
   circle2RadiusCm: number;
+  ballisticParams?: BallisticParams | null;
+  simResult?: SimulationResult | null;
 }
 
 const SCALE = 0.01;
@@ -18,14 +21,22 @@ export function PenetrationMode({
   penetrationCm,
   circle1RadiusCm,
   circle2RadiusCm,
+  ballisticParams,
+  simResult,
 }: PenetrationModeProps) {
+  const enhanced = !!ballisticParams && !!simResult;
   const extent = circle2RadiusCm * SCALE * 1.2;
+
+  // Use per-pellet penetration from simulation, or uniform default
+  const maxPen = enhanced
+    ? Math.max(...simResult!.pellets.map(p => p.penetrationCm), penetrationCm)
+    : penetrationCm;
 
   return (
     <group>
       {/* Gel block - cross section */}
-      <mesh position={[0, -penetrationCm * DEPTH_SCALE / 2, 0]}>
-        <boxGeometry args={[extent * 2, penetrationCm * DEPTH_SCALE, extent * 0.6]} />
+      <mesh position={[0, -maxPen * DEPTH_SCALE / 2, 0]}>
+        <boxGeometry args={[extent * 2, maxPen * DEPTH_SCALE, extent * 0.6]} />
         <meshStandardMaterial
           color="#e8c170"
           transparent
@@ -35,8 +46,8 @@ export function PenetrationMode({
       </mesh>
 
       {/* Gel block wireframe */}
-      <mesh position={[0, -penetrationCm * DEPTH_SCALE / 2, 0]}>
-        <boxGeometry args={[extent * 2, penetrationCm * DEPTH_SCALE, extent * 0.6]} />
+      <mesh position={[0, -maxPen * DEPTH_SCALE / 2, 0]}>
+        <boxGeometry args={[extent * 2, maxPen * DEPTH_SCALE, extent * 0.6]} />
         <meshStandardMaterial
           color="#e8c170"
           transparent
@@ -67,9 +78,18 @@ export function PenetrationMode({
       </mesh>
 
       {/* Impact pellets with depth channels */}
-      {impacts.map((imp) => {
-        const depth = imp.z * DEPTH_SCALE;
+      {impacts.map((imp, i) => {
+        // Use per-pellet physics penetration if available
+        const pelletPen = enhanced && simResult!.pellets[i]
+          ? simResult!.pellets[i].penetrationCm
+          : imp.z;
+        const depth = pelletPen * DEPTH_SCALE;
         const color = getZoneColor(imp.zone);
+
+        // Pellet size proportional to diameter if enhanced
+        const pelletRadius = enhanced
+          ? Math.max(0.005, (ballisticParams!.pelletDiameterMm / 2) * SCALE * 0.8)
+          : 0.008;
 
         return (
           <group key={imp.index}>
@@ -91,7 +111,7 @@ export function PenetrationMode({
 
             {/* Pellet at depth */}
             <mesh position={[imp.x * SCALE, -depth, -imp.y * SCALE]}>
-              <sphereGeometry args={[0.008, 10, 10]} />
+              <sphereGeometry args={[pelletRadius, 10, 10]} />
               <meshStandardMaterial
                 color={color}
                 emissive={color}
@@ -109,7 +129,19 @@ export function PenetrationMode({
                 color="#a0a4b8"
                 anchorX="left"
               >
-                {`${imp.z.toFixed(1)}cm`}
+                {`${pelletPen.toFixed(1)}cm`}
+              </Text>
+            )}
+
+            {/* Enhanced: show impact velocity per pellet */}
+            {enhanced && simResult!.pellets[i] && imp.index <= 5 && (
+              <Text
+                position={[imp.x * SCALE + 0.02, -depth - 0.025, -imp.y * SCALE]}
+                fontSize={0.014}
+                color="#c084fc"
+                anchorX="left"
+              >
+                {`${simResult!.pellets[i].impactVelocity.toFixed(0)} m/s | ${simResult!.pellets[i].energyJoules.toFixed(2)} J`}
               </Text>
             )}
           </group>
@@ -119,7 +151,7 @@ export function PenetrationMode({
       {/* Depth ruler */}
       <group position={[-extent - 0.05, 0, 0]}>
         {[0, 25, 50, 75, 100].map((pct) => {
-          const depthCm = (penetrationCm * pct) / 100;
+          const depthCm = (maxPen * pct) / 100;
           const y = -depthCm * DEPTH_SCALE;
           return (
             <group key={pct}>
@@ -161,7 +193,10 @@ export function PenetrationMode({
         fontSize={0.025}
         color="#a0a4b8"
       >
-        {`Pénétration max: ${penetrationCm}cm`}
+        {enhanced
+          ? `∅${ballisticParams!.pelletDiameterMm}mm | Pénétration moy: ${simResult!.avgPenetration.toFixed(1)}cm | É moy: ${simResult!.avgEnergy.toFixed(2)}J`
+          : `Pénétration max: ${penetrationCm}cm`
+        }
       </Text>
     </group>
   );
