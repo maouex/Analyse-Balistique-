@@ -20,6 +20,8 @@ import { TimelineControls } from './TimelineControls';
 import { EnhancedBallisticsPanel } from './EnhancedBallisticsPanel';
 import { Camera, RotateCcw, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { SimColorMenu } from './SimColorMenu';
+import { useSimColorStore } from '../../stores/simColorStore';
 
 interface Scene3DProps {
   distanceStr?: string;
@@ -93,6 +95,7 @@ export function Scene3D({
   }, [impacts3D, simResult]);
 
   const isSimMode = activeMode === 'simulation';
+  const simColors = useSimColorStore(s => s.colors);
 
   // Camera config per mode
   const cameraPosition: [number, number, number] =
@@ -250,7 +253,7 @@ export function Scene3D({
       </div>
 
       {/* 3D Canvas + Timeline */}
-      <div ref={canvasContainerRef} style={{ flex: 1, minHeight: 0, position: 'relative', background: isSimMode ? '#5a6478' : 'var(--canvas-bg)' }}>
+      <div ref={canvasContainerRef} style={{ flex: 1, minHeight: 0, position: 'relative', background: isSimMode ? simColors.sky : 'var(--canvas-bg)' }}>
         <Canvas
           gl={{ preserveDrawingBuffer: true, antialias: true }}
           style={{ position: 'absolute', inset: 0 }}
@@ -375,6 +378,9 @@ export function Scene3D({
             )}
           </Suspense>
         </Canvas>
+
+        {/* Color menu overlay (only in simulation mode) */}
+        {isSimMode && <SimColorMenu />}
 
         {/* Timeline overlay (only in simulation mode) */}
         {isSimMode && (

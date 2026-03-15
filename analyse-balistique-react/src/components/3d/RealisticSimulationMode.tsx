@@ -6,6 +6,7 @@ import type { Impact3D } from '../../lib/3d-utils';
 import { getZoneColor } from '../../lib/3d-utils';
 import type { BallisticParams, DenseSimulationResult, DensePelletResult } from '../../lib/ballistics-sim';
 import { simulateSpreadDense } from '../../lib/ballistics-sim';
+import { useSimColorStore } from '../../stores/simColorStore';
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -114,15 +115,16 @@ const PELLET_VISUAL_SCALE = 3;
 // ─── Sub-components ────────────────────────────────────────
 
 function Ground({ distanceM }: { distanceM: number }) {
+  const { ground, gridMajor, gridMinor } = useSimColorStore(s => s.colors);
   const length = distanceM + 10;
   return (
     <group>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, GROUND_Y - 0.01, length / 2 - 3]}>
         <planeGeometry args={[20, length]} />
-        <meshStandardMaterial color={COL.ground} side={THREE.DoubleSide} />
+        <meshStandardMaterial color={ground} side={THREE.DoubleSide} />
       </mesh>
       <gridHelper
-        args={[length, Math.ceil(length), COL.gridMajor, COL.gridMinor]}
+        args={[length, Math.ceil(length), gridMajor, gridMinor]}
         position={[0, GROUND_Y, length / 2 - 3]}
       />
     </group>
@@ -301,6 +303,7 @@ function PelletCloud({ denseSim, currentTime, pelletDiamMm, muzzleVelocity }: {
   pelletDiamMm: number;
   muzzleVelocity: number;
 }) {
+  const { pelletBase, pelletEmit, pelletTrail } = useSimColorStore(s => s.colors);
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const trailMeshRef = useRef<THREE.InstancedMesh>(null);
   const count = denseSim.pellets.length;
@@ -310,16 +313,16 @@ function PelletCloud({ denseSim, currentTime, pelletDiamMm, muzzleVelocity }: {
   const sphereGeom = useMemo(() => new THREE.SphereGeometry(pelletR, 12, 12), [pelletR]);
   const trailGeom = useMemo(() => new THREE.SphereGeometry(pelletR * 0.5, 6, 6), [pelletR]);
   const pelletMat = useMemo(() => new THREE.MeshStandardMaterial({
-    color: COL.pelletBase,
+    color: pelletBase,
     metalness: 0.4,
     roughness: 0.3,
-    emissive: new THREE.Color(COL.pelletEmit),
+    emissive: new THREE.Color(pelletEmit),
     emissiveIntensity: 0.35,
-  }), []);
+  }), [pelletBase, pelletEmit]);
   const trailMat = useMemo(() => new THREE.MeshStandardMaterial({
-    color: '#99aabb', transparent: true, opacity: 0.35,
-    emissive: new THREE.Color('#667899'), emissiveIntensity: 0.2,
-  }), []);
+    color: pelletTrail, transparent: true, opacity: 0.35,
+    emissive: new THREE.Color(pelletTrail), emissiveIntensity: 0.2,
+  }), [pelletTrail]);
 
   const _obj = useMemo(() => new THREE.Object3D(), []);
   const _color = useMemo(() => new THREE.Color(), []);
@@ -527,6 +530,7 @@ export function RealisticSimulationMode({
     }
   });
 
+  const simColors = useSimColorStore(s => s.colors);
   const currentTime = timeState.currentTime;
   const showFlash = currentTime > 0 && currentTime < 0.003;
 
@@ -538,7 +542,7 @@ export function RealisticSimulationMode({
       <ScaleRuler />
 
       {/* Fog matching background */}
-      <fog attach="fog" args={[COL.fog, distanceM * 0.8, distanceM * 2.5]} />
+      <fog attach="fog" args={[simColors.sky, distanceM * 0.8, distanceM * 2.5]} />
 
       <Barrel barrelDiamMm={params.barrelDiameterMm} />
       <MuzzleFlash visible={showFlash} />
@@ -586,7 +590,7 @@ export function RealisticSimulationMode({
       {/* Lighting — neutral, balanced */}
       <directionalLight position={[10, 20, 10]} intensity={0.7} castShadow />
       <directionalLight position={[-5, 15, distanceM / 2]} intensity={0.25} color={COL.lightSky} />
-      <hemisphereLight args={[COL.lightSky, COL.lightGround, 0.35]} />
+      <hemisphereLight args={[COL.lightSky, simColors.ground, 0.35]} />
     </group>
   );
 }
