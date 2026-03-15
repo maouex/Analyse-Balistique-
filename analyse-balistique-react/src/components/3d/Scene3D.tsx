@@ -6,7 +6,7 @@ import { computeFullAnalysis } from '../../lib/ballistics';
 import { impactsTo3D, getDistanceMeters, VIEW_3D_MODES } from '../../lib/3d-utils';
 import type { View3DMode } from '../../lib/3d-utils';
 import type { BallisticParams } from '../../lib/ballistics-sim';
-import { simulateSpread } from '../../lib/ballistics-sim';
+import { useBallisticsWorker } from '../../lib/useBallisticsWorker';
 import { ConeDispersionMode } from './ConeDispersionMode';
 import { HeatmapMode } from './HeatmapMode';
 import { EnergyHeatmapMode } from './EnergyHeatmapMode';
@@ -60,12 +60,14 @@ export function Scene3D({
   const c1r = store.circle1.diameterCm / 2;
   const c2r = store.circle2.diameterCm / 2;
 
-  // Enhanced simulation results
-  const simResult = useMemo(() => {
-    if (!ballisticParams || impacts3D.length === 0) return null;
-    const positions = impacts3D.map(imp => ({ x: imp.x, y: imp.y }));
-    return simulateSpread(ballisticParams, distanceM, positions);
-  }, [ballisticParams, impacts3D, distanceM]);
+  // Impact positions (stable reference for worker)
+  const impactPositionsCm = useMemo(
+    () => impacts3D.map(imp => ({ x: imp.x, y: imp.y })),
+    [impacts3D]
+  );
+
+  // Simulation runs in Web Worker (non-blocking)
+  const { simResult, computing } = useBallisticsWorker(ballisticParams, distanceM, impactPositionsCm);
 
   // Effective velocity and penetration
   const effectiveVelocity = ballisticParams?.muzzleVelocity ?? velocityMs;
@@ -165,7 +167,16 @@ export function Scene3D({
             Souris: orbite | Molette: zoom | Clic droit: pan
           </span>
         </span>
-        {simResult && (
+        {computing && (
+          <span style={{
+            fontSize: 10, fontWeight: 600, color: 'var(--purple)',
+            background: 'var(--purple-glow)', padding: '2px 8px', borderRadius: 6,
+            animation: 'pulse 1s infinite',
+          }}>
+            Simulation...
+          </span>
+        )}
+        {simResult && !computing && (
           <span style={{
             fontSize: 10, fontWeight: 600, color: 'var(--purple)',
             background: 'var(--purple-glow)', padding: '2px 8px', borderRadius: 6,

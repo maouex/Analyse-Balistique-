@@ -1,30 +1,30 @@
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import { Text } from '@react-three/drei';
 import { TargetPlane } from './TargetPlane';
+import { InstancedPellets } from './InstancedPellets';
+import { InstancedHeatmapBars } from './InstancedHeatmapBars';
 import type { Impact3D } from '../../lib/3d-utils';
-import type { BallisticParams, SimulationResult } from '../../lib/ballistics-sim';
+import type { SimulationResult } from '../../lib/ballistics-sim';
+import { WORLD_SCALE } from './constants';
 
 interface EnergyHeatmapModeProps {
   impacts: Impact3D[];
   circle1RadiusCm: number;
   circle2RadiusCm: number;
-  ballisticParams: BallisticParams | null;
+  ballisticParams: { pelletDiameterMm: number } | null;
   simResult: SimulationResult | null;
 }
 
-const SCALE = 0.01;
 const GRID_RES = 40;
-
-// Energy thresholds (Joules)
-const LETHAL_J = 5;      // Sufficient to kill small game
-const WOUNDING_J = 2;    // Can cause significant wound
-const MINIMUM_J = 0.5;   // Minimum effective energy
+const LETHAL_J = 5;
+const WOUNDING_J = 2;
+const MINIMUM_J = 0.5;
 
 function getEnergyColor(energyJ: number): string {
-  if (energyJ >= LETHAL_J) return '#ff1744';      // Red - lethal
-  if (energyJ >= WOUNDING_J) return '#ff9100';     // Orange - wounding
-  if (energyJ >= MINIMUM_J) return '#ffea00';      // Yellow - marginal
-  return '#2979ff';                                  // Blue - ineffective
+  if (energyJ >= LETHAL_J) return '#ff1744';
+  if (energyJ >= WOUNDING_J) return '#ff9100';
+  if (energyJ >= MINIMUM_J) return '#ffea00';
+  return '#2979ff';
 }
 
 function getEnergyLabel(energyJ: number): string {
@@ -43,22 +43,21 @@ export function EnergyHeatmapMode({
 }: EnergyHeatmapModeProps) {
   const enhanced = !!ballisticParams && !!simResult;
 
+  // Pre-compute per-impact energy values (stable reference)
+  const impactEnergies = useMemo(() =>
+    impacts.map((imp, i) => {
+      if (enhanced && simResult!.pellets[i]) return simResult!.pellets[i].energyJoules;
+      return [8, 4, 1.5][imp.zone - 1];
+    }),
+    [impacts, enhanced, simResult]
+  );
+
   const heatmapData = useMemo(() => {
     if (impacts.length === 0) return null;
 
     const extent = circle2RadiusCm * 1.2;
     const cellSize = (extent * 2) / GRID_RES;
 
-    // Build per-impact energy values
-    const impactEnergies = impacts.map((_, i) => {
-      if (enhanced && simResult!.pellets[i]) {
-        return simResult!.pellets[i].energyJoules;
-      }
-      // Fallback: estimate from zone (rough approximation)
-      return [8, 4, 1.5][impacts[i].zone - 1];
-    });
-
-    // Gaussian kernel weighted by energy
     const sigma = circle1RadiusCm * 0.35;
     const sigma2 = 2 * sigma * sigma;
     const grid: number[][] = Array.from({ length: GRID_RES }, () => Array(GRID_RES).fill(0));
@@ -72,18 +71,16 @@ export function EnergyHeatmapMode({
           const cy = -extent + gy * cellSize + cellSize / 2;
           const dx = cx - imp.x;
           const dy = cy - imp.y;
-          const dist2 = dx * dx + dy * dy;
-          grid[gy][gx] += energy * Math.exp(-dist2 / sigma2);
+          grid[gy][gx] += energy * Math.exp(-(dx * dx + dy * dy) / sigma2);
         }
       }
     }
 
-    // Find max for normalization
     let maxVal = 0;
     for (const row of grid) for (const v of row) if (v > maxVal) maxVal = v;
     if (maxVal === 0) maxVal = 1;
 
-    const cells: { x: number; z: number; height: number; energyJ: number }[] = [];
+    const cells: { x: number; z: number; height: number; intensity: number; energyJ: number }[] = [];
     for (let gy = 0; gy < GRID_RES; gy++) {
       for (let gx = 0; gx < GRID_RES; gx++) {
         const energyJ = grid[gy][gx];
@@ -92,84 +89,75 @@ export function EnergyHeatmapMode({
         const cmY = -extent + gy * cellSize + cellSize / 2;
         const normalized = energyJ / maxVal;
         cells.push({
-          x: cmX * SCALE,
-          z: cmY * SCALE,
+          x: cmX * WORLD_SCALE,
+          z: cmY * WORLD_SCALE,
           height: normalized * 0.35,
+          intensity: normalized,
           energyJ,
         });
       }
     }
 
-    return { cells, cellSize: cellSize * SCALE };
-  }, [impacts, circle1RadiusCm, circle2RadiusCm, enhanced, simResult]);
+    return { cells, cellSize: cellSize * WORLD_SCALE };
+  }, [impacts, circle1RadiusCm, circle2RadiusCm, impactEnergies]);
+
+  // Color function for instanced bars: map normalized intensity to energy color
+  const energyColorFn = useCallback((intensity: number) => {
+    // Map back from normalized intensity to approximate energy threshold
+    if (intensity > 0.6) return '#ff1744';
+    if (intensity > 0.35) return '#ff9100';
+    if (intensity > 0.15) return '#ffea00';
+    return '#2979ff';
+  }, []);
+
+  // Color function for instanced pellets
+  const pelletColorFn = useCallback((_imp: Impact3D, i: number) => {
+    return getEnergyColor(impactEnergies[i] ?? 0);
+  }, [impactEnergies]);
 
   return (
     <group>
-      <TargetPlane
-        circle1RadiusCm={circle1RadiusCm}
-        circle2RadiusCm={circle2RadiusCm}
-        scale={SCALE}
+      <TargetPlane circle1RadiusCm={circle1RadiusCm} circle2RadiusCm={circle2RadiusCm} scale={WORLD_SCALE} />
+
+      {/* Instanced energy bars (1 draw call) */}
+      {heatmapData && (
+        <InstancedHeatmapBars
+          cells={heatmapData.cells}
+          cellWorldSize={heatmapData.cellSize}
+          colorFn={energyColorFn}
+          baseOpacity={0.7}
+        />
+      )}
+
+      {/* Instanced pellets with energy coloring (1 draw call) */}
+      <InstancedPellets
+        impacts={impacts}
+        yOffset={0.36}
+        pelletRadius={0.01}
+        colorFn={pelletColorFn}
+        metalness={0.7}
+        roughness={0.3}
+        emissiveIntensity={0.6}
       />
 
-      {/* Energy bars */}
-      {heatmapData?.cells.map((cell, i) => {
-        const color = getEnergyColor(cell.energyJ);
+      {/* Energy labels for first few impacts */}
+      {impacts.slice(0, 5).map((imp, i) => {
+        const energy = impactEnergies[i];
         return (
-          <mesh
-            key={i}
-            position={[cell.x, cell.height / 2 + 0.003, -cell.z]}
+          <Text
+            key={imp.index}
+            position={[imp.x * WORLD_SCALE + 0.02, 0.36, -imp.y * WORLD_SCALE]}
+            fontSize={0.018}
+            color={getEnergyColor(energy)}
+            anchorX="left"
           >
-            <boxGeometry args={[
-              heatmapData.cellSize * 0.9,
-              cell.height,
-              heatmapData.cellSize * 0.9,
-            ]} />
-            <meshStandardMaterial
-              color={color}
-              transparent
-              opacity={0.6 + (cell.height / 0.35) * 0.3}
-              emissive={color}
-              emissiveIntensity={(cell.height / 0.35) * 0.4}
-            />
-          </mesh>
-        );
-      })}
-
-      {/* Impact pellets with energy color */}
-      {impacts.map((imp, i) => {
-        const energy = enhanced && simResult!.pellets[i]
-          ? simResult!.pellets[i].energyJoules
-          : [8, 4, 1.5][imp.zone - 1];
-        const color = getEnergyColor(energy);
-        return (
-          <group key={imp.index}>
-            <mesh position={[imp.x * SCALE, 0.36, -imp.y * SCALE]}>
-              <sphereGeometry args={[0.01, 10, 10]} />
-              <meshStandardMaterial
-                color={color}
-                emissive={color}
-                emissiveIntensity={0.6}
-                metalness={0.7}
-                roughness={0.3}
-              />
-            </mesh>
-            {/* Energy label for first few */}
-            {imp.index <= 4 && (
-              <Text
-                position={[imp.x * SCALE + 0.02, 0.36, -imp.y * SCALE]}
-                fontSize={0.018}
-                color={color}
-                anchorX="left"
-              >
-                {`${energy.toFixed(1)}J`}
-              </Text>
-            )}
-          </group>
+            {`${energy.toFixed(1)}J`}
+          </Text>
         );
       })}
 
       {/* Legend */}
-      <group position={[circle2RadiusCm * SCALE * 1.3, 0.35, 0]}>
+      <group position={[circle2RadiusCm * WORLD_SCALE * 1.3, 0.35, 0]}>
         <Text position={[0, 0.14, 0]} fontSize={0.032} color="#dde0e8" anchorX="left" fontWeight="bold">
           Carte d'énergie
         </Text>
@@ -191,9 +179,9 @@ export function EnergyHeatmapMode({
         ))}
       </group>
 
-      {/* Stats overlay */}
+      {/* Stats */}
       {enhanced && simResult && (
-        <group position={[-circle2RadiusCm * SCALE * 1.3, 0.35, 0]}>
+        <group position={[-circle2RadiusCm * WORLD_SCALE * 1.3, 0.35, 0]}>
           <Text position={[0, 0.1, 0]} fontSize={0.025} color="#a0a4b8" anchorX="right">
             {`É moy: ${simResult.avgEnergy.toFixed(2)}J`}
           </Text>

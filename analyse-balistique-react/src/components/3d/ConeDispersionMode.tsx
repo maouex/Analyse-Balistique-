@@ -3,10 +3,11 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { Text } from '@react-three/drei';
 import { TargetPlane } from './TargetPlane';
+import { InstancedPellets } from './InstancedPellets';
 import type { Impact3D } from '../../lib/3d-utils';
 import type { CovarianceEllipse } from '../../types';
-import { getZoneColor } from '../../lib/3d-utils';
 import type { BallisticParams, SimulationResult } from '../../lib/ballistics-sim';
+import { pelletWorldRadius } from './constants';
 
 interface ConeDispersionModeProps {
   impacts: Impact3D[];
@@ -143,27 +144,12 @@ export function ConeDispersionMode({
         </line>
       )}
 
-      {/* Impact pellets (metallic) */}
-      {impacts.map((imp) => {
-        const pelletR = enhanced
-          ? Math.max(0.006, (ballisticParams!.pelletDiameterMm / 2) * SCALE * 0.7)
-          : 0.012;
-        return (
-          <mesh
-            key={imp.index}
-            position={[imp.x * SCALE, 0.01, -imp.y * SCALE]}
-          >
-            <sphereGeometry args={[pelletR, 14, 14]} />
-            <meshStandardMaterial
-              color="#c0c0c0"
-              emissive={getZoneColor(imp.zone)}
-              emissiveIntensity={0.2}
-              metalness={0.85}
-              roughness={0.12}
-            />
-          </mesh>
-        );
-      })}
+      {/* Impact pellets (instanced — 1 draw call) */}
+      <InstancedPellets
+        impacts={impacts}
+        pelletRadius={pelletWorldRadius(enhanced ? ballisticParams!.pelletDiameterMm : undefined)}
+        yOffset={0.01}
+      />
 
       {/* R90 circle */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.004, 0]}>

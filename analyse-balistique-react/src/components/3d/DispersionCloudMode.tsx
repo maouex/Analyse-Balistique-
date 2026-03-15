@@ -1,11 +1,13 @@
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { Text } from '@react-three/drei';
 import { TargetPlane } from './TargetPlane';
+import { InstancedPellets } from './InstancedPellets';
 import type { Impact3D } from '../../lib/3d-utils';
 import { getZoneColor } from '../../lib/3d-utils';
 import type { BallisticParams, SimulationResult } from '../../lib/ballistics-sim';
+import { WORLD_SCALE } from './constants';
 
 interface DispersionCloudModeProps {
   impacts: Impact3D[];
@@ -17,173 +19,12 @@ interface DispersionCloudModeProps {
   simResult?: SimulationResult | null;
 }
 
-const SCALE = 0.01;
-const CYCLE_DURATION = 6; // seconds for full cycle
+const CYCLE_DURATION = 6;
 
-function CloudPellet({ impact, distanceM, index, pelletDiamMm }: {
-  impact: Impact3D;
-  distanceM: number;
-  index: number;
-  pelletDiamMm: number;
-}) {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const trailMeshRef = useRef<THREE.Mesh>(null);
-
-  const targetPos = useMemo(
-    () => new THREE.Vector3(impact.x * SCALE, 0.01, -impact.y * SCALE),
-    [impact]
-  );
-
-  // Pellet visual radius based on actual diameter
-  const pelletRadius = Math.max(0.004, (pelletDiamMm / 2) * SCALE * 0.6);
-
-  useFrame(({ clock }) => {
-    if (!meshRef.current) return;
-
-    // Global animation progress (0→1 repeating)
-    const elapsed = clock.getElapsedTime();
-    const t = ((elapsed + index * 0.02) % CYCLE_DURATION) / CYCLE_DURATION;
-
-    // Position: from barrel (y = distanceM) to target (y = 0)
-    const y = (1 - t) * distanceM * SCALE;
-
-    // Lateral spread increases with distance from barrel
-    const spreadFactor = t; // 0 at barrel, 1 at target
-    const x = targetPos.x * spreadFactor;
-    const z = targetPos.z * spreadFactor;
-
-    // Add slight arc for gravity
-    const gravDrop = t * t * distanceM * SCALE * 0.01;
-
-    meshRef.current.position.set(x, y - gravDrop, z);
-
-    // Scale: slightly smaller when far, bigger when close
-    const s = 0.7 + t * 0.3;
-    meshRef.current.scale.setScalar(s);
-
-    // Trail sphere (at slightly earlier position)
-    if (trailMeshRef.current) {
-      const tTrail = Math.max(0, t - 0.03);
-      const yTrail = (1 - tTrail) * distanceM * SCALE;
-      const spreadTrail = tTrail;
-      trailMeshRef.current.position.set(
-        targetPos.x * spreadTrail,
-        yTrail - tTrail * tTrail * distanceM * SCALE * 0.01,
-        targetPos.z * spreadTrail
-      );
-    }
-  });
-
-  const color = getZoneColor(impact.zone);
-
-  return (
-    <group>
-      {/* Trail ghost */}
-      <mesh ref={trailMeshRef}>
-        <sphereGeometry args={[pelletRadius * 0.6, 6, 6]} />
-        <meshStandardMaterial
-          color={color}
-          transparent
-          opacity={0.15}
-        />
-      </mesh>
-
-      {/* Main pellet */}
-      <mesh ref={meshRef}>
-        <sphereGeometry args={[pelletRadius, 10, 10]} />
-        <meshStandardMaterial
-          color="#c0c0c0"
-          emissive={color}
-          emissiveIntensity={0.2}
-          metalness={0.85}
-          roughness={0.15}
-        />
-      </mesh>
-    </group>
-  );
-}
-
-// Animated cross-section ring showing spread at current distance
-function SpreadRing({ impacts, distanceM }: {
-  impacts: Impact3D[];
-  distanceM: number;
-}) {
-  const ringRef = useRef<THREE.Group>(null);
-  const textRef = useRef<THREE.Group>(null);
-
-  useFrame(({ clock }) => {
-    if (!ringRef.current) return;
-    const t = (clock.getElapsedTime() % CYCLE_DURATION) / CYCLE_DURATION;
-    const y = (1 - t) * distanceM * SCALE;
-
-    // Compute spread radius at this distance fraction
-    const maxR = Math.max(...impacts.map(imp =>
-      Math.sqrt(imp.x * imp.x + imp.y * imp.y)
-    ));
-    const currentR = maxR * t * SCALE;
-
-    ringRef.current.position.y = y;
-    ringRef.current.scale.set(
-      Math.max(0.001, currentR / 0.5),
-      1,
-      Math.max(0.001, currentR / 0.5)
-    );
-
-    if (textRef.current) {
-      textRef.current.position.y = y;
-      textRef.current.position.x = Math.max(0.1, currentR) + 0.04;
-    }
-  });
-
-  return (
-    <group>
-      <group ref={ringRef}>
-        <mesh rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[0.48, 0.5, 64]} />
-          <meshBasicMaterial color="#4dabf7" transparent opacity={0.35} side={THREE.DoubleSide} />
-        </mesh>
-      </group>
-    </group>
-  );
-}
-
-// Distance markers along the flight path
-function DistanceMarkers({ distanceM }: { distanceM: number }) {
-  const markers = useMemo(() => {
-    const result: { y: number; label: string }[] = [];
-    const step = distanceM <= 20 ? 5 : 10;
-    for (let d = step; d < distanceM; d += step) {
-      result.push({
-        y: (1 - d / distanceM) * distanceM * SCALE,
-        label: `${d}m`,
-      });
-    }
-    return result;
-  }, [distanceM]);
-
-  return (
-    <group>
-      {markers.map((m) => (
-        <group key={m.label}>
-          {/* Dashed ring at this distance */}
-          <mesh position={[0, m.y, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-            <ringGeometry args={[0.002, 0.004, 32]} />
-            <meshBasicMaterial color="#3a3f55" transparent opacity={0.6} />
-          </mesh>
-          <Text
-            position={[-0.08, m.y, 0]}
-            fontSize={0.025}
-            color="#5c6378"
-            anchorX="right"
-          >
-            {m.label}
-          </Text>
-        </group>
-      ))}
-    </group>
-  );
-}
-
+/**
+ * Batched cloud animation: single useFrame updates ALL pellet positions
+ * via InstancedMesh matrix manipulation. N useFrame calls → 1.
+ */
 export function DispersionCloudMode({
   impacts,
   distanceM,
@@ -193,89 +34,175 @@ export function DispersionCloudMode({
   simResult,
 }: DispersionCloudModeProps) {
   const pelletDiam = ballisticParams?.pelletDiameterMm ?? 3.0;
+  const pelletRadius = Math.max(0.004, (pelletDiam / 2) * WORLD_SCALE * 0.6);
   const enhanced = !!ballisticParams && !!simResult;
+
+  const cloudMeshRef = useRef<THREE.InstancedMesh>(null);
+  const trailMeshRef = useRef<THREE.InstancedMesh>(null);
+  const ringRef = useRef<THREE.Group>(null);
+
+  const count = impacts.length;
+
+  // Pre-compute target positions (stable)
+  const targetPositions = useMemo(
+    () => impacts.map(imp => [imp.x * WORLD_SCALE, -imp.y * WORLD_SCALE] as [number, number]),
+    [impacts]
+  );
+
+  // Max radius (memoized — not recalculated every frame)
+  const maxR = useMemo(
+    () => Math.max(1, ...impacts.map(imp => Math.sqrt(imp.x * imp.x + imp.y * imp.y))),
+    [impacts]
+  );
+
+  // Shared geometry & material
+  const sphereGeom = useMemo(() => new THREE.SphereGeometry(pelletRadius, 10, 10), [pelletRadius]);
+  const trailGeom = useMemo(() => new THREE.SphereGeometry(pelletRadius * 0.6, 6, 6), [pelletRadius]);
+  const cloudMat = useMemo(() => new THREE.MeshStandardMaterial({
+    color: '#c0c0c0', metalness: 0.85, roughness: 0.15, emissiveIntensity: 0.2,
+  }), []);
+  const trailMat = useMemo(() => new THREE.MeshStandardMaterial({
+    color: '#888', transparent: true, opacity: 0.15,
+  }), []);
+
+  const _obj = useMemo(() => new THREE.Object3D(), []);
+  const _color = useMemo(() => new THREE.Color(), []);
+
+  // Set initial instance colors
+  useEffect(() => {
+    const cloud = cloudMeshRef.current;
+    if (!cloud) return;
+    for (let i = 0; i < count; i++) {
+      _color.set(getZoneColor(impacts[i].zone));
+      cloud.setColorAt(i, _color);
+    }
+    if (cloud.instanceColor) cloud.instanceColor.needsUpdate = true;
+  }, [impacts, count, _color]);
+
+  // SINGLE useFrame callback for ALL pellets + ring
+  useFrame(({ clock }) => {
+    const cloud = cloudMeshRef.current;
+    const trail = trailMeshRef.current;
+    if (!cloud) return;
+
+    const elapsed = clock.getElapsedTime();
+    const distScale = distanceM * WORLD_SCALE;
+
+    for (let i = 0; i < count; i++) {
+      const t = ((elapsed + i * 0.02) % CYCLE_DURATION) / CYCLE_DURATION;
+      const [tx, tz] = targetPositions[i];
+
+      // Main pellet
+      const y = (1 - t) * distScale;
+      const spread = t;
+      const gravDrop = t * t * distScale * 0.01;
+      const scale = 0.7 + t * 0.3;
+
+      _obj.position.set(tx * spread, y - gravDrop, tz * spread);
+      _obj.scale.setScalar(scale);
+      _obj.updateMatrix();
+      cloud.setMatrixAt(i, _obj.matrix);
+
+      // Trail ghost (slightly behind)
+      if (trail) {
+        const tTrail = Math.max(0, t - 0.03);
+        const yTrail = (1 - tTrail) * distScale;
+        _obj.position.set(tx * tTrail, yTrail - tTrail * tTrail * distScale * 0.01, tz * tTrail);
+        _obj.scale.setScalar(1);
+        _obj.updateMatrix();
+        trail.setMatrixAt(i, _obj.matrix);
+      }
+    }
+
+    cloud.instanceMatrix.needsUpdate = true;
+    if (trail) trail.instanceMatrix.needsUpdate = true;
+
+    // Spread ring
+    if (ringRef.current) {
+      const t = (elapsed % CYCLE_DURATION) / CYCLE_DURATION;
+      const y = (1 - t) * distScale;
+      const currentR = maxR * t * WORLD_SCALE;
+      ringRef.current.position.y = y;
+      const s = Math.max(0.001, currentR / 0.5);
+      ringRef.current.scale.set(s, 1, s);
+    }
+  });
+
+  // Distance markers
+  const markers = useMemo(() => {
+    const result: { y: number; label: string }[] = [];
+    const step = distanceM <= 20 ? 5 : 10;
+    for (let d = step; d < distanceM; d += step) {
+      result.push({ y: (1 - d / distanceM) * distanceM * WORLD_SCALE, label: `${d}m` });
+    }
+    return result;
+  }, [distanceM]);
 
   return (
     <group>
-      <TargetPlane
-        circle1RadiusCm={circle1RadiusCm}
-        circle2RadiusCm={circle2RadiusCm}
-        scale={SCALE}
-      />
+      <TargetPlane circle1RadiusCm={circle1RadiusCm} circle2RadiusCm={circle2RadiusCm} scale={WORLD_SCALE} />
 
-      {/* Barrel point */}
-      <mesh position={[0, distanceM * SCALE, 0]}>
+      {/* Barrel */}
+      <mesh position={[0, distanceM * WORLD_SCALE, 0]}>
         <cylinderGeometry args={[0.015, 0.02, 0.04, 12]} />
         <meshStandardMaterial color="#666" metalness={0.9} roughness={0.1} />
       </mesh>
-      <Text
-        position={[0.06, distanceM * SCALE, 0]}
-        fontSize={0.04}
-        color="#ff6b6b"
-        anchorX="left"
-      >
+      <Text position={[0.06, distanceM * WORLD_SCALE, 0]} fontSize={0.04} color="#ff6b6b" anchorX="left">
         {`Canon (${distanceM}m)`}
       </Text>
-
       {enhanced && (
-        <Text
-          position={[0.06, distanceM * SCALE - 0.06, 0]}
-          fontSize={0.022}
-          color="#c084fc"
-          anchorX="left"
-        >
+        <Text position={[0.06, distanceM * WORLD_SCALE - 0.06, 0]} fontSize={0.022} color="#c084fc" anchorX="left">
           {`∅${pelletDiam}mm | V₀=${ballisticParams!.muzzleVelocity}m/s`}
         </Text>
       )}
 
       {/* Distance markers */}
-      <DistanceMarkers distanceM={distanceM} />
+      {markers.map(m => (
+        <group key={m.label}>
+          <mesh position={[0, m.y, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+            <ringGeometry args={[0.002, 0.004, 32]} />
+            <meshBasicMaterial color="#3a3f55" transparent opacity={0.6} />
+          </mesh>
+          <Text position={[-0.08, m.y, 0]} fontSize={0.025} color="#5c6378" anchorX="right">
+            {m.label}
+          </Text>
+        </group>
+      ))}
 
-      {/* Animated spread ring */}
-      <SpreadRing impacts={impacts} distanceM={distanceM} />
+      {/* Spread ring */}
+      <group ref={ringRef}>
+        <mesh rotation={[-Math.PI / 2, 0, 0]}>
+          <ringGeometry args={[0.48, 0.5, 64]} />
+          <meshBasicMaterial color="#4dabf7" transparent opacity={0.35} side={THREE.DoubleSide} />
+        </mesh>
+      </group>
 
       {/* Central axis */}
-      <mesh position={[0, distanceM * SCALE / 2, 0]}>
-        <cylinderGeometry args={[0.001, 0.001, distanceM * SCALE, 4]} />
+      <mesh position={[0, distanceM * WORLD_SCALE / 2, 0]}>
+        <cylinderGeometry args={[0.001, 0.001, distanceM * WORLD_SCALE, 4]} />
         <meshBasicMaterial color="#2b2f3d" transparent opacity={0.3} />
       </mesh>
 
-      {/* Cloud of pellets */}
-      {impacts.map((imp) => (
-        <CloudPellet
-          key={imp.index}
-          impact={imp}
-          distanceM={distanceM}
-          index={imp.index}
-          pelletDiamMm={pelletDiam}
-        />
-      ))}
+      {/* Animated pellet cloud (instanced — 1 draw call) */}
+      {count > 0 && (
+        <>
+          <instancedMesh ref={cloudMeshRef} args={[sphereGeom, cloudMat, count]} frustumCulled={false} />
+          <instancedMesh ref={trailMeshRef} args={[trailGeom, trailMat, count]} frustumCulled={false} />
+        </>
+      )}
 
-      {/* Target impact markers (static, always visible) */}
-      {impacts.map((imp) => (
-        <mesh
-          key={`target-${imp.index}`}
-          position={[imp.x * SCALE, 0.005, -imp.y * SCALE]}
-        >
-          <sphereGeometry args={[0.006, 8, 8]} />
-          <meshStandardMaterial
-            color={getZoneColor(imp.zone)}
-            emissive={getZoneColor(imp.zone)}
-            emissiveIntensity={0.3}
-            transparent
-            opacity={0.5}
-          />
-        </mesh>
-      ))}
+      {/* Static target impact ghosts (instanced) */}
+      <InstancedPellets
+        impacts={impacts}
+        yOffset={0.005}
+        pelletRadius={0.006}
+        emissiveIntensity={0.3}
+        metalness={0.3}
+        roughness={0.7}
+      />
 
-      {/* Info */}
-      <Text
-        position={[-circle2RadiusCm * SCALE * 1.2, 0.02, circle2RadiusCm * SCALE * 0.8]}
-        fontSize={0.025}
-        color="#a0a4b8"
-        anchorX="left"
-      >
-        {`${impacts.length} plombs | Dispersion progressive`}
+      <Text position={[-circle2RadiusCm * WORLD_SCALE * 1.2, 0.02, circle2RadiusCm * WORLD_SCALE * 0.8]} fontSize={0.025} color="#a0a4b8" anchorX="left">
+        {`${count} plombs | Dispersion progressive`}
       </Text>
     </group>
   );
