@@ -1,7 +1,8 @@
-import { Crosshair, Sun, Moon, Scan, BookOpen } from 'lucide-react';
+import { Sun, Moon, Scan, BookOpen } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useThemeStore } from '../../stores/themeStore';
 import { useAnalysisStore } from '../../stores/analysisStore';
+import { PlombScopeIcon } from '../brand/PlombScopeLogo';
 
 const NAV_ITEMS = [
   { path: '/analyse', label: 'Analyse', icon: Scan },
@@ -47,31 +48,22 @@ export function Header() {
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: 9,
+          gap: 8,
           cursor: 'pointer',
           marginRight: 8,
           flexShrink: 0,
         }}
       >
-        <div style={{
-          width: 30,
-          height: 30,
-          borderRadius: 8,
-          background: 'linear-gradient(135deg, var(--accent), var(--accent2))',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: '0 2px 10px var(--accent-glow)',
-        }}>
-          <Crosshair size={15} color="#fff" strokeWidth={2.5} />
-        </div>
+        <PlombScopeIcon size={28} />
         <span style={{
           fontSize: 14,
-          fontWeight: 800,
+          fontWeight: 900,
           letterSpacing: '-0.4px',
-          color: 'var(--text)',
+          background: 'linear-gradient(135deg, var(--text), var(--accent2))',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
         }}>
-          Balistique
+          PlombScope
         </span>
       </div>
 
@@ -130,7 +122,6 @@ export function Header() {
 
       {/* Right side */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-        {/* Active analysis indicator */}
         {hasAnalysis && location.pathname !== '/analyse' && location.pathname !== '/3d' && (
           <button
             onClick={() => navigate('/analyse')}
@@ -160,7 +151,6 @@ export function Header() {
           </button>
         )}
 
-        {/* Theme toggle */}
         <button
           onClick={toggle}
           title={mode === 'dark' ? 'Thème clair' : 'Thème sombre'}

@@ -1,10 +1,11 @@
 import { useNavigate } from 'react-router-dom';
-import { Crosshair, BookOpen, Target, Database, ArrowRight, Play, GitCompare, Box } from 'lucide-react';
+import { Crosshair, BookOpen, Database, ArrowRight, Play, GitCompare, Box } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAnalysisStore } from '../stores/analysisStore';
 import { useMunitionsStore } from '../stores/munitionsStore';
 import { useEffect, useMemo } from 'react';
 import { computeFullAnalysis } from '../lib/ballistics';
+import { PlombScopeLogo } from '../components/brand/PlombScopeLogo';
 
 export function HomePage() {
   const navigate = useNavigate();
@@ -56,33 +57,10 @@ export function HomePage() {
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.1, duration: 0.4 }}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: 56,
-            height: 56,
-            borderRadius: 16,
-            background: 'linear-gradient(135deg, var(--accent), var(--accent2))',
-            marginBottom: 16,
-            boxShadow: '0 8px 32px var(--accent-glow-strong)',
-          }}
+          style={{ marginBottom: 12 }}
         >
-          <Target size={28} color="#fff" strokeWidth={1.8} />
+          <PlombScopeLogo size={64} showText textSize={32} />
         </motion.div>
-
-        <h1 style={{
-          fontSize: 36,
-          fontWeight: 900,
-          letterSpacing: '-1px',
-          lineHeight: 1.1,
-          marginBottom: 10,
-          background: 'linear-gradient(135deg, var(--text), var(--accent2))',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-        }}>
-          Analyse Balistique
-        </h1>
 
         <p style={{
           color: 'var(--text-secondary)',
