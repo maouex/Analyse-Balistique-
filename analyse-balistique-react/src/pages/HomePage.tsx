@@ -234,11 +234,11 @@ export function HomePage() {
   useEffect(() => { injectStyles(); }, []);
 
   return (
-    <div ref={containerRef} style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden', background: 'var(--bg)' }}>
+    <div ref={containerRef} style={{ height: '100dvh', overflowY: 'auto', overflowX: 'hidden', background: 'var(--bg)' }}>
 
       {/* ─── Grain overlay ─── */}
       <div style={{
-        position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 9999, opacity: 0.04,
+        position: 'fixed', inset: '-20%', pointerEvents: 'none', zIndex: 9999, opacity: 0.04,
         backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\'/%3E%3C/svg%3E")',
         backgroundSize: '128px 128px',
         animation: 'hp-grain 0.5s steps(6) infinite',
@@ -246,9 +246,9 @@ export function HomePage() {
 
       {/* ══════════ HERO ══════════ */}
       <motion.section style={{
-        height: '100vh', position: 'relative',
+        height: '100dvh', minHeight: '100vh', position: 'relative',
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-        overflow: 'hidden', y: heroY, scale: heroScale, opacity: heroOpacity,
+        overflow: 'hidden', width: '100%', y: heroY, scale: heroScale, opacity: heroOpacity,
       }}>
         {/* Aurora background */}
         <div style={{
