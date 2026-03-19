@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Crosshair, BookOpen, Target, Database, Box, ChevronDown, Zap, BarChart3, Eye, ArrowRight, Layers, Cpu } from 'lucide-react';
 import { motion, useScroll, useTransform, useInView, useMotionValue, useSpring, animate } from 'framer-motion';
-import { useRef, useEffect, useMemo } from 'react';
+import { useRef, useEffect, useState } from 'react';
 
 /* ─── Animated counter ──────────────────────────────────── */
 function AnimatedCounter({ target, suffix = '', duration = 2 }: { target: number; suffix?: string; duration?: number }) {
@@ -365,13 +365,13 @@ function ImpactBurst() {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-100px' });
 
-  const impacts = useMemo(() =>
+  const [impacts] = useState(() =>
     Array.from({ length: 24 }).map(() => ({
       x: (Math.random() - 0.5) * 200,
       y: (Math.random() - 0.5) * 200,
       size: Math.random() * 6 + 3,
       delay: Math.random() * 0.8,
-    })), []);
+    })));
 
   return (
     <div ref={ref} style={{ position: 'relative', width: 300, height: 300 }}>
