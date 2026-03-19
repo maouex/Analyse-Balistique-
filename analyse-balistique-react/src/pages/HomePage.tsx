@@ -231,10 +231,16 @@ export function HomePage() {
   const heroScale = useTransform(scrollYProgress, [0, 0.2], [1, 0.92]);
   const heroOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
 
-  useEffect(() => { injectStyles(); }, []);
+  const [vh, setVh] = useState(window.innerHeight);
+  useEffect(() => {
+    injectStyles();
+    const onResize = () => setVh(window.innerHeight);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   return (
-    <div ref={containerRef} style={{ position: 'absolute', inset: 0, overflowY: 'auto', overflowX: 'hidden', background: 'var(--bg)' }}>
+    <div ref={containerRef} style={{ width: '100vw', height: vh, overflowY: 'auto', overflowX: 'hidden', background: 'var(--bg)' }}>
 
       {/* ─── Grain overlay ─── */}
       <div style={{
@@ -246,7 +252,7 @@ export function HomePage() {
 
       {/* ══════════ HERO ══════════ */}
       <motion.section style={{
-        height: '100vh', minHeight: '100dvh', position: 'relative',
+        height: vh, position: 'relative',
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
         overflow: 'hidden', width: '100%', y: heroY, scale: heroScale, opacity: heroOpacity,
       }}>
@@ -300,7 +306,7 @@ export function HomePage() {
           </motion.div>
 
           {/* Title letter-by-letter */}
-          <h1 style={{ fontSize: 64, fontWeight: 900, lineHeight: 1.05, marginBottom: 20, letterSpacing: '-2px' }}>
+          <h1 style={{ fontSize: 'clamp(36px, 6vw, 64px)', fontWeight: 900, lineHeight: 1.05, marginBottom: 20, letterSpacing: '-2px' }}>
             {'PlombScope'.split('').map((ch, i) => (
               <motion.span
                 key={i}
@@ -323,7 +329,7 @@ export function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.3, duration: 0.8 }}
-            style={{ fontSize: 18, color: 'var(--text-secondary)', lineHeight: 1.8, maxWidth: 480, margin: '0 auto 44px' }}
+            style={{ fontSize: 'clamp(14px, 2vw, 18px)', color: 'var(--text-secondary)', lineHeight: 1.8, maxWidth: 480, margin: '0 auto 44px' }}
           >
             Analysez vos gerbes de tir avec précision chirurgicale.
             Dispersion, comparaison, modélisation 3D — tout en un.
@@ -426,7 +432,7 @@ export function HomePage() {
           }}>
             Fonctionnalités
           </div>
-          <h2 style={{ fontSize: 40, fontWeight: 900, letterSpacing: '-1px', marginBottom: 14 }}>
+          <h2 style={{ fontSize: 'clamp(28px, 4vw, 40px)', fontWeight: 900, letterSpacing: '-1px', marginBottom: 14 }}>
             Tout pour analyser vos tirs
           </h2>
           <p style={{ fontSize: 16, color: 'var(--text-secondary)', maxWidth: 460, margin: '0 auto' }}>
@@ -601,7 +607,7 @@ export function HomePage() {
           style={{ position: 'relative', zIndex: 1 }}
         >
           <Target size={52} color="var(--accent2)" style={{ marginBottom: 24 }} />
-          <h2 style={{ fontSize: 36, fontWeight: 900, letterSpacing: '-0.5px', marginBottom: 14 }}>
+          <h2 style={{ fontSize: 'clamp(26px, 3.5vw, 36px)', fontWeight: 900, letterSpacing: '-0.5px', marginBottom: 14 }}>
             Prêt à analyser ?
           </h2>
           <p style={{ fontSize: 16, color: 'var(--text-secondary)', marginBottom: 36, maxWidth: 400, margin: '0 auto 36px' }}>
