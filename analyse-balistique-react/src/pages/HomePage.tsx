@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Crosshair, BookOpen, Target, Database, Box, ChevronDown, Zap, BarChart3, Eye, ArrowRight, Layers, Cpu } from 'lucide-react';
 import { motion, useScroll, useTransform, useInView, useMotionValue, useSpring, animate } from 'framer-motion';
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useMemo } from 'react';
 
 /* ─── Animated counter ──────────────────────────────────── */
 function AnimatedCounter({ target, suffix = '', duration = 2 }: { target: number; suffix?: string; duration?: number }) {
@@ -365,13 +365,13 @@ function ImpactBurst() {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-100px' });
 
-  const [impacts] = useState(() =>
+  const impacts = useMemo(() =>
     Array.from({ length: 24 }).map(() => ({
       x: (Math.random() - 0.5) * 200,
       y: (Math.random() - 0.5) * 200,
       size: Math.random() * 6 + 3,
       delay: Math.random() * 0.8,
-    })));
+    })), []);
 
   return (
     <div ref={ref} style={{ position: 'relative', width: 300, height: 300 }}>
@@ -518,7 +518,7 @@ export function HomePage() {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.97 }}
-              onClick={() => navigate('/analyse')}
+              onClick={() => navigate('/login')}
               style={{
                 padding: '14px 32px',
                 fontSize: 15,
@@ -535,7 +535,7 @@ export function HomePage() {
               }}
             >
               <Crosshair size={18} />
-              Commencer l'analyse
+              Se connecter
             </motion.button>
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -824,7 +824,7 @@ export function HomePage() {
           <motion.button
             whileHover={{ scale: 1.06 }}
             whileTap={{ scale: 0.97 }}
-            onClick={() => navigate('/analyse')}
+            onClick={() => navigate('/login')}
             style={{
               padding: '16px 40px',
               fontSize: 16,
@@ -841,7 +841,7 @@ export function HomePage() {
             }}
           >
             <Crosshair size={20} />
-            Lancer une analyse
+            Se connecter
             <ArrowRight size={18} />
           </motion.button>
         </motion.div>

@@ -11,32 +11,44 @@ const steps = [
   {
     icon: Upload,
     title: 'Charger une image',
-    description: 'Importez une photo de votre cible via le bouton "Charger" ou en la glissant sur le canvas.',
+    description: "Importez une photo de votre cible via le bouton \u00AB Charger \u00BB ou en la glissant sur le canvas.",
+    color: 'var(--blue)',
+    glow: 'var(--blue-glow)',
   },
   {
     icon: Ruler,
-    title: 'Étalonner l\'échelle',
-    description: 'Utilisez l\'outil "Échelle" pour tracer un trait de référence dont vous connaissez la longueur réelle.',
+    title: "\u00C9talonner l'\u00E9chelle",
+    description: "Utilisez l'outil \u00AB \u00C9chelle \u00BB pour tracer un trait de r\u00E9f\u00E9rence dont vous connaissez la longueur r\u00E9elle.",
+    color: 'var(--green)',
+    glow: 'var(--green-glow)',
   },
   {
     icon: Crosshair,
     title: 'Placer le centre',
-    description: 'Avec l\'outil "Centre", cliquez sur le point visé de votre cible.',
+    description: "Avec l'outil \u00AB Centre \u00BB, cliquez sur le point vis\u00E9 de votre cible.",
+    color: 'var(--accent2)',
+    glow: 'var(--accent-glow)',
   },
   {
     icon: CircleIcon,
     title: 'Marquer les impacts',
-    description: 'Sélectionnez l\'outil "Impacts" et cliquez sur chaque impact de plomb visible.',
+    description: "S\u00E9lectionnez l'outil \u00AB Impacts \u00BB et cliquez sur chaque impact de plomb visible.",
+    color: 'var(--red)',
+    glow: 'var(--red-glow)',
   },
   {
     icon: BarChart3,
-    title: 'Analyser les résultats',
-    description: 'Le panneau de droite affiche en temps réel le score, les zones et les statistiques de dispersion.',
+    title: 'Analyser les r\u00E9sultats',
+    description: "Le panneau de droite affiche en temps r\u00E9el le score, les zones et les statistiques de dispersion.",
+    color: 'var(--purple)',
+    glow: 'var(--purple-glow)',
   },
   {
     icon: Download,
     title: 'Exporter et sauvegarder',
-    description: 'Exportez votre analyse en PNG ou sauvegardez-la dans votre bibliothèque de munitions.',
+    description: "Exportez votre analyse en PNG ou sauvegardez-la dans votre biblioth\u00E8que de munitions.",
+    color: 'var(--amber)',
+    glow: 'var(--amber-glow)',
   },
 ];
 
@@ -50,6 +62,7 @@ export function Tutorial({ onComplete }: TutorialProps) {
   };
 
   const isLast = currentStep === steps.length - 1;
+  const step = steps[currentStep];
 
   return (
     <motion.div
@@ -59,8 +72,9 @@ export function Tutorial({ onComplete }: TutorialProps) {
       style={{
         position: 'fixed',
         inset: 0,
-        background: 'rgba(0, 0, 0, 0.8)',
-        backdropFilter: 'blur(8px)',
+        background: 'rgba(0, 0, 0, 0.75)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -69,20 +83,22 @@ export function Tutorial({ onComplete }: TutorialProps) {
       }}
     >
       <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
+        initial={{ scale: 0.92, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
         style={{
-          background: 'var(--surface2)',
+          background: 'var(--surface)',
           border: '1px solid var(--border)',
-          borderRadius: 'var(--radius-lg)',
+          borderRadius: 'var(--radius-xl)',
           maxWidth: 520,
           width: '100%',
           overflow: 'hidden',
+          boxShadow: 'var(--shadow-lg)',
         }}
       >
         {/* Header */}
         <div style={{
-          padding: '24px 28px 16px',
+          padding: '24px 28px 14px',
           textAlign: 'center',
         }}>
           <div style={{
@@ -91,9 +107,9 @@ export function Tutorial({ onComplete }: TutorialProps) {
             color: 'var(--accent2)',
             letterSpacing: '1px',
             textTransform: 'uppercase',
-            marginBottom: 8,
+            marginBottom: 4,
           }}>
-            Guide de démarrage — Étape {currentStep + 1}/{steps.length}
+            Guide de d{'\u00E9'}marrage — {'\u00C9'}tape {currentStep + 1}/{steps.length}
           </div>
         </div>
 
@@ -101,40 +117,68 @@ export function Tutorial({ onComplete }: TutorialProps) {
         <AnimatePresence mode="wait">
           <motion.div
             key={currentStep}
-            initial={{ opacity: 0, x: 20 }}
+            initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.2 }}
+            exit={{ opacity: 0, x: -30 }}
+            transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
             style={{
-              padding: '0 28px 24px',
+              padding: '0 32px 28px',
               textAlign: 'center',
             }}
           >
-            {(() => {
-              const Icon = steps[currentStep].icon;
-              return <Icon size={48} color="var(--accent2)" strokeWidth={1.5} style={{ marginBottom: 16 }} />;
-            })()}
-            <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>
-              {steps[currentStep].title}
+            {/* Icon with colored glow */}
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 72,
+              height: 72,
+              borderRadius: 20,
+              background: step.glow,
+              border: `1px solid ${step.color}22`,
+              marginBottom: 20,
+            }}>
+              {(() => {
+                const Icon = step.icon;
+                return <Icon size={34} color={step.color} strokeWidth={1.5} />;
+              })()}
+            </div>
+
+            <h3 style={{
+              fontSize: 22,
+              fontWeight: 800,
+              marginBottom: 10,
+              letterSpacing: '-0.3px',
+            }}>
+              {step.title}
             </h3>
-            <p style={{ fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-              {steps[currentStep].description}
+            <p style={{
+              fontSize: 14,
+              color: 'var(--text-secondary)',
+              lineHeight: 1.7,
+              maxWidth: 380,
+              margin: '0 auto',
+            }}>
+              {step.description}
             </p>
           </motion.div>
         </AnimatePresence>
 
         {/* Progress dots */}
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 6, paddingBottom: 16 }}>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 6, paddingBottom: 20 }}>
           {steps.map((_, i) => (
             <div
               key={i}
               style={{
-                width: i === currentStep ? 20 : 8,
+                width: i === currentStep ? 24 : 8,
                 height: 8,
                 borderRadius: 4,
-                background: i === currentStep ? 'var(--accent2)' : 'var(--border)',
-                transition: 'all 0.2s ease',
+                background: i === currentStep
+                  ? step.color
+                  : i < currentStep ? 'var(--text-secondary)' : 'var(--border)',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                 cursor: 'pointer',
+                boxShadow: i === currentStep ? `0 0 10px ${step.glow}` : 'none',
               }}
               onClick={() => setCurrentStep(i)}
             />
@@ -149,7 +193,14 @@ export function Tutorial({ onComplete }: TutorialProps) {
           alignItems: 'center',
           justifyContent: 'space-between',
         }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--muted)', cursor: 'pointer' }}>
+          <label style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            fontSize: 12,
+            color: 'var(--muted)',
+            cursor: 'pointer',
+          }}>
             <input
               type="checkbox"
               checked={dontShowAgain}
@@ -161,7 +212,7 @@ export function Tutorial({ onComplete }: TutorialProps) {
           <div style={{ display: 'flex', gap: 8 }}>
             {currentStep > 0 && (
               <button className="btn btn-sm" onClick={() => setCurrentStep((s) => s - 1)}>
-                Précédent
+                Pr{'\u00E9'}c{'\u00E9'}dent
               </button>
             )}
             {isLast ? (
