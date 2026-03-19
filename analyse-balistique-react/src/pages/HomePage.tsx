@@ -518,7 +518,7 @@ export function HomePage() {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.97 }}
-              onClick={() => navigate('/analyse')}
+              onClick={() => navigate('/login')}
               style={{
                 padding: '14px 32px',
                 fontSize: 15,
@@ -535,7 +535,7 @@ export function HomePage() {
               }}
             >
               <Crosshair size={18} />
-              Commencer l'analyse
+              Se connecter
             </motion.button>
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -824,7 +824,7 @@ export function HomePage() {
           <motion.button
             whileHover={{ scale: 1.06 }}
             whileTap={{ scale: 0.97 }}
-            onClick={() => navigate('/analyse')}
+            onClick={() => navigate('/login')}
             style={{
               padding: '16px 40px',
               fontSize: 16,
@@ -841,7 +841,7 @@ export function HomePage() {
             }}
           >
             <Crosshair size={20} />
-            Lancer une analyse
+            Se connecter
             <ArrowRight size={18} />
           </motion.button>
         </motion.div>
