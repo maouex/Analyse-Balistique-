@@ -1,0 +1,7 @@
+# Fichiers bundlés volumineux - ne pas charger dans le contexte
+analyse-balistique-react/dist/
+analyse-balistique-react/node_modules/
+analyse-balistique-react/package-lock.json
+
+# Le fichier HTML monolithique (119 Ko) - préférer la version React
+analyse-balistique.html
