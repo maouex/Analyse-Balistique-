@@ -1,6 +1,6 @@
 import type { Impact, Point } from '../types';
 
-export type View3DMode = 'cone' | 'heatmap' | 'trajectories' | 'penetration';
+export type View3DMode = 'cone' | 'heatmap' | 'energy' | 'trajectories' | 'cloud' | 'penetration' | 'multiDistance' | 'simulation';
 
 export interface View3DConfig {
   mode: View3DMode;
@@ -18,21 +18,45 @@ export const VIEW_3D_MODES: View3DConfig[] = [
   },
   {
     mode: 'heatmap',
-    label: 'Heatmap de densité',
+    label: 'Densité',
     description: 'Carte de chaleur 3D montrant la densité des impacts sur la cible.',
     icon: '🌡',
   },
   {
+    mode: 'energy',
+    label: 'Carte d\'énergie',
+    description: 'Énergie cinétique à l\'impact — zones létale, blessante et inefficace.',
+    icon: '⚡',
+  },
+  {
     mode: 'trajectories',
-    label: 'Trajectoires balistiques',
-    description: 'Animation des plombs en vol du point de tir vers chaque impact.',
+    label: 'Trajectoires',
+    description: 'Animation des plombs avec gradient de vitesse (rouge→bleu).',
     icon: '💨',
   },
   {
+    mode: 'cloud',
+    label: 'Nappe',
+    description: 'Nuage de plombs animé montrant la dispersion progressive du canon à la cible.',
+    icon: '☁️',
+  },
+  {
     mode: 'penetration',
-    label: 'Profil de pénétration',
-    description: 'Vue en coupe montrant la profondeur de pénétration estimée des plombs.',
+    label: 'Pénétration',
+    description: 'Vue en coupe du gel balistique avec cavités de blessure réalistes.',
     icon: '🎯',
+  },
+  {
+    mode: 'multiDistance',
+    label: 'Multi-distance',
+    description: 'Comparaison du pattern à 3 distances différentes côte à côte.',
+    icon: '📏',
+  },
+  {
+    mode: 'simulation',
+    label: 'Simulation',
+    description: 'Simulation réaliste avec vue latérale, échelles 1:1 et timeline interactive.',
+    icon: '🎬',
   },
 ];
 

@@ -26,7 +26,7 @@ export function TargetPlane({
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
         <planeGeometry args={[planeSize, planeSize]} />
         <meshStandardMaterial
-          color="#191c25"
+          color="#4a5468"
           transparent
           opacity={0.85}
           side={THREE.DoubleSide}
@@ -35,7 +35,7 @@ export function TargetPlane({
 
       {/* Grid lines */}
       <gridHelper
-        args={[planeSize, 20, '#2b2f3d', '#1a1d26']}
+        args={[planeSize, 20, '#3d4558', '#4e586c']}
         position={[0, 0.001, 0]}
       />
 
