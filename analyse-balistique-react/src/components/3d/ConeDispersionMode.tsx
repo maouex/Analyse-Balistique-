@@ -3,9 +3,11 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { Text } from '@react-three/drei';
 import { TargetPlane } from './TargetPlane';
+import { InstancedPellets } from './InstancedPellets';
 import type { Impact3D } from '../../lib/3d-utils';
 import type { CovarianceEllipse } from '../../types';
-import { getZoneColor } from '../../lib/3d-utils';
+import type { BallisticParams, SimulationResult } from '../../lib/ballistics-sim';
+import { pelletWorldRadius } from './constants';
 
 interface ConeDispersionModeProps {
   impacts: Impact3D[];
@@ -15,6 +17,8 @@ interface ConeDispersionModeProps {
   circle1RadiusCm: number;
   circle2RadiusCm: number;
   pixelsPerCm: number | null;
+  ballisticParams?: BallisticParams | null;
+  simResult?: SimulationResult | null;
 }
 
 const SCALE = 0.01; // 1cm = 0.01 unit
@@ -27,10 +31,14 @@ export function ConeDispersionMode({
   circle1RadiusCm,
   circle2RadiusCm,
   pixelsPerCm,
+  ballisticParams,
+  simResult,
 }: ConeDispersionModeProps) {
   const coneRef = useRef<THREE.Mesh>(null);
   const coneHeight = distanceM * SCALE;
   const coneRadius = r90Cm * SCALE;
+
+  const enhanced = !!ballisticParams && !!simResult;
 
   // Slowly rotate cone for visual effect
   useFrame((_, delta) => {
@@ -42,7 +50,6 @@ export function ConeDispersionMode({
   // Ellipse shape on the target plane
   const ellipseShape = useMemo(() => {
     if (!ellipse || !pixelsPerCm) return null;
-    // Convert semi-axes from pixels to cm, then to 3D scale
     const aCm = ellipse.semiMajor / pixelsPerCm;
     const bCm = ellipse.semiMinor / pixelsPerCm;
     const curve = new THREE.EllipseCurve(
@@ -57,7 +64,7 @@ export function ConeDispersionMode({
     return new THREE.BufferGeometry().setFromPoints(
       points.map((p) => new THREE.Vector3(p.x, 0.005, p.y))
     );
-  }, [ellipse]);
+  }, [ellipse, pixelsPerCm]);
 
   return (
     <group>
@@ -74,7 +81,7 @@ export function ConeDispersionMode({
       >
         <coneGeometry args={[coneRadius, coneHeight, 32, 1, true]} />
         <meshStandardMaterial
-          color="#f0a030"
+          color={enhanced ? '#c084fc' : '#f0a030'}
           transparent
           opacity={0.12}
           side={THREE.DoubleSide}
@@ -86,7 +93,7 @@ export function ConeDispersionMode({
       <mesh position={[0, coneHeight / 2, 0]}>
         <coneGeometry args={[coneRadius, coneHeight, 32, 1, true]} />
         <meshStandardMaterial
-          color="#f0a030"
+          color={enhanced ? '#c084fc' : '#f0a030'}
           transparent
           opacity={0.05}
           side={THREE.DoubleSide}
@@ -107,6 +114,28 @@ export function ConeDispersionMode({
         {`Point de tir (${distanceM}m)`}
       </Text>
 
+      {/* Enhanced: show ballistic params at firing point */}
+      {enhanced && (
+        <>
+          <Text
+            position={[0.06, coneHeight - 0.06, 0]}
+            fontSize={0.025}
+            color="#c084fc"
+            anchorX="left"
+          >
+            {`V₀ = ${ballisticParams!.muzzleVelocity} m/s | Cd = ${ballisticParams!.dragCoefficient}`}
+          </Text>
+          <Text
+            position={[0.06, coneHeight - 0.1, 0]}
+            fontSize={0.022}
+            color="#a0a4b8"
+            anchorX="left"
+          >
+            {`∅ plomb ${ballisticParams!.pelletDiameterMm}mm | ∅ canon ${ballisticParams!.barrelDiameterMm}mm`}
+          </Text>
+        </>
+      )}
+
       {/* PCA Ellipse on target */}
       {ellipseShape && (
         <line>
@@ -115,20 +144,12 @@ export function ConeDispersionMode({
         </line>
       )}
 
-      {/* Impact spheres */}
-      {impacts.map((imp) => (
-        <mesh
-          key={imp.index}
-          position={[imp.x * SCALE, 0.01, -imp.y * SCALE]}
-        >
-          <sphereGeometry args={[0.012, 12, 12]} />
-          <meshStandardMaterial
-            color={getZoneColor(imp.zone)}
-            emissive={getZoneColor(imp.zone)}
-            emissiveIntensity={0.3}
-          />
-        </mesh>
-      ))}
+      {/* Impact pellets (instanced — 1 draw call) */}
+      <InstancedPellets
+        impacts={impacts}
+        pelletRadius={pelletWorldRadius(enhanced ? ballisticParams!.pelletDiameterMm : undefined)}
+        yOffset={0.01}
+      />
 
       {/* R90 circle */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.004, 0]}>
@@ -144,6 +165,21 @@ export function ConeDispersionMode({
       >
         {`R90: ${r90Cm.toFixed(1)}cm`}
       </Text>
+
+      {/* Enhanced: velocity & energy stats at target */}
+      {enhanced && simResult && (
+        <group position={[-circle2RadiusCm * SCALE * 1.2, 0.02, circle2RadiusCm * SCALE * 0.8]}>
+          <Text fontSize={0.028} color="#c084fc" anchorX="left" position={[0, 0.06, 0]}>
+            Balistique avancée
+          </Text>
+          <Text fontSize={0.022} color="#a0a4b8" anchorX="left" position={[0, 0.03, 0]}>
+            {`V impact: ${simResult.avgImpactVelocity.toFixed(0)} m/s (${simResult.velocityRetention.toFixed(0)}%)`}
+          </Text>
+          <Text fontSize={0.022} color="#a0a4b8" anchorX="left" position={[0, 0.005, 0]}>
+            {`Énergie: ${simResult.avgEnergy.toFixed(2)} J | Pénétration: ${simResult.avgPenetration.toFixed(1)} cm`}
+          </Text>
+        </group>
+      )}
     </group>
   );
 }
