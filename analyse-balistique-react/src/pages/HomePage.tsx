@@ -1,416 +1,198 @@
 import { useNavigate } from 'react-router-dom';
-import { Crosshair, BookOpen, Target, Database, Box, ChevronDown, Zap, BarChart3, Eye, ArrowRight, Layers, Cpu } from 'lucide-react';
+import { Crosshair, BookOpen, Box, ChevronDown, ArrowRight, Target, BarChart3, Layers, Zap } from 'lucide-react';
 import { motion, useScroll, useTransform, useInView, useMotionValue, useSpring, animate } from 'framer-motion';
-import { useRef, useEffect, useMemo } from 'react';
+import { useRef, useEffect, useState, type MouseEvent as RMouseEvent } from 'react';
 
-/* ─── Animated counter ──────────────────────────────────── */
-function AnimatedCounter({ target, suffix = '', duration = 2 }: { target: number; suffix?: string; duration?: number }) {
-  const ref = useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, { once: true, margin: '-50px' });
-  const motionVal = useMotionValue(0);
-  const springVal = useSpring(motionVal, { stiffness: 60, damping: 20 });
-
-  useEffect(() => {
-    if (inView) {
-      animate(motionVal, target, { duration });
+/* ═══ CSS injected once ═══ */
+const STYLE_ID = 'homepage-fx';
+function injectStyles() {
+  if (document.getElementById(STYLE_ID)) return;
+  const s = document.createElement('style');
+  s.id = STYLE_ID;
+  s.textContent = `
+    @keyframes hp-aurora {
+      0%,100%{background-position:0% 50%}
+      50%{background-position:100% 50%}
     }
-  }, [inView, target, duration, motionVal]);
+    @keyframes hp-grain {
+      0%{transform:translate(0,0)}
+      10%{transform:translate(-5%,-5%)}
+      20%{transform:translate(-10%,5%)}
+      30%{transform:translate(5%,-10%)}
+      40%{transform:translate(-5%,15%)}
+      50%{transform:translate(-10%,5%)}
+      60%{transform:translate(15%,0)}
+      70%{transform:translate(0,10%)}
+      80%{transform:translate(-15%,0)}
+      90%{transform:translate(10%,5%)}
+      100%{transform:translate(5%,0)}
+    }
+    @keyframes hp-scan {
+      0%{top:-2px}
+      100%{top:calc(100% - 2px)}
+    }
+    @keyframes hp-pulse-ring {
+      0%{transform:scale(0.8);opacity:0.6}
+      100%{transform:scale(2.5);opacity:0}
+    }
+    @keyframes hp-trace {
+      0%{stroke-dashoffset:800}
+      100%{stroke-dashoffset:0}
+    }
+    .hp-scroll-section {
+      overflow: hidden;
+    }
+  `;
+  document.head.appendChild(s);
+}
+
+/* ═══ Animated counter ═══ */
+function Counter({ target, suffix = '' }: { target: number; suffix?: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true, margin: '-80px' });
+  const mv = useMotionValue(0);
+  const spring = useSpring(mv, { stiffness: 50, damping: 18 });
 
   useEffect(() => {
-    const unsub = springVal.on('change', (v) => {
+    if (inView) animate(mv, target, { duration: 2.5 });
+  }, [inView, target, mv]);
+
+  useEffect(() => {
+    return spring.on('change', (v) => {
       if (ref.current) ref.current.textContent = Math.round(v) + suffix;
     });
-    return unsub;
-  }, [springVal, suffix]);
+  }, [spring, suffix]);
 
   return <span ref={ref}>0{suffix}</span>;
 }
 
-/* ─── Floating particles background ─────────────────────── */
-function ParticlesCanvas() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    let animId: number;
-    const particles: { x: number; y: number; vx: number; vy: number; r: number; a: number; pulse: number }[] = [];
-
-    const resize = () => {
-      canvas.width = canvas.offsetWidth * devicePixelRatio;
-      canvas.height = canvas.offsetHeight * devicePixelRatio;
-      ctx.scale(devicePixelRatio, devicePixelRatio);
-    };
-    resize();
-    window.addEventListener('resize', resize);
-
-    for (let i = 0; i < 60; i++) {
-      particles.push({
-        x: Math.random() * canvas.offsetWidth,
-        y: Math.random() * canvas.offsetHeight,
-        vx: (Math.random() - 0.5) * 0.3,
-        vy: (Math.random() - 0.5) * 0.3,
-        r: Math.random() * 2 + 1,
-        a: Math.random() * 0.4 + 0.1,
-        pulse: Math.random() * Math.PI * 2,
-      });
-    }
-
-    const draw = () => {
-      ctx.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
-      const w = canvas.offsetWidth;
-      const h = canvas.offsetHeight;
-
-      for (const p of particles) {
-        p.x += p.vx;
-        p.y += p.vy;
-        p.pulse += 0.01;
-        if (p.x < 0) p.x = w;
-        if (p.x > w) p.x = 0;
-        if (p.y < 0) p.y = h;
-        if (p.y > h) p.y = 0;
-
-        const alpha = p.a * (0.6 + 0.4 * Math.sin(p.pulse));
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(240, 160, 48, ${alpha})`;
-        ctx.fill();
-      }
-
-      // Draw connections
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const dx = particles[i].x - particles[j].x;
-          const dy = particles[i].y - particles[j].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 120) {
-            ctx.beginPath();
-            ctx.moveTo(particles[i].x, particles[i].y);
-            ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = `rgba(200, 134, 10, ${0.08 * (1 - dist / 120)})`;
-            ctx.lineWidth = 0.5;
-            ctx.stroke();
-          }
-        }
-      }
-
-      animId = requestAnimationFrame(draw);
-    };
-    draw();
-
-    return () => {
-      cancelAnimationFrame(animId);
-      window.removeEventListener('resize', resize);
-    };
-  }, []);
-
-  return (
-    <canvas
-      ref={canvasRef}
-      style={{
-        position: 'absolute',
-        inset: 0,
-        width: '100%',
-        height: '100%',
-        pointerEvents: 'none',
-        zIndex: 0,
-      }}
-    />
-  );
-}
-
-/* ─── Animated crosshair SVG ────────────────────────────── */
-function AnimatedCrosshair() {
-  return (
-    <motion.svg
-      width="200"
-      height="200"
-      viewBox="0 0 200 200"
-      initial={{ opacity: 0, scale: 0.5, rotate: -90 }}
-      animate={{ opacity: 1, scale: 1, rotate: 0 }}
-      transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-    >
-      {/* Outer ring */}
-      <motion.circle
-        cx="100" cy="100" r="80"
-        fill="none" stroke="rgba(240,160,48,0.15)" strokeWidth="1"
-        initial={{ pathLength: 0 }}
-        animate={{ pathLength: 1 }}
-        transition={{ duration: 2, ease: 'easeInOut' }}
-      />
-      {/* Middle ring */}
-      <motion.circle
-        cx="100" cy="100" r="55"
-        fill="none" stroke="rgba(240,160,48,0.25)" strokeWidth="1.5"
-        strokeDasharray="4 6"
-        initial={{ pathLength: 0 }}
-        animate={{ pathLength: 1 }}
-        transition={{ duration: 1.8, delay: 0.3 }}
-      />
-      {/* Inner ring */}
-      <motion.circle
-        cx="100" cy="100" r="30"
-        fill="none" stroke="rgba(240,160,48,0.5)" strokeWidth="2"
-        initial={{ pathLength: 0 }}
-        animate={{ pathLength: 1 }}
-        transition={{ duration: 1.5, delay: 0.6 }}
-      />
-      {/* Center dot */}
-      <motion.circle
-        cx="100" cy="100" r="4"
-        fill="#f0a030"
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ delay: 1.2, type: 'spring', stiffness: 300 }}
-      />
-      {/* Crosshair lines */}
-      {[
-        { x1: 100, y1: 10, x2: 100, y2: 65 },
-        { x1: 100, y1: 135, x2: 100, y2: 190 },
-        { x1: 10, y1: 100, x2: 65, y2: 100 },
-        { x1: 135, y1: 100, x2: 190, y2: 100 },
-      ].map((line, i) => (
-        <motion.line
-          key={i}
-          {...line}
-          stroke="rgba(240,160,48,0.4)"
-          strokeWidth="1.5"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ duration: 0.8, delay: 0.8 + i * 0.1 }}
-        />
-      ))}
-      {/* Tick marks */}
-      {Array.from({ length: 36 }).map((_, i) => {
-        const angle = (i * 10 * Math.PI) / 180;
-        const r1 = 76;
-        const r2 = i % 3 === 0 ? 84 : 80;
-        return (
-          <motion.line
-            key={`tick-${i}`}
-            x1={100 + r1 * Math.cos(angle)}
-            y1={100 + r1 * Math.sin(angle)}
-            x2={100 + r2 * Math.cos(angle)}
-            y2={100 + r2 * Math.sin(angle)}
-            stroke={`rgba(240,160,48,${i % 3 === 0 ? 0.4 : 0.15})`}
-            strokeWidth={i % 3 === 0 ? 1.5 : 0.8}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1 + i * 0.02 }}
-          />
-        );
-      })}
-    </motion.svg>
-  );
-}
-
-/* ─── Scroll indicator ──────────────────────────────────── */
-function ScrollIndicator() {
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ delay: 2.5 }}
-      style={{
-        position: 'absolute',
-        bottom: 32,
-        left: '50%',
-        transform: 'translateX(-50%)',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: 8,
-      }}
-    >
-      <motion.span style={{ fontSize: 11, color: 'var(--muted)', letterSpacing: '2px', textTransform: 'uppercase' }}>
-        Découvrir
-      </motion.span>
-      <motion.div
-        animate={{ y: [0, 8, 0] }}
-        transition={{ repeat: Infinity, duration: 1.5, ease: 'easeInOut' }}
-      >
-        <ChevronDown size={20} color="var(--accent2)" />
-      </motion.div>
-    </motion.div>
-  );
-}
-
-/* ─── Feature card ──────────────────────────────────────── */
-function FeatureCard({
-  icon,
-  title,
-  description,
-  gradient,
-  delay,
-  onClick,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  gradient: string;
-  delay: number;
+/* ═══ Tilt card ═══ */
+function TiltCard({ children, onClick, gradient }: {
+  children: React.ReactNode;
   onClick: () => void;
+  gradient: string;
 }) {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: '-80px' });
+  const ref = useRef<HTMLDivElement>(null);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [8, -8]), { stiffness: 200, damping: 20 });
+  const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-8, 8]), { stiffness: 200, damping: 20 });
+  const glowX = useSpring(useTransform(x, [-0.5, 0.5], [0, 100]), { stiffness: 200, damping: 20 });
+  const glowY = useSpring(useTransform(y, [-0.5, 0.5], [0, 100]), { stiffness: 200, damping: 20 });
+
+  const handleMove = (e: RMouseEvent) => {
+    const el = ref.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    x.set((e.clientX - rect.left) / rect.width - 0.5);
+    y.set((e.clientY - rect.top) / rect.height - 0.5);
+  };
+  const handleLeave = () => { x.set(0); y.set(0); };
+  const cardInView = useInView(ref, { once: true, margin: '-100px' });
 
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 60, scale: 0.9 }}
-      animate={inView ? { opacity: 1, y: 0, scale: 1 } : {}}
-      transition={{ duration: 0.7, delay, ease: [0.16, 1, 0.3, 1] }}
+      onMouseMove={handleMove}
+      onMouseLeave={handleLeave}
       onClick={onClick}
-      whileHover={{ scale: 1.04, y: -4 }}
-      whileTap={{ scale: 0.98 }}
+      initial={{ opacity: 0, y: 80 }}
+      animate={cardInView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
       style={{
-        width: 320,
-        padding: 32,
+        rotateX, rotateY,
+        transformStyle: 'preserve-3d',
+        perspective: 800,
+        width: 340,
+        padding: 36,
         background: gradient,
         border: '1px solid var(--border)',
-        borderRadius: 20,
+        borderRadius: 24,
         cursor: 'pointer',
         position: 'relative',
         overflow: 'hidden',
       }}
     >
-      <motion.div
-        style={{
-          position: 'absolute',
-          top: -40,
-          right: -40,
-          width: 120,
-          height: 120,
-          borderRadius: '50%',
-          background: 'rgba(240,160,48,0.05)',
-          filter: 'blur(30px)',
-        }}
-        animate={{ scale: [1, 1.3, 1] }}
-        transition={{ repeat: Infinity, duration: 4, ease: 'easeInOut' }}
-      />
-      <div style={{ marginBottom: 20, position: 'relative', zIndex: 1 }}>{icon}</div>
-      <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 10, position: 'relative', zIndex: 1 }}>{title}</h3>
-      <p style={{ fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.7, position: 'relative', zIndex: 1 }}>{description}</p>
-      <motion.div
-        style={{
-          marginTop: 20,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 6,
-          fontSize: 13,
-          fontWeight: 600,
-          color: 'var(--accent2)',
-          position: 'relative',
-          zIndex: 1,
-        }}
-        whileHover={{ x: 4 }}
-      >
-        Ouvrir <ArrowRight size={14} />
-      </motion.div>
+      {/* Glow that follows cursor */}
+      <motion.div style={{
+        position: 'absolute', inset: 0, pointerEvents: 'none',
+        background: useTransform(
+          [glowX, glowY],
+          ([gx, gy]: number[]) => `radial-gradient(circle at ${gx}% ${gy}%, rgba(240,160,48,0.15) 0%, transparent 60%)`
+        ),
+      }} />
+      <div style={{ position: 'relative', zIndex: 1 }}>{children}</div>
     </motion.div>
   );
 }
 
-/* ─── Animated workflow step ────────────────────────────── */
-function WorkflowStep({ step, title, desc, delay }: { step: number; title: string; desc: string; delay: number }) {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: '-60px' });
-
-  return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, x: -40 }}
-      animate={inView ? { opacity: 1, x: 0 } : {}}
-      transition={{ duration: 0.6, delay, ease: [0.16, 1, 0.3, 1] }}
-      style={{
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: 20,
-        padding: '20px 0',
-      }}
-    >
-      <motion.div
-        initial={{ scale: 0 }}
-        animate={inView ? { scale: 1 } : {}}
-        transition={{ delay: delay + 0.2, type: 'spring', stiffness: 200 }}
-        style={{
-          width: 48,
-          height: 48,
-          borderRadius: '50%',
-          background: 'linear-gradient(135deg, var(--accent), var(--accent2))',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontWeight: 800,
-          fontSize: 18,
-          color: '#fff',
-          flexShrink: 0,
-        }}
-      >
-        {step}
-      </motion.div>
-      <div>
-        <h4 style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>{title}</h4>
-        <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{desc}</p>
-      </div>
-    </motion.div>
-  );
-}
-
-/* ─── Animated pellet impact burst ──────────────────────── */
-function ImpactBurst() {
+/* ═══ Target scan animation ═══ */
+function TargetScan() {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-100px' });
-
-  const impacts = useMemo(() =>
-    Array.from({ length: 24 }).map(() => ({
-      x: (Math.random() - 0.5) * 200,
-      y: (Math.random() - 0.5) * 200,
-      size: Math.random() * 6 + 3,
-      delay: Math.random() * 0.8,
-    })), []);
+  const [impacts] = useState(() =>
+    Array.from({ length: 18 }, () => ({
+      x: 50 + (Math.random() - 0.5) * 60,
+      y: 50 + (Math.random() - 0.5) * 60,
+      delay: 0.8 + Math.random() * 1.5,
+      size: 4 + Math.random() * 5,
+    }))
+  );
 
   return (
-    <div ref={ref} style={{ position: 'relative', width: 300, height: 300 }}>
-      {/* Target circles */}
-      {[120, 80, 40].map((r, i) => (
+    <div ref={ref} style={{ position: 'relative', width: 320, height: 320 }}>
+      {/* Concentric target rings */}
+      {[140, 100, 60, 25].map((r, i) => (
         <motion.div
           key={r}
           initial={{ scale: 0, opacity: 0 }}
           animate={inView ? { scale: 1, opacity: 1 } : {}}
-          transition={{ delay: i * 0.2, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ delay: i * 0.15, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           style={{
-            position: 'absolute',
-            left: '50%',
-            top: '50%',
-            width: r * 2,
-            height: r * 2,
-            marginLeft: -r,
-            marginTop: -r,
+            position: 'absolute', left: '50%', top: '50%',
+            width: r * 2, height: r * 2,
+            marginLeft: -r, marginTop: -r,
             borderRadius: '50%',
-            border: `1px solid rgba(240,160,48,${0.1 + i * 0.1})`,
+            border: `${i === 3 ? 2 : 1}px solid rgba(240,160,48,${0.12 + i * 0.08})`,
           }}
         />
       ))}
-      {/* Impact dots */}
+      {/* Crosshair lines */}
+      {inView && <>
+        <motion.div
+          initial={{ scaleX: 0 }} animate={{ scaleX: 1 }}
+          transition={{ delay: 0.5, duration: 0.6 }}
+          style={{ position: 'absolute', top: '50%', left: 20, right: 20, height: 1, background: 'rgba(240,160,48,0.2)' }}
+        />
+        <motion.div
+          initial={{ scaleY: 0 }} animate={{ scaleY: 1 }}
+          transition={{ delay: 0.5, duration: 0.6 }}
+          style={{ position: 'absolute', left: '50%', top: 20, bottom: 20, width: 1, background: 'rgba(240,160,48,0.2)' }}
+        />
+      </>}
+      {/* Scan line */}
+      {inView && (
+        <div style={{
+          position: 'absolute', left: 20, right: 20, height: 2,
+          background: 'linear-gradient(90deg, transparent, var(--accent2), transparent)',
+          animation: 'hp-scan 2s ease-in-out infinite alternate',
+          boxShadow: '0 0 20px rgba(240,160,48,0.5)',
+        }} />
+      )}
+      {/* Impact dots revealed after scan */}
       {impacts.map((imp, i) => (
         <motion.div
           key={i}
           initial={{ scale: 0, opacity: 0 }}
-          animate={inView ? { scale: 1, opacity: 0.8 } : {}}
-          transition={{ delay: 0.6 + imp.delay, type: 'spring', stiffness: 300, damping: 15 }}
+          animate={inView ? { scale: 1, opacity: 0.9 } : {}}
+          transition={{ delay: imp.delay, type: 'spring', stiffness: 400, damping: 15 }}
           style={{
             position: 'absolute',
-            left: `calc(50% + ${imp.x}px)`,
-            top: `calc(50% + ${imp.y}px)`,
-            width: imp.size,
-            height: imp.size,
+            left: `${imp.x}%`, top: `${imp.y}%`,
+            width: imp.size, height: imp.size,
             borderRadius: '50%',
             background: 'var(--accent2)',
-            boxShadow: '0 0 8px rgba(240,160,48,0.5)',
+            boxShadow: '0 0 10px rgba(240,160,48,0.6)',
           }}
         />
       ))}
@@ -418,82 +200,120 @@ function ImpactBurst() {
   );
 }
 
-/* ═══════════════════════════════════════════════════════════
-   MAIN HOMEPAGE
-   ═══════════════════════════════════════════════════════════ */
+/* ═══ Bullet trajectory SVG ═══ */
+function BulletTrajectory() {
+  return (
+    <svg width="100%" height="200" viewBox="0 0 800 200" fill="none" style={{ position: 'absolute', bottom: 60, left: 0, opacity: 0.3 }}>
+      <path
+        d="M-50 180 Q200 30 400 90 Q600 150 850 20"
+        stroke="url(#traj-grad)" strokeWidth="2" strokeDasharray="800"
+        style={{ animation: 'hp-trace 3s ease-out forwards' }}
+      />
+      <defs>
+        <linearGradient id="traj-grad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="transparent" />
+          <stop offset="40%" stopColor="var(--accent2)" />
+          <stop offset="100%" stopColor="transparent" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
+/* ═══════════════════════════════════════════════════
+   MAIN PAGE
+   ═══════════════════════════════════════════════════ */
 export function HomePage() {
   const navigate = useNavigate();
-  const heroRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll();
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.15], [1, 0]);
-  const heroScale = useTransform(scrollYProgress, [0, 0.15], [1, 0.95]);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: containerRef });
+  const heroY = useTransform(scrollYProgress, [0, 0.25], [0, -150]);
+  const heroScale = useTransform(scrollYProgress, [0, 0.2], [1, 0.92]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
 
-  // Text reveal animation
-  const titleWords = 'Analyse Balistique'.split('');
+  useEffect(() => { injectStyles(); }, []);
 
   return (
-    <div style={{ minHeight: '100%', background: 'var(--bg)' }}>
+    <div ref={containerRef} style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden', background: 'var(--bg)' }}>
 
-      {/* ─── HERO SECTION ────────────────────────────────────── */}
-      <motion.section
-        ref={heroRef}
-        style={{
-          height: 'calc(100vh - 56px)',
-          position: 'relative',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          overflow: 'hidden',
-          opacity: heroOpacity,
-          scale: heroScale,
-        }}
-      >
-        <ParticlesCanvas />
+      {/* ─── Grain overlay ─── */}
+      <div style={{
+        position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 9999, opacity: 0.04,
+        backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\'/%3E%3C/svg%3E")',
+        backgroundSize: '128px 128px',
+        animation: 'hp-grain 0.5s steps(6) infinite',
+      }} />
 
+      {/* ══════════ HERO ══════════ */}
+      <motion.section style={{
+        height: '100vh', position: 'relative',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+        overflow: 'hidden', y: heroY, scale: heroScale, opacity: heroOpacity,
+      }}>
+        {/* Aurora background */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'linear-gradient(135deg, rgba(200,134,10,0.08) 0%, transparent 40%, rgba(77,171,247,0.05) 60%, transparent 100%)',
+          backgroundSize: '400% 400%',
+          animation: 'hp-aurora 12s ease infinite',
+        }} />
+        {/* Grid */}
+        <div style={{
+          position: 'absolute', inset: 0, pointerEvents: 'none',
+          backgroundImage: 'linear-gradient(rgba(240,160,48,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(240,160,48,0.04) 1px, transparent 1px)',
+          backgroundSize: '80px 80px',
+        }} />
         {/* Radial glow */}
         <div style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'radial-gradient(ellipse 60% 50% at 50% 40%, rgba(200,134,10,0.08) 0%, transparent 100%)',
-          pointerEvents: 'none',
+          position: 'absolute', inset: 0, pointerEvents: 'none',
+          background: 'radial-gradient(ellipse 50% 40% at 50% 45%, rgba(200,134,10,0.12) 0%, transparent 100%)',
         }} />
 
-        {/* Grid overlay */}
-        <div style={{
-          position: 'absolute',
-          inset: 0,
-          backgroundImage: `
-            linear-gradient(rgba(240,160,48,0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(240,160,48,0.03) 1px, transparent 1px)
-          `,
-          backgroundSize: '60px 60px',
-          pointerEvents: 'none',
-        }} />
+        <BulletTrajectory />
 
-        <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', maxWidth: 700 }}>
-          {/* Animated crosshair */}
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-            <AnimatedCrosshair />
-          </div>
+        {/* Pulse rings behind title */}
+        <div style={{ position: 'absolute', width: 400, height: 400, borderRadius: '50%' }}>
+          {[0, 1, 2].map(i => (
+            <div key={i} style={{
+              position: 'absolute', inset: 0, borderRadius: '50%',
+              border: '1px solid rgba(240,160,48,0.15)',
+              animation: `hp-pulse-ring 3s ease-out ${i * 0.8}s infinite`,
+            }} />
+          ))}
+        </div>
 
-          {/* Title with letter-by-letter reveal */}
-          <h1 style={{ fontSize: 56, fontWeight: 800, lineHeight: 1.1, marginBottom: 16, letterSpacing: '-1.5px' }}>
-            {titleWords.map((char, i) => (
+        <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', maxWidth: 700, padding: '0 24px' }}>
+          {/* Badge */}
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ delay: 0.3, duration: 0.6 }}
+            style={{
+              display: 'inline-block', fontSize: 11, fontWeight: 700,
+              color: 'var(--accent2)', background: 'rgba(200,134,10,0.15)',
+              padding: '6px 18px', borderRadius: 20,
+              letterSpacing: '2px', textTransform: 'uppercase', marginBottom: 24,
+              border: '1px solid rgba(240,160,48,0.2)',
+            }}
+          >
+            Journal de chasse
+          </motion.div>
+
+          {/* Title letter-by-letter */}
+          <h1 style={{ fontSize: 64, fontWeight: 900, lineHeight: 1.05, marginBottom: 20, letterSpacing: '-2px' }}>
+            {'PlombScope'.split('').map((ch, i) => (
               <motion.span
                 key={i}
-                initial={{ opacity: 0, y: 30, filter: 'blur(8px)' }}
+                initial={{ opacity: 0, y: 40, filter: 'blur(10px)' }}
                 animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                transition={{ delay: 1.3 + i * 0.04, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ delay: 0.6 + i * 0.05, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                 style={{
                   display: 'inline-block',
-                  background: 'linear-gradient(135deg, var(--accent2), #fff, var(--accent2))',
-                  backgroundSize: '200% 200%',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
+                  background: 'linear-gradient(135deg, #fff 20%, var(--accent2) 80%)',
+                  WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
                 }}
               >
-                {char === ' ' ? '\u00A0' : char}
+                {ch}
               </motion.span>
             ))}
           </h1>
@@ -502,83 +322,67 @@ export function HomePage() {
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 2, duration: 0.8 }}
-            style={{ fontSize: 18, color: 'var(--text-secondary)', lineHeight: 1.7, maxWidth: 500, margin: '0 auto 40px' }}
+            transition={{ delay: 1.3, duration: 0.8 }}
+            style={{ fontSize: 18, color: 'var(--text-secondary)', lineHeight: 1.8, maxWidth: 480, margin: '0 auto 44px' }}
           >
-            Journal de chasse — Analysez vos gerbes de tir, mesurez la dispersion et comparez vos munitions en temps réel.
+            Analysez vos gerbes de tir avec précision chirurgicale.
+            Dispersion, comparaison, modélisation 3D — tout en un.
           </motion.p>
 
-          {/* CTA buttons */}
+          {/* CTA */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 2.3, duration: 0.6 }}
+            transition={{ delay: 1.6, duration: 0.6 }}
             style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}
           >
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.97 }}
-              onClick={() => navigate('/login')}
+              whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.96 }}
+              onClick={() => navigate('/analyse')}
               style={{
-                padding: '14px 32px',
-                fontSize: 15,
-                fontWeight: 700,
+                padding: '16px 36px', fontSize: 15, fontWeight: 700,
                 background: 'linear-gradient(135deg, var(--accent), var(--accent2))',
-                border: 'none',
-                borderRadius: 12,
-                color: '#fff',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                boxShadow: '0 4px 24px rgba(200,134,10,0.3)',
+                border: 'none', borderRadius: 14, color: '#fff', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: 10,
+                boxShadow: '0 8px 32px rgba(200,134,10,0.35)',
               }}
             >
-              <Crosshair size={18} />
-              Se connecter
+              <Crosshair size={18} /> Commencer l'analyse
             </motion.button>
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.97 }}
+              whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.96 }}
               onClick={() => navigate('/bibliotheque')}
               style={{
-                padding: '14px 32px',
-                fontSize: 15,
-                fontWeight: 600,
-                background: 'var(--surface2)',
-                border: '1px solid var(--border)',
-                borderRadius: 12,
-                color: 'var(--text)',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
+                padding: '16px 36px', fontSize: 15, fontWeight: 600,
+                background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)',
+                border: '1px solid var(--border)', borderRadius: 14,
+                color: 'var(--text)', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: 10,
               }}
             >
-              <BookOpen size={18} />
-              Bibliothèque
+              <BookOpen size={18} /> Bibliothèque
             </motion.button>
           </motion.div>
         </div>
 
-        <ScrollIndicator />
+        {/* Scroll indicator */}
+        <motion.div
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2.5 }}
+          style={{ position: 'absolute', bottom: 32, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}
+        >
+          <span style={{ fontSize: 10, color: 'var(--muted)', letterSpacing: 2, textTransform: 'uppercase' }}>Découvrir</span>
+          <motion.div animate={{ y: [0, 8, 0] }} transition={{ repeat: Infinity, duration: 1.5 }}>
+            <ChevronDown size={20} color="var(--accent2)" />
+          </motion.div>
+        </motion.div>
       </motion.section>
 
-      {/* ─── STATS BANNER ────────────────────────────────────── */}
+      {/* ══════════ STATS BANNER ══════════ */}
       <section style={{
-        padding: '60px 24px',
-        background: 'var(--surface)',
-        borderTop: '1px solid var(--border)',
-        borderBottom: '1px solid var(--border)',
+        padding: '70px 24px', background: 'var(--surface)',
+        borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)',
       }}>
-        <div style={{
-          maxWidth: 900,
-          margin: '0 auto',
-          display: 'flex',
-          justifyContent: 'space-around',
-          flexWrap: 'wrap',
-          gap: 32,
-        }}>
+        <div style={{ maxWidth: 900, margin: '0 auto', display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: 40 }}>
           {[
             { value: 4, suffix: '', label: 'Modes de visualisation 3D' },
             { value: 100, suffix: '%', label: 'Analyse côté client' },
@@ -586,22 +390,18 @@ export function HomePage() {
           ].map((stat, i) => (
             <motion.div
               key={i}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-50px' }}
-              transition={{ delay: i * 0.15 }}
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true, margin: '-60px' }}
+              transition={{ delay: i * 0.12, type: 'spring', stiffness: 100 }}
               style={{ textAlign: 'center', minWidth: 160 }}
             >
               <div style={{
-                fontSize: 48,
-                fontWeight: 800,
+                fontSize: 56, fontWeight: 900, lineHeight: 1, marginBottom: 8,
                 background: 'linear-gradient(135deg, var(--accent2), var(--accent))',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                lineHeight: 1,
-                marginBottom: 8,
+                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
               }}>
-                <AnimatedCounter target={stat.value} suffix={stat.suffix} />
+                <Counter target={stat.value} suffix={stat.suffix} />
               </div>
               <div style={{ fontSize: 13, color: 'var(--muted)', fontWeight: 500 }}>{stat.label}</div>
             </motion.div>
@@ -609,253 +409,223 @@ export function HomePage() {
         </div>
       </section>
 
-      {/* ─── FEATURES SECTION ────────────────────────────────── */}
-      <section style={{ padding: '100px 24px', position: 'relative' }}>
-        {/* Section title */}
+      {/* ══════════ FEATURES CARDS ══════════ */}
+      <section className="hp-scroll-section" style={{ padding: '120px 24px', position: 'relative' }}>
+        {/* Section header */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-80px' }}
-          transition={{ duration: 0.6 }}
-          style={{ textAlign: 'center', marginBottom: 60 }}
+          transition={{ duration: 0.7 }}
+          style={{ textAlign: 'center', marginBottom: 70 }}
         >
-          <motion.div
-            style={{
-              display: 'inline-block',
-              fontSize: 11,
-              fontWeight: 700,
-              color: 'var(--accent2)',
-              background: 'var(--accent-glow)',
-              padding: '6px 16px',
-              borderRadius: 20,
-              letterSpacing: '1.5px',
-              textTransform: 'uppercase',
-              marginBottom: 16,
-            }}
-          >
+          <div style={{
+            display: 'inline-block', fontSize: 11, fontWeight: 700, color: 'var(--accent2)',
+            background: 'rgba(200,134,10,0.12)', padding: '6px 18px', borderRadius: 20,
+            letterSpacing: '2px', textTransform: 'uppercase', marginBottom: 16,
+          }}>
             Fonctionnalités
-          </motion.div>
-          <h2 style={{ fontSize: 36, fontWeight: 800, letterSpacing: '-0.8px', marginBottom: 12 }}>
+          </div>
+          <h2 style={{ fontSize: 40, fontWeight: 900, letterSpacing: '-1px', marginBottom: 14 }}>
             Tout pour analyser vos tirs
           </h2>
-          <p style={{ fontSize: 16, color: 'var(--text-secondary)', maxWidth: 500, margin: '0 auto' }}>
-            De la photo au rapport complet — un outil pensé pour le chasseur exigeant.
+          <p style={{ fontSize: 16, color: 'var(--text-secondary)', maxWidth: 460, margin: '0 auto' }}>
+            De la photo au rapport — un outil pensé pour le chasseur exigeant.
           </p>
         </motion.div>
 
-        {/* Feature cards */}
-        <div style={{
-          display: 'flex',
-          gap: 24,
-          justifyContent: 'center',
-          flexWrap: 'wrap',
-          maxWidth: 1100,
-          margin: '0 auto',
-        }}>
-          <FeatureCard
-            icon={<Crosshair size={36} color="var(--accent2)" />}
-            title="Analyse de dispersion"
-            description="Chargez une photo de cible, calibrez l'échelle et marquez chaque impact. Détection automatique avec réglage de sensibilité."
-            gradient="linear-gradient(135deg, rgba(200,134,10,0.08), var(--surface))"
-            delay={0}
+        {/* Cards */}
+        <div style={{ display: 'flex', gap: 28, justifyContent: 'center', flexWrap: 'wrap', maxWidth: 1140, margin: '0 auto' }}>
+          <TiltCard
             onClick={() => navigate('/analyse')}
-          />
-          <FeatureCard
-            icon={
-              <div style={{ display: 'flex', gap: 8 }}>
-                <Database size={32} color="var(--blue)" />
-                <BookOpen size={32} color="var(--blue)" />
-              </div>
-            }
-            title="Bibliothèque munitions"
-            description="Comparez jusqu'à 4 munitions côte à côte avec radar chart, overlay d'impacts et tri avancé."
-            gradient="linear-gradient(135deg, rgba(77,171,247,0.08), var(--surface))"
-            delay={0.15}
+            gradient="linear-gradient(145deg, rgba(200,134,10,0.1), var(--surface))"
+          >
+            <Crosshair size={40} color="var(--accent2)" style={{ marginBottom: 20 }} />
+            <h3 style={{ fontSize: 22, fontWeight: 800, marginBottom: 10 }}>Analyse de dispersion</h3>
+            <p style={{ fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.7, marginBottom: 20 }}>
+              Chargez votre cible, calibrez, marquez chaque impact. Détection auto avec réglage de sensibilité.
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, color: 'var(--accent2)' }}>
+              Ouvrir <ArrowRight size={14} />
+            </div>
+          </TiltCard>
+
+          <TiltCard
             onClick={() => navigate('/bibliotheque')}
-          />
-          <FeatureCard
-            icon={<Box size={36} color="#c084fc" />}
-            title="Modélisation 3D"
-            description="Cône de dispersion, heatmap de densité, trajectoires animées et vue pénétration. 4 modes interactifs."
-            gradient="linear-gradient(135deg, rgba(192,132,252,0.08), var(--surface))"
-            delay={0.3}
+            gradient="linear-gradient(145deg, rgba(77,171,247,0.1), var(--surface))"
+          >
+            <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
+              <BarChart3 size={36} color="var(--blue)" />
+              <BookOpen size={36} color="var(--blue)" />
+            </div>
+            <h3 style={{ fontSize: 22, fontWeight: 800, marginBottom: 10 }}>Bibliothèque munitions</h3>
+            <p style={{ fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.7, marginBottom: 20 }}>
+              Comparez jusqu'à 4 munitions côte à côte. Radar chart, overlay d'impacts et tri avancé.
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, color: 'var(--blue)' }}>
+              Ouvrir <ArrowRight size={14} />
+            </div>
+          </TiltCard>
+
+          <TiltCard
             onClick={() => navigate('/3d')}
-          />
+            gradient="linear-gradient(145deg, rgba(192,132,252,0.1), var(--surface))"
+          >
+            <Box size={40} color="#c084fc" style={{ marginBottom: 20 }} />
+            <h3 style={{ fontSize: 22, fontWeight: 800, marginBottom: 10 }}>Modélisation 3D</h3>
+            <p style={{ fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.7, marginBottom: 20 }}>
+              Cône de dispersion, heatmap, trajectoires animées et vue pénétration. 4 modes interactifs.
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, color: '#c084fc' }}>
+              Ouvrir <ArrowRight size={14} />
+            </div>
+          </TiltCard>
         </div>
       </section>
 
-      {/* ─── WORKFLOW SECTION ────────────────────────────────── */}
+      {/* ══════════ SHOWCASE — Target scan ══════════ */}
       <section style={{
-        padding: '100px 24px',
-        background: 'var(--surface)',
-        borderTop: '1px solid var(--border)',
-        borderBottom: '1px solid var(--border)',
+        padding: '120px 24px', background: 'var(--surface)',
+        borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)',
       }}>
-        <div style={{ maxWidth: 900, margin: '0 auto', display: 'flex', gap: 60, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
-          {/* Left - Impact burst animation */}
+        <div style={{ maxWidth: 1000, margin: '0 auto', display: 'flex', gap: 60, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
           <motion.div
-            initial={{ opacity: 0, x: -40 }}
+            initial={{ opacity: 0, x: -60 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: '-80px' }}
-            transition={{ duration: 0.7 }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
-            <ImpactBurst />
+            <TargetScan />
           </motion.div>
 
-          {/* Right - Workflow steps */}
           <div style={{ flex: 1, minWidth: 300 }}>
             <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
+              initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
               style={{
-                fontSize: 11,
-                fontWeight: 700,
-                color: 'var(--accent2)',
-                background: 'var(--accent-glow)',
-                padding: '6px 16px',
-                borderRadius: 20,
-                letterSpacing: '1.5px',
-                textTransform: 'uppercase',
-                marginBottom: 20,
-                display: 'inline-block',
+                fontSize: 11, fontWeight: 700, color: 'var(--accent2)',
+                background: 'rgba(200,134,10,0.12)', padding: '6px 18px', borderRadius: 20,
+                letterSpacing: '2px', textTransform: 'uppercase', marginBottom: 24, display: 'inline-block',
               }}
             >
               Comment ça marche
             </motion.div>
-            <WorkflowStep step={1} title="Chargez votre photo" desc="Importez la photo de votre cible depuis votre appareil." delay={0} />
-            <WorkflowStep step={2} title="Calibrez l'échelle" desc="Placez 2 points de référence pour convertir pixels en centimètres." delay={0.15} />
-            <WorkflowStep step={3} title="Marquez les impacts" desc="Ajoutez manuellement ou utilisez la détection automatique." delay={0.3} />
-            <WorkflowStep step={4} title="Analysez et sauvegardez" desc="Consultez les statistiques, visualisez en 3D et exportez." delay={0.45} />
+            {[
+              { n: 1, title: 'Chargez votre photo', desc: 'Importez la photo de votre cible depuis votre appareil.' },
+              { n: 2, title: "Calibrez l'échelle", desc: 'Placez 2 points de référence pour convertir pixels en cm.' },
+              { n: 3, title: 'Marquez les impacts', desc: 'Ajoutez manuellement ou utilisez la détection automatique.' },
+              { n: 4, title: 'Analysez et exportez', desc: 'Statistiques, visualisation 3D, comparaison et export PDF.' },
+            ].map((step, i) => (
+              <motion.div
+                key={step.n}
+                initial={{ opacity: 0, x: -30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, margin: '-40px' }}
+                transition={{ delay: i * 0.12, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                style={{ display: 'flex', alignItems: 'flex-start', gap: 18, padding: '16px 0' }}
+              >
+                <motion.div
+                  initial={{ scale: 0 }}
+                  whileInView={{ scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.12 + 0.15, type: 'spring', stiffness: 200 }}
+                  style={{
+                    width: 44, height: 44, borderRadius: '50%', flexShrink: 0,
+                    background: 'linear-gradient(135deg, var(--accent), var(--accent2))',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontWeight: 800, fontSize: 17, color: '#fff',
+                  }}
+                >
+                  {step.n}
+                </motion.div>
+                <div>
+                  <h4 style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>{step.title}</h4>
+                  <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{step.desc}</p>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ─── TECH SECTION ────────────────────────────────────── */}
-      <section style={{ padding: '80px 24px' }}>
+      {/* ══════════ TECH STACK ══════════ */}
+      <section style={{ padding: '100px 24px' }}>
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-80px' }}
-          transition={{ duration: 0.6 }}
           style={{ textAlign: 'center', marginBottom: 50 }}
         >
-          <h2 style={{ fontSize: 28, fontWeight: 800, letterSpacing: '-0.5px', marginBottom: 12 }}>
-            Construit avec les meilleures technos
+          <h2 style={{ fontSize: 30, fontWeight: 900, letterSpacing: '-0.5px', marginBottom: 12 }}>
+            Propulsé par les meilleures technos
           </h2>
-          <p style={{ fontSize: 14, color: 'var(--text-secondary)', maxWidth: 450, margin: '0 auto' }}>
-            Performance et précision au service de votre passion.
-          </p>
+          <p style={{ fontSize: 14, color: 'var(--text-secondary)' }}>Performance et précision au service de votre passion.</p>
         </motion.div>
-
-        <div style={{
-          display: 'flex',
-          gap: 20,
-          justifyContent: 'center',
-          flexWrap: 'wrap',
-          maxWidth: 800,
-          margin: '0 auto',
-        }}>
+        <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap', maxWidth: 800, margin: '0 auto' }}>
           {[
             { icon: <Layers size={20} />, label: 'React 19', color: '#61dafb' },
             { icon: <Box size={20} />, label: 'Three.js', color: '#c084fc' },
             { icon: <Zap size={20} />, label: 'Framer Motion', color: '#f0a030' },
-            { icon: <Cpu size={20} />, label: 'Canvas API', color: '#2ecc71' },
-            { icon: <Eye size={20} />, label: 'WebGL', color: '#e05252' },
-            { icon: <BarChart3 size={20} />, label: 'Zustand', color: '#4dabf7' },
-          ].map((tech, i) => (
+            { icon: <Target size={20} />, label: 'Canvas API', color: '#2ecc71' },
+          ].map((t, i) => (
             <motion.div
-              key={tech.label}
+              key={t.label}
               initial={{ opacity: 0, scale: 0.8 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.08 }}
-              whileHover={{ y: -4, borderColor: tech.color }}
+              whileHover={{ y: -4, borderColor: t.color }}
               style={{
-                padding: '14px 24px',
-                background: 'var(--surface)',
-                border: '1px solid var(--border)',
-                borderRadius: 12,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-                fontSize: 14,
-                fontWeight: 600,
-                color: 'var(--text)',
-                transition: 'border-color 0.2s',
+                padding: '14px 24px', background: 'var(--surface)',
+                border: '1px solid var(--border)', borderRadius: 12,
+                display: 'flex', alignItems: 'center', gap: 10,
+                fontSize: 14, fontWeight: 600, color: 'var(--text)', transition: 'border-color 0.2s',
               }}
             >
-              <span style={{ color: tech.color }}>{tech.icon}</span>
-              {tech.label}
+              <span style={{ color: t.color }}>{t.icon}</span> {t.label}
             </motion.div>
           ))}
         </div>
       </section>
 
-      {/* ─── FINAL CTA ───────────────────────────────────────── */}
-      <section style={{
-        padding: '80px 24px 100px',
-        textAlign: 'center',
-        position: 'relative',
-        overflow: 'hidden',
-      }}>
-        {/* Background glow */}
+      {/* ══════════ FINAL CTA ══════════ */}
+      <section style={{ padding: '100px 24px 120px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
         <div style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'radial-gradient(ellipse 50% 60% at 50% 80%, rgba(200,134,10,0.1) 0%, transparent 100%)',
-          pointerEvents: 'none',
+          position: 'absolute', inset: 0, pointerEvents: 'none',
+          background: 'radial-gradient(ellipse 50% 70% at 50% 90%, rgba(200,134,10,0.12) 0%, transparent 100%)',
         }} />
-
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.7 }}
+          transition={{ duration: 0.8 }}
           style={{ position: 'relative', zIndex: 1 }}
         >
-          <Target size={48} color="var(--accent2)" style={{ marginBottom: 20 }} />
-          <h2 style={{ fontSize: 32, fontWeight: 800, letterSpacing: '-0.5px', marginBottom: 12 }}>
+          <Target size={52} color="var(--accent2)" style={{ marginBottom: 24 }} />
+          <h2 style={{ fontSize: 36, fontWeight: 900, letterSpacing: '-0.5px', marginBottom: 14 }}>
             Prêt à analyser ?
           </h2>
-          <p style={{ fontSize: 16, color: 'var(--text-secondary)', marginBottom: 32, maxWidth: 400, margin: '0 auto 32px' }}>
-            Importez votre première photo de cible et découvrez la puissance de l'analyse balistique.
+          <p style={{ fontSize: 16, color: 'var(--text-secondary)', marginBottom: 36, maxWidth: 400, margin: '0 auto 36px' }}>
+            Importez votre première photo de cible et découvrez la puissance de PlombScope.
           </p>
           <motion.button
-            whileHover={{ scale: 1.06 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={() => navigate('/login')}
+            whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.96 }}
+            onClick={() => navigate('/analyse')}
             style={{
-              padding: '16px 40px',
-              fontSize: 16,
-              fontWeight: 700,
+              padding: '18px 44px', fontSize: 16, fontWeight: 700,
               background: 'linear-gradient(135deg, var(--accent), var(--accent2))',
-              border: 'none',
-              borderRadius: 14,
-              color: '#fff',
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 10,
-              boxShadow: '0 8px 32px rgba(200,134,10,0.35)',
+              border: 'none', borderRadius: 16, color: '#fff', cursor: 'pointer',
+              display: 'inline-flex', alignItems: 'center', gap: 10,
+              boxShadow: '0 12px 40px rgba(200,134,10,0.4)',
             }}
           >
-            <Crosshair size={20} />
-            Se connecter
-            <ArrowRight size={18} />
+            <Crosshair size={20} /> Lancer une analyse <ArrowRight size={18} />
           </motion.button>
         </motion.div>
       </section>
 
-      {/* ─── FOOTER ──────────────────────────────────────────── */}
-      <footer style={{
-        padding: '24px',
-        borderTop: '1px solid var(--border)',
-        textAlign: 'center',
-        fontSize: 12,
-        color: 'var(--muted)',
-      }}>
-        Analyse Balistique v3.0 — Journal de chasse
+      {/* Footer */}
+      <footer style={{ padding: 24, borderTop: '1px solid var(--border)', textAlign: 'center', fontSize: 12, color: 'var(--muted)' }}>
+        PlombScope v3.0 — Journal de chasse
       </footer>
     </div>
   );
