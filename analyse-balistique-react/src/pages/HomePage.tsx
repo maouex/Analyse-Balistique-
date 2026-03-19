@@ -234,7 +234,7 @@ export function HomePage() {
   useEffect(() => { injectStyles(); }, []);
 
   return (
-    <div ref={containerRef} style={{ height: '100dvh', overflowY: 'auto', overflowX: 'hidden', background: 'var(--bg)' }}>
+    <div ref={containerRef} style={{ position: 'absolute', inset: 0, overflowY: 'auto', overflowX: 'hidden', background: 'var(--bg)' }}>
 
       {/* ─── Grain overlay ─── */}
       <div style={{
@@ -246,7 +246,7 @@ export function HomePage() {
 
       {/* ══════════ HERO ══════════ */}
       <motion.section style={{
-        height: '100dvh', minHeight: '100vh', position: 'relative',
+        height: '100vh', minHeight: '100dvh', position: 'relative',
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
         overflow: 'hidden', width: '100%', y: heroY, scale: heroScale, opacity: heroOpacity,
       }}>
