@@ -103,8 +103,8 @@ function TiltCard({ children, onClick, gradient }: {
         rotateX, rotateY,
         transformStyle: 'preserve-3d',
         perspective: 800,
-        width: 340,
-        padding: 36,
+        width: 'min(340px, calc(100vw - 48px))',
+        padding: 'clamp(20px, 4vw, 36px)',
         background: gradient,
         border: '1px solid var(--border)',
         borderRadius: 24,
@@ -140,7 +140,7 @@ function TargetScan() {
   );
 
   return (
-    <div ref={ref} style={{ position: 'relative', width: 320, height: 320 }}>
+    <div ref={ref} style={{ position: 'relative', width: 'min(320px, 80vw)', height: 'min(320px, 80vw)' }}>
       {/* Concentric target rings */}
       {[140, 100, 60, 25].map((r, i) => (
         <motion.div
@@ -231,16 +231,10 @@ export function HomePage() {
   const heroScale = useTransform(scrollYProgress, [0, 0.2], [1, 0.92]);
   const heroOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
 
-  const [vh, setVh] = useState(window.innerHeight);
-  useEffect(() => {
-    injectStyles();
-    const onResize = () => setVh(window.innerHeight);
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-  }, []);
+  useEffect(() => { injectStyles(); }, []);
 
   return (
-    <div ref={containerRef} style={{ width: '100vw', height: vh, overflowY: 'auto', overflowX: 'hidden', background: 'var(--bg)' }}>
+    <div ref={containerRef} style={{ position: 'fixed', inset: 0, overflowY: 'auto', overflowX: 'hidden', background: 'var(--bg)', zIndex: 10 }}>
 
       {/* ─── Grain overlay ─── */}
       <div style={{
@@ -252,7 +246,7 @@ export function HomePage() {
 
       {/* ══════════ HERO ══════════ */}
       <motion.section style={{
-        height: vh, position: 'relative',
+        minHeight: '100dvh', position: 'relative',
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
         overflow: 'hidden', width: '100%', y: heroY, scale: heroScale, opacity: heroOpacity,
       }}>
@@ -346,7 +340,7 @@ export function HomePage() {
               whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.96 }}
               onClick={() => navigate('/analyse')}
               style={{
-                padding: '16px 36px', fontSize: 15, fontWeight: 700,
+                padding: 'clamp(12px, 2vw, 16px) clamp(24px, 4vw, 36px)', fontSize: 'clamp(13px, 1.5vw, 15px)', fontWeight: 700,
                 background: 'linear-gradient(135deg, var(--accent), var(--accent2))',
                 border: 'none', borderRadius: 14, color: '#fff', cursor: 'pointer',
                 display: 'flex', alignItems: 'center', gap: 10,
@@ -359,7 +353,7 @@ export function HomePage() {
               whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.96 }}
               onClick={() => navigate('/bibliotheque')}
               style={{
-                padding: '16px 36px', fontSize: 15, fontWeight: 600,
+                padding: 'clamp(12px, 2vw, 16px) clamp(24px, 4vw, 36px)', fontSize: 'clamp(13px, 1.5vw, 15px)', fontWeight: 600,
                 background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)',
                 border: '1px solid var(--border)', borderRadius: 14,
                 color: 'var(--text)', cursor: 'pointer',
@@ -385,10 +379,10 @@ export function HomePage() {
 
       {/* ══════════ STATS BANNER ══════════ */}
       <section style={{
-        padding: '70px 24px', background: 'var(--surface)',
+        padding: 'clamp(40px, 6vw, 70px) clamp(16px, 4vw, 24px)', background: 'var(--surface)',
         borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)',
       }}>
-        <div style={{ maxWidth: 900, margin: '0 auto', display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: 40 }}>
+        <div style={{ maxWidth: 900, margin: '0 auto', display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: 'clamp(20px, 4vw, 40px)' }}>
           {[
             { value: 4, suffix: '', label: 'Modes de visualisation 3D' },
             { value: 100, suffix: '%', label: 'Analyse côté client' },
@@ -403,7 +397,7 @@ export function HomePage() {
               style={{ textAlign: 'center', minWidth: 160 }}
             >
               <div style={{
-                fontSize: 56, fontWeight: 900, lineHeight: 1, marginBottom: 8,
+                fontSize: 'clamp(36px, 6vw, 56px)', fontWeight: 900, lineHeight: 1, marginBottom: 8,
                 background: 'linear-gradient(135deg, var(--accent2), var(--accent))',
                 WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
               }}>
@@ -416,7 +410,7 @@ export function HomePage() {
       </section>
 
       {/* ══════════ FEATURES CARDS ══════════ */}
-      <section className="hp-scroll-section" style={{ padding: '120px 24px', position: 'relative' }}>
+      <section className="hp-scroll-section" style={{ padding: 'clamp(60px, 10vw, 120px) clamp(16px, 4vw, 24px)', position: 'relative' }}>
         {/* Section header */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}
@@ -491,10 +485,10 @@ export function HomePage() {
 
       {/* ══════════ SHOWCASE — Target scan ══════════ */}
       <section style={{
-        padding: '120px 24px', background: 'var(--surface)',
+        padding: 'clamp(60px, 10vw, 120px) clamp(16px, 4vw, 24px)', background: 'var(--surface)',
         borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)',
       }}>
-        <div style={{ maxWidth: 1000, margin: '0 auto', display: 'flex', gap: 60, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
+        <div style={{ maxWidth: 1000, margin: '0 auto', display: 'flex', gap: 'clamp(30px, 5vw, 60px)', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
           <motion.div
             initial={{ opacity: 0, x: -60 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -554,14 +548,14 @@ export function HomePage() {
       </section>
 
       {/* ══════════ TECH STACK ══════════ */}
-      <section style={{ padding: '100px 24px' }}>
+      <section style={{ padding: 'clamp(50px, 8vw, 100px) clamp(16px, 4vw, 24px)' }}>
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-80px' }}
           style={{ textAlign: 'center', marginBottom: 50 }}
         >
-          <h2 style={{ fontSize: 30, fontWeight: 900, letterSpacing: '-0.5px', marginBottom: 12 }}>
+          <h2 style={{ fontSize: 'clamp(22px, 3vw, 30px)', fontWeight: 900, letterSpacing: '-0.5px', marginBottom: 12 }}>
             Propulsé par les meilleures technos
           </h2>
           <p style={{ fontSize: 14, color: 'var(--text-secondary)' }}>Performance et précision au service de votre passion.</p>
@@ -594,7 +588,7 @@ export function HomePage() {
       </section>
 
       {/* ══════════ FINAL CTA ══════════ */}
-      <section style={{ padding: '100px 24px 120px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+      <section style={{ padding: 'clamp(50px, 8vw, 100px) clamp(16px, 4vw, 24px) clamp(60px, 10vw, 120px)', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
         <div style={{
           position: 'absolute', inset: 0, pointerEvents: 'none',
           background: 'radial-gradient(ellipse 50% 70% at 50% 90%, rgba(200,134,10,0.12) 0%, transparent 100%)',
