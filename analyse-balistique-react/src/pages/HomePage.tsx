@@ -236,38 +236,41 @@ export function HomePage() {
   return (
     <div ref={containerRef} style={{ position: 'fixed', inset: 0, overflowY: 'auto', overflowX: 'hidden', background: 'var(--bg)', zIndex: 10 }}>
 
-      {/* ─── Grain overlay ─── */}
-      <div style={{
-        position: 'fixed', inset: '-20%', pointerEvents: 'none', zIndex: 9999, opacity: 0.04,
-        backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\'/%3E%3C/svg%3E")',
-        backgroundSize: '128px 128px',
-        animation: 'hp-grain 0.5s steps(6) infinite',
-      }} />
-
-      {/* ══════════ HERO ══════════ */}
-      <motion.section style={{
-        minHeight: '100dvh', position: 'relative',
-        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-        overflow: 'hidden', width: '100%', y: heroY, scale: heroScale, opacity: heroOpacity,
-      }}>
-        {/* Aurora background */}
+      {/* ─── Background effects — fixed to viewport, never clipped ─── */}
+      <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0 }}>
+        {/* Aurora */}
         <div style={{
           position: 'absolute', inset: 0,
           background: 'linear-gradient(135deg, rgba(200,134,10,0.18) 0%, rgba(200,134,10,0.04) 35%, rgba(77,171,247,0.10) 65%, rgba(77,171,247,0.03) 100%)',
           backgroundSize: '400% 400%',
           animation: 'hp-aurora 12s ease infinite',
         }} />
-        {/* Grid — visible across entire hero */}
+        {/* Grid */}
         <div style={{
-          position: 'absolute', inset: 0, pointerEvents: 'none',
+          position: 'absolute', inset: 0,
           backgroundImage: 'linear-gradient(rgba(240,160,48,0.09) 1px, transparent 1px), linear-gradient(90deg, rgba(240,160,48,0.09) 1px, transparent 1px)',
           backgroundSize: '80px 80px',
         }} />
-        {/* Radial glow — covers most of viewport */}
+        {/* Radial glow */}
         <div style={{
-          position: 'absolute', inset: 0, pointerEvents: 'none',
+          position: 'absolute', inset: 0,
           background: 'radial-gradient(ellipse 90% 80% at 50% 45%, rgba(200,134,10,0.18) 0%, rgba(200,134,10,0.04) 60%, transparent 100%)',
         }} />
+        {/* Grain */}
+        <div style={{
+          position: 'absolute', inset: '-20%', opacity: 0.04,
+          backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\'/%3E%3C/svg%3E")',
+          backgroundSize: '128px 128px',
+          animation: 'hp-grain 0.5s steps(6) infinite',
+        }} />
+      </div>
+
+      {/* ══════════ HERO ══════════ */}
+      <motion.section style={{
+        minHeight: '100vh', position: 'relative',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+        overflow: 'hidden', width: '100%', y: heroY, scale: heroScale, opacity: heroOpacity,
+      }}>
 
         <BulletTrajectory />
 
