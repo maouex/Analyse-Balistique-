@@ -253,26 +253,26 @@ export function HomePage() {
         {/* Aurora background */}
         <div style={{
           position: 'absolute', inset: 0,
-          background: 'linear-gradient(135deg, rgba(200,134,10,0.08) 0%, transparent 40%, rgba(77,171,247,0.05) 60%, transparent 100%)',
+          background: 'linear-gradient(135deg, rgba(200,134,10,0.18) 0%, rgba(200,134,10,0.04) 35%, rgba(77,171,247,0.10) 65%, rgba(77,171,247,0.03) 100%)',
           backgroundSize: '400% 400%',
           animation: 'hp-aurora 12s ease infinite',
         }} />
-        {/* Grid */}
+        {/* Grid — visible across entire hero */}
         <div style={{
           position: 'absolute', inset: 0, pointerEvents: 'none',
-          backgroundImage: 'linear-gradient(rgba(240,160,48,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(240,160,48,0.04) 1px, transparent 1px)',
+          backgroundImage: 'linear-gradient(rgba(240,160,48,0.09) 1px, transparent 1px), linear-gradient(90deg, rgba(240,160,48,0.09) 1px, transparent 1px)',
           backgroundSize: '80px 80px',
         }} />
-        {/* Radial glow */}
+        {/* Radial glow — covers most of viewport */}
         <div style={{
           position: 'absolute', inset: 0, pointerEvents: 'none',
-          background: 'radial-gradient(ellipse 50% 40% at 50% 45%, rgba(200,134,10,0.12) 0%, transparent 100%)',
+          background: 'radial-gradient(ellipse 90% 80% at 50% 45%, rgba(200,134,10,0.18) 0%, rgba(200,134,10,0.04) 60%, transparent 100%)',
         }} />
 
         <BulletTrajectory />
 
         {/* Pulse rings behind title */}
-        <div style={{ position: 'absolute', width: 400, height: 400, borderRadius: '50%' }}>
+        <div style={{ position: 'absolute', width: 'min(500px, 80vw)', height: 'min(500px, 80vw)', borderRadius: '50%' }}>
           {[0, 1, 2].map(i => (
             <div key={i} style={{
               position: 'absolute', inset: 0, borderRadius: '50%',
