@@ -378,12 +378,14 @@ export function HomePage() {
           </motion.div>
         </motion.div>
       </motion.section>
+      </div>{/* ─── end grid/aurora zone ─── */}
 
       {/* ══════════ STATS BANNER ══════════ */}
       <section style={{
         position: 'relative',
         padding: 'clamp(40px, 6vw, 70px) clamp(16px, 4vw, 24px)',
-        borderTop: '1px solid var(--border)',
+        background: 'var(--bg)',
+        borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)',
       }}>
         <div style={{ maxWidth: 900, margin: '0 auto', display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: 'clamp(20px, 4vw, 40px)' }}>
           {[
@@ -411,7 +413,6 @@ export function HomePage() {
           ))}
         </div>
       </section>
-      </div>{/* ─── end grid/aurora zone ─── */}
 
       {/* ══════════ FEATURES CARDS ══════════ */}
       <section className="hp-scroll-section" style={{ padding: 'clamp(60px, 10vw, 120px) clamp(16px, 4vw, 24px)', position: 'relative' }}>
