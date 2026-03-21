@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AppLayout } from './components/layout/AppLayout';
 import { AnalysisPage } from './pages/AnalysisPage';
@@ -10,12 +10,17 @@ import { LoginScreen } from './components/auth/LoginScreen';
 function App() {
   const [authed, setAuthed] = useState(() => sessionStorage.getItem('sag-auth') === '1');
 
+  const handleLogout = useCallback(() => {
+    sessionStorage.removeItem('sag-auth');
+    setAuthed(false);
+  }, []);
+
   return (
     <HashRouter>
       <Routes>
         <Route path="/" element={<LandingPage />} />
         {authed ? (
-          <Route element={<AppLayout />}>
+          <Route element={<AppLayout onLogout={handleLogout} />}>
             <Route path="/analyse" element={<AnalysisPage />} />
             <Route path="/bibliotheque" element={<LibraryPage />} />
             <Route path="/3d" element={<View3DPage />} />

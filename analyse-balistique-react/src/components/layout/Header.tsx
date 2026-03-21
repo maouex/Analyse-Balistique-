@@ -1,4 +1,4 @@
-import { Sun, Moon, Scan, BookOpen, Crosshair } from 'lucide-react';
+import { Sun, Moon, Scan, BookOpen, Crosshair, LogOut } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useThemeStore } from '../../stores/themeStore';
 import { useAnalysisStore } from '../../stores/analysisStore';
@@ -8,7 +8,11 @@ const NAV_ITEMS = [
   { path: '/bibliotheque', label: 'BIBLIOTHÈQUE', icon: BookOpen },
 ];
 
-export function Header() {
+interface HeaderProps {
+  onLogout?: () => void;
+}
+
+export function Header({ onLogout }: HeaderProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const { mode, toggle } = useThemeStore();
@@ -175,6 +179,27 @@ export function Header() {
         >
           {mode === 'dark' ? <Sun size={12} /> : <Moon size={12} />}
         </button>
+
+        {onLogout && (
+          <button
+            onClick={onLogout}
+            title="Déconnexion"
+            style={{
+              width: 28,
+              height: 28,
+              border: '1px solid rgba(255,68,68,0.2)',
+              background: 'rgba(255,68,68,0.05)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'rgba(255,68,68,0.5)',
+              transition: 'all 0.2s',
+            }}
+          >
+            <LogOut size={12} />
+          </button>
+        )}
       </div>
     </header>
   );
