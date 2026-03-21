@@ -4,7 +4,7 @@ interface LogoProps {
   textSize?: number;
 }
 
-export function PlombScopeLogo({ size = 40, showText = false, textSize = 18 }: LogoProps) {
+export function SAGLogo({ size = 40, showText = false, textSize = 18 }: LogoProps) {
   return (
     <div style={{ display: 'inline-flex', alignItems: 'center', gap: size * 0.3 }}>
       <svg
@@ -68,7 +68,7 @@ export function PlombScopeLogo({ size = 40, showText = false, textSize = 18 }: L
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
           }}>
-            PlombScope
+            S.A.G.
           </span>
           <span style={{
             fontSize: textSize * 0.45,
@@ -78,7 +78,7 @@ export function PlombScopeLogo({ size = 40, showText = false, textSize = 18 }: L
             textTransform: 'uppercase',
             marginTop: 2,
           }}>
-            Analyse de gerbe
+            Système d'Analyse de Gerbe
           </span>
         </div>
       )}
@@ -86,7 +86,7 @@ export function PlombScopeLogo({ size = 40, showText = false, textSize = 18 }: L
   );
 }
 
-export function PlombScopeIcon({ size = 30 }: { size?: number }) {
+export function SAGIcon({ size = 30 }: { size?: number }) {
   return (
     <svg
       width={size}
