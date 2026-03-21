@@ -34,27 +34,28 @@
   text-shadow: 0 0 20px rgba(0, 255, 65, 0.4);
 }
 
-.access-badge-progress {
-  width: 200px;
-  height: 2px;
-  background: rgba(0, 255, 65, 0.15);
-  border-radius: 1px;
-  overflow: hidden;
+.access-badge-button {
+  padding: 10px 28px;
+  border: 1px solid rgba(0, 255, 65, 0.4);
+  background: rgba(0, 255, 65, 0.1);
+  color: #00ff41;
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  animation: fadeInStatus 0.5s ease both;
 }
 
-.access-badge-progress-bar {
-  height: 100%;
-  background: #00ff41;
-  box-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
-  animation: progressFill 2s ease-in-out forwards;
+.access-badge-button:hover {
+  background: rgba(0, 255, 65, 0.2);
+  border-color: #00ff41;
+  box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
 }
 
 @keyframes fadeInStatus {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes progressFill {
-  from { width: 0%; }
-  to { width: 100%; }
 }
