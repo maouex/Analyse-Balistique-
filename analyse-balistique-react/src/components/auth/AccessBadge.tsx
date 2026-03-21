@@ -1,5 +1,5 @@
 /* eslint-disable react/no-unknown-property */
-import { useEffect, useRef, useState, useMemo } from 'react';
+import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { Canvas, extend, useFrame, useThree } from '@react-three/fiber';
 import { Environment, Lightformer } from '@react-three/drei';
 import {
@@ -12,6 +12,7 @@ import {
 } from '@react-three/rapier';
 import { MeshLineGeometry, MeshLineMaterial } from 'meshline';
 import * as THREE from 'three';
+import { TvStatic } from '../transitions/TvStatic';
 import './AccessBadge.css';
 
 extend({ MeshLineGeometry, MeshLineMaterial });
@@ -388,6 +389,7 @@ export default function AccessBadge({ onComplete }: AccessBadgeProps) {
     () => typeof window !== 'undefined' && window.innerWidth < 768
   );
   const [showButton, setShowButton] = useState(false);
+  const [transitioning, setTransitioning] = useState(false);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -399,6 +401,10 @@ export default function AccessBadge({ onComplete }: AccessBadgeProps) {
   useEffect(() => {
     const timer = setTimeout(() => setShowButton(true), 1800);
     return () => clearTimeout(timer);
+  }, []);
+
+  const handleContinue = useCallback(() => {
+    setTransitioning(true);
   }, []);
 
   return (
@@ -443,11 +449,12 @@ export default function AccessBadge({ onComplete }: AccessBadgeProps) {
       <div className="access-badge-status">
         <div className="access-badge-status-text">Accès autorisé</div>
         {showButton && (
-          <button className="access-badge-button" onClick={onComplete}>
+          <button className="access-badge-button" onClick={handleContinue}>
             CONTINUER VERS L'ANALYSE
           </button>
         )}
       </div>
+      <TvStatic active={transitioning} onComplete={onComplete} duration={600} />
     </div>
   );
 }
