@@ -126,12 +126,14 @@ function ShotgunBlast({ active }: { active: boolean }) {
   const rafRef = useRef<number>(0);
   const lastSpawnRef = useRef(0);
 
+  const hasFiredRef = useRef(false);
+
   const spawnBurst = useCallback(() => {
     const pellets: Pellet[] = [];
-    // Spawn 30-40 pellets in a cone
-    const count = 30 + Math.floor(Math.random() * 12);
+    // Single burst: 50 pellets in a cone
+    const count = 50;
     for (let i = 0; i < count; i++) {
-      const angle = (Math.random() - 0.5) * 0.7; // ±20° cone spread
+      const angle = (Math.random() - 0.5) * 0.7;
       const speed = 3 + Math.random() * 6;
       pellets.push({
         x: 0, y: 0,
@@ -140,7 +142,7 @@ function ShotgunBlast({ active }: { active: boolean }) {
         r: 1.5 + Math.random() * 2.5,
         opacity: 0.7 + Math.random() * 0.3,
         life: 0,
-        maxLife: 40 + Math.random() * 40,
+        maxLife: 60 + Math.random() * 50,
       });
     }
     pelletsRef.current.push(...pellets);
@@ -177,13 +179,15 @@ function ShotgunBlast({ active }: { active: boolean }) {
       const originX = containerLeft + (797 / 820) * containerW;
       const originY = svgTop + (95 / 300) * svgH;
 
-      // Spawn bursts when active
-      if (active) {
-        const now = Date.now();
-        if (now - lastSpawnRef.current > 600) {
-          spawnBurst();
-          lastSpawnRef.current = now;
-        }
+      // Single shot: fire once when active
+      if (active && !hasFiredRef.current) {
+        hasFiredRef.current = true;
+        lastSpawnRef.current = Date.now();
+        spawnBurst();
+      }
+      // Reset when scrolling back up
+      if (!active) {
+        hasFiredRef.current = false;
       }
 
       // Update & draw pellets
