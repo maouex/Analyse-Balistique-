@@ -1,5 +1,6 @@
 import { useRef, useEffect, useCallback } from 'react';
 import { useAnalysisStore } from '../../stores/analysisStore';
+import { useThemeStore } from '../../stores/themeStore';
 import { render } from '../../lib/canvas-renderer';
 import { computeFullAnalysis } from '../../lib/ballistics';
 import type { Point } from '../../types';
@@ -15,6 +16,10 @@ export function AnalysisCanvas() {
   const lastMouse = useRef<Point>({ x: 0, y: 0 });
 
   const store = useAnalysisStore();
+  // Subscribe to theme so canvas re-renders synchronously during view transition
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const themeMode = useThemeStore((s) => s.mode);
+  void themeMode;
 
   const canvasToImage = useCallback((cx: number, cy: number): Point => {
     const { zoom, panX, panY } = store.view;
@@ -210,7 +215,6 @@ export function AnalysisCanvas() {
         position: 'relative',
         overflow: 'hidden',
         background: 'var(--canvas-bg)',
-        viewTransitionName: 'canvas-area',
       }}
     >
       <canvas
