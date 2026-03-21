@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { Sun, Moon, Scan, BookOpen, Crosshair, LogOut } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { useThemeStore } from '../../stores/themeStore';
@@ -16,17 +17,18 @@ interface HeaderProps {
 export function Header({ onLogout }: HeaderProps) {
   const navigate = useTransitionNavigate();
   const location = useLocation();
-  const { mode, toggle } = useThemeStore();
+  const { mode, animatedToggle } = useThemeStore();
   const hasAnalysis = useAnalysisStore((s) => s.impacts.length > 0);
   const impactCount = useAnalysisStore((s) => s.impacts.length);
+  const themeButtonRef = useRef<HTMLButtonElement>(null);
 
   return (
     <header style={{
       height: 48,
-      background: 'rgba(1, 10, 1, 0.9)',
+      background: 'var(--surface-glass)',
       backdropFilter: 'blur(12px)',
       WebkitBackdropFilter: 'blur(12px)',
-      borderBottom: '1px solid rgba(0, 255, 65, 0.15)',
+      borderBottom: '1px solid var(--border)',
       display: 'flex',
       alignItems: 'center',
       padding: '0 16px',
@@ -42,7 +44,7 @@ export function Header({ onLogout }: HeaderProps) {
         left: 0,
         right: 0,
         height: 1,
-        background: 'linear-gradient(90deg, transparent, rgba(0, 255, 65, 0.2), transparent)',
+        background: 'linear-gradient(90deg, transparent, var(--border-glow), transparent)',
         pointerEvents: 'none',
       }} />
 
@@ -58,13 +60,13 @@ export function Header({ onLogout }: HeaderProps) {
           flexShrink: 0,
         }}
       >
-        <Crosshair size={18} color="#00ff41" strokeWidth={1.5} />
+        <Crosshair size={18} color="var(--accent2)" strokeWidth={1.5} />
         <span style={{
           fontSize: 12,
           fontWeight: 800,
           letterSpacing: '2px',
-          color: '#00ff41',
-          textShadow: '0 0 10px rgba(0,255,65,0.3)',
+          color: 'var(--accent2)',
+          textShadow: '0 0 10px var(--accent-glow)',
           fontFamily: "'Inter', monospace",
         }}>
           S.A.G.
@@ -75,7 +77,7 @@ export function Header({ onLogout }: HeaderProps) {
       <div style={{
         width: 1,
         height: 20,
-        background: 'rgba(0,255,65,0.15)',
+        background: 'var(--border)',
         marginRight: 8,
       }} />
 
@@ -99,13 +101,13 @@ export function Header({ onLogout }: HeaderProps) {
                 alignItems: 'center',
                 gap: 6,
                 padding: '6px 14px',
-                border: isActive ? '1px solid rgba(0,255,65,0.3)' : '1px solid transparent',
-                background: isActive ? 'rgba(0,255,65,0.08)' : 'transparent',
+                border: isActive ? '1px solid var(--border-light)' : '1px solid transparent',
+                background: isActive ? 'var(--accent-glow)' : 'transparent',
                 cursor: 'pointer',
                 fontSize: 11,
                 fontWeight: 700,
                 letterSpacing: '1.5px',
-                color: isActive ? '#00ff41' : 'rgba(0,255,65,0.4)',
+                color: isActive ? 'var(--accent2)' : 'var(--muted)',
                 transition: 'all 0.2s',
                 position: 'relative',
                 whiteSpace: 'nowrap',
@@ -129,10 +131,10 @@ export function Header({ onLogout }: HeaderProps) {
               alignItems: 'center',
               gap: 6,
               padding: '4px 10px',
-              border: '1px solid rgba(0,255,65,0.3)',
-              background: 'rgba(0,255,65,0.08)',
+              border: '1px solid var(--border-light)',
+              background: 'var(--accent-glow)',
               cursor: 'pointer',
-              color: '#00ff41',
+              color: 'var(--accent2)',
               fontSize: 10,
               fontWeight: 700,
               letterSpacing: '1px',
@@ -144,8 +146,8 @@ export function Header({ onLogout }: HeaderProps) {
               width: 6,
               height: 6,
               borderRadius: '50%',
-              background: '#00ff41',
-              boxShadow: '0 0 8px rgba(0,255,65,0.6)',
+              background: 'var(--accent2)',
+              boxShadow: '0 0 8px var(--accent-glow-strong)',
               animation: 'pulse 2s ease-in-out infinite',
             }} />
             {impactCount} IMPACTS
@@ -156,25 +158,26 @@ export function Header({ onLogout }: HeaderProps) {
         <span style={{
           fontSize: 9,
           fontFamily: "'Courier New', monospace",
-          color: 'rgba(0,255,65,0.25)',
+          color: 'var(--muted)',
           letterSpacing: '1px',
         }}>
           SYS:OK
         </span>
 
         <button
-          onClick={toggle}
+          ref={themeButtonRef}
+          onClick={() => animatedToggle(themeButtonRef.current)}
           title={mode === 'dark' ? 'Thème clair' : 'Thème sombre'}
           style={{
             width: 28,
             height: 28,
-            border: '1px solid rgba(0,255,65,0.15)',
-            background: 'rgba(0,255,65,0.05)',
+            border: '1px solid var(--border)',
+            background: 'var(--accent-glow)',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: 'rgba(0,255,65,0.5)',
+            color: 'var(--text-secondary)',
             transition: 'all 0.2s',
           }}
         >
@@ -188,13 +191,14 @@ export function Header({ onLogout }: HeaderProps) {
             style={{
               width: 28,
               height: 28,
-              border: '1px solid rgba(255,68,68,0.2)',
+              border: '1px solid var(--red-glow)',
               background: 'rgba(255,68,68,0.05)',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: 'rgba(255,68,68,0.5)',
+              color: 'var(--red)',
+              opacity: 0.5,
               transition: 'all 0.2s',
             }}
           >
