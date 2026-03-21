@@ -2,12 +2,20 @@ import { useRef, useState } from 'react';
 import {
   Upload, RotateCcw, Crosshair, Circle, Move, Undo2, Ruler,
   ZoomIn, Maximize2, Eye, EyeOff, Hash, X, Wand2, Loader2,
-  Eraser, Trash2, ChevronDown, ChevronRight, Palette,
+  Eraser, Trash2, ChevronDown, ChevronRight, Palette, Pin, Wrench,
 } from 'lucide-react';
 import { useAnalysisStore } from '../../stores/analysisStore';
 import { detectImpacts } from '../../lib/autoDetect';
 
-export function Toolbar() {
+interface ToolbarProps {
+  collapsed?: boolean;
+  pinned?: boolean;
+  onPin?: () => void;
+  onExpand?: () => void;
+  onCollapse?: () => void;
+}
+
+export function Toolbar({ collapsed, pinned, onPin, onExpand, onCollapse }: ToolbarProps) {
   const store = useAnalysisStore();
   const fileRef = useRef<HTMLInputElement>(null);
   const [detecting, setDetecting] = useState(false);
@@ -33,18 +41,23 @@ export function Toolbar() {
   const hasImpacts = store.impacts.length > 0;
 
   return (
-    <div className="sidebar-left" style={{
-      width: 220,
-      background: 'var(--surface)',
-      borderRight: '1px solid var(--border)',
-      overflowY: 'auto',
-      padding: '10px 10px',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 14,
-      flexShrink: 0,
-      position: 'relative',
-    }}>
+    <div
+      className={`sidebar-left ${collapsed ? 'collapsed' : ''}`}
+      style={{
+        width: collapsed ? 46 : 220,
+        background: 'var(--surface)',
+        borderRight: '1px solid var(--border)',
+        overflowY: collapsed ? 'hidden' : 'auto',
+        padding: collapsed ? '10px 6px' : '10px 10px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 14,
+        flexShrink: 0,
+        position: 'relative',
+      }}
+      onMouseEnter={collapsed ? onExpand : undefined}
+      onMouseLeave={collapsed ? onCollapse : undefined}
+    >
       {/* Top decoration line */}
       <div style={{
         position: 'absolute',
@@ -57,6 +70,29 @@ export function Toolbar() {
       }} />
 
       <input ref={fileRef} type="file" accept="image/*" hidden onChange={handleFileChange} />
+
+      {/* Collapsed indicator */}
+      {collapsed && (
+        <div className="sidebar-collapsed-icon">
+          <Wrench size={16} color="rgba(0,255,65,0.5)" />
+          <span>Outils</span>
+        </div>
+      )}
+
+      {/* Pin button */}
+      {onPin && !collapsed && (
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <button
+            className={`sidebar-pin-btn ${pinned ? 'pinned' : ''}`}
+            onClick={onPin}
+            title={pinned ? 'Réduire auto activé' : 'Garder ouvert'}
+          >
+            <Pin size={12} />
+          </button>
+        </div>
+      )}
+
+      <div className="sidebar-content">
 
       {/* ─── IMAGE ─── */}
       {!hasImage ? (
@@ -336,6 +372,7 @@ export function Toolbar() {
           </CollapsibleSection>
         </>
       )}
+      </div>{/* end sidebar-content */}
     </div>
   );
 }

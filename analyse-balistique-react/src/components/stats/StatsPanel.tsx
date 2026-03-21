@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Download, Save, Box, Target, Ruler, Activity, Layers } from 'lucide-react';
+import { Download, Save, Box, Target, Ruler, Activity, Layers, Pin, BarChart3 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAnalysisStore } from '../../stores/analysisStore';
 import { computeFullAnalysis, distancePx, pxToCm, classifyZone } from '../../lib/ballistics';
@@ -9,9 +9,14 @@ import type { AnalysisStats } from '../../types';
 interface StatsPanelProps {
   onExport: () => void;
   onSaveMunition: () => void;
+  collapsed?: boolean;
+  pinned?: boolean;
+  onPin?: () => void;
+  onExpand?: () => void;
+  onCollapse?: () => void;
 }
 
-export function StatsPanel({ onExport, onSaveMunition }: StatsPanelProps) {
+export function StatsPanel({ onExport, onSaveMunition, collapsed, pinned, onPin, onExpand, onCollapse }: StatsPanelProps) {
   const navigate = useNavigate();
   const { impacts, center, circle1, circle2, scale } = useAnalysisStore();
 
@@ -21,18 +26,23 @@ export function StatsPanel({ onExport, onSaveMunition }: StatsPanelProps) {
   );
 
   return (
-    <div className="sidebar-right" style={{
-      width: 280,
-      background: 'var(--surface)',
-      borderLeft: '1px solid var(--border)',
-      overflowY: 'auto',
-      padding: '12px 12px',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 12,
-      flexShrink: 0,
-      position: 'relative',
-    }}>
+    <div
+      className={`sidebar-right ${collapsed ? 'collapsed' : ''}`}
+      style={{
+        width: collapsed ? 46 : 280,
+        background: 'var(--surface)',
+        borderLeft: '1px solid var(--border)',
+        overflowY: collapsed ? 'hidden' : 'auto',
+        padding: collapsed ? '12px 6px' : '12px 12px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 12,
+        flexShrink: 0,
+        position: 'relative',
+      }}
+      onMouseEnter={collapsed ? onExpand : undefined}
+      onMouseLeave={collapsed ? onCollapse : undefined}
+    >
       {/* Top decoration */}
       <div style={{
         position: 'absolute',
@@ -43,6 +53,29 @@ export function StatsPanel({ onExport, onSaveMunition }: StatsPanelProps) {
         background: 'linear-gradient(90deg, transparent, rgba(0,255,65,0.2))',
         pointerEvents: 'none',
       }} />
+
+      {/* Collapsed indicator */}
+      {collapsed && (
+        <div className="sidebar-collapsed-icon">
+          <BarChart3 size={16} color="rgba(0,255,65,0.5)" />
+          <span>Stats</span>
+        </div>
+      )}
+
+      {/* Pin button */}
+      {onPin && !collapsed && (
+        <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+          <button
+            className={`sidebar-pin-btn ${pinned ? 'pinned' : ''}`}
+            onClick={onPin}
+            title={pinned ? 'Réduire auto activé' : 'Garder ouvert'}
+          >
+            <Pin size={12} />
+          </button>
+        </div>
+      )}
+
+      <div className="sidebar-content">
 
       {/* Header */}
       <div style={{
@@ -212,6 +245,7 @@ export function StatsPanel({ onExport, onSaveMunition }: StatsPanelProps) {
           </button>
         </div>
       </div>
+      </div>{/* end sidebar-content */}
     </div>
   );
 }
