@@ -104,7 +104,7 @@ function ScrollPanel({ progress, range, side, keepVisible, children }: {
   );
 
   return (
-    <motion.div className={`scroll-panel panel-${side}`} style={{ opacity, x, y }}>
+    <motion.div className={`scroll-panel panel-${side}`} style={side === 'center' ? { opacity } : { opacity, x, y }}>
       {children}
     </motion.div>
   );
@@ -166,9 +166,13 @@ function ShotgunBlast({ active }: { active: boolean }) {
       const h = canvas.offsetHeight;
       ctx.clearRect(0, 0, w, h);
 
-      // Origin: muzzle position (right side of weapon, vertically centered slightly above middle)
-      const originX = w * 0.97;
-      const originY = h * 0.35;
+      // Canvas matches weapon-container exactly
+      // SVG viewBox 820x300, aspect ratio preserved, width=100% of container
+      // SVG height = w * (300/820), vertically aligned to top
+      // Muzzle at viewBox coords (797, 95)
+      const originX = (797 / 820) * w;
+      const svgRenderedH = w * (300 / 820);
+      const originY = (95 / 300) * svgRenderedH;
 
       // Spawn bursts when active
       if (active) {
@@ -252,6 +256,7 @@ function ShotgunBlast({ active }: { active: boolean }) {
         width: '100%', height: '100%',
         pointerEvents: 'none',
         zIndex: 10,
+        overflow: 'visible',
       }}
     />
   );
@@ -260,7 +265,7 @@ function ShotgunBlast({ active }: { active: boolean }) {
 /* ═══════════════════════════════════════════════════════════
    WEAPON BLUEPRINT — SVG shotgun that assembles on scroll
    ═══════════════════════════════════════════════════════════ */
-function WeaponBlueprint({ progress }: { progress: MotionValue<number> }) {
+function WeaponBlueprint({ progress, blastActive }: { progress: MotionValue<number>; blastActive: boolean }) {
   // Part opacities — each part fades in during its phase
   const stockOp = useTransform(progress, [0, 0.05, 0.14], [0.04, 0.6, 1]);
   const receiverOp = useTransform(progress, [0.12, 0.20, 0.30], [0.04, 0.6, 1]);
@@ -402,6 +407,7 @@ function WeaponBlueprint({ progress }: { progress: MotionValue<number> }) {
 
         {/* Gerbe handled by ShotgunBlast canvas particle system */}
       </svg>
+      <ShotgunBlast active={blastActive} />
     </div>
   );
 }
@@ -552,11 +558,8 @@ export function LandingPage() {
       {/* ═══ WEAPON ASSEMBLY TRACK ═══ */}
       <div className="weapon-track" ref={trackRef}>
         <div className="weapon-sticky">
-          {/* Shotgun blast particle system */}
-          <ShotgunBlast active={blastActive} />
-
           {/* Central weapon SVG */}
-          <WeaponBlueprint progress={wp} />
+          <WeaponBlueprint progress={wp} blastActive={blastActive} />
 
           {/* Phase indicator dots */}
           <div className="phase-dots">
