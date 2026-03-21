@@ -10,11 +10,11 @@ interface Step {
 }
 
 const STEPS: Step[] = [
-  { key: 'image', label: 'Image', icon: <Upload size={12} />, hint: 'Chargez une photo de cible' },
-  { key: 'scale', label: 'Échelle', icon: <Ruler size={12} />, hint: 'Tracez une référence connue (2 points)' },
-  { key: 'center', label: 'Centre', icon: <Crosshair size={12} />, hint: 'Cliquez sur le point visé de la cible' },
-  { key: 'impacts', label: 'Impacts', icon: <Circle size={12} />, hint: 'Marquez chaque impact ou utilisez la détection auto' },
-  { key: 'results', label: 'Résultats', icon: <BarChart3 size={12} />, hint: 'Analyse terminée — exportez ou sauvegardez' },
+  { key: 'image', label: 'IMG', icon: <Upload size={10} />, hint: 'Chargez une photo de cible' },
+  { key: 'scale', label: 'ECH', icon: <Ruler size={10} />, hint: 'Tracez une référence connue' },
+  { key: 'center', label: 'CTR', icon: <Crosshair size={10} />, hint: 'Cliquez sur le point visé' },
+  { key: 'impacts', label: 'IMP', icon: <Circle size={10} />, hint: 'Marquez les impacts' },
+  { key: 'results', label: 'RES', icon: <BarChart3 size={10} />, hint: 'Analyse terminée' },
 ];
 
 export function WorkflowStepper() {
@@ -45,30 +45,29 @@ export function WorkflowStepper() {
       display: 'flex',
       alignItems: 'center',
       gap: 0,
-      padding: '8px 18px',
-      background: 'var(--surface-glass)',
-      backdropFilter: 'blur(12px)',
+      padding: '6px 16px',
+      background: 'rgba(1, 10, 1, 0.85)',
+      backdropFilter: 'blur(8px)',
       borderBottom: '1px solid var(--border)',
       overflow: 'hidden',
       flexShrink: 0,
       position: 'relative',
     }}>
-      {/* Progress bar background */}
+      {/* Progress bar */}
       <div style={{
         position: 'absolute',
         bottom: 0,
         left: 0,
         right: 0,
-        height: 2,
-        background: 'var(--border)',
+        height: 1,
+        background: 'rgba(0,255,65,0.05)',
       }}>
         <div style={{
           height: '100%',
           width: `${progress}%`,
-          background: 'linear-gradient(90deg, var(--accent), var(--accent2))',
-          borderRadius: 1,
+          background: '#00ff41',
           transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-          boxShadow: '0 0 8px var(--accent-glow)',
+          boxShadow: '0 0 8px rgba(0,255,65,0.3)',
         }} />
       </div>
 
@@ -81,53 +80,57 @@ export function WorkflowStepper() {
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              gap: 7,
-              padding: '5px 12px',
-              borderRadius: 20,
-              fontSize: 11,
-              fontWeight: isActive ? 700 : 500,
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              gap: 5,
+              padding: '4px 10px',
+              fontSize: 9,
+              fontWeight: 700,
+              letterSpacing: '1.5px',
+              fontFamily: 'var(--font-mono)',
+              transition: 'all 0.3s',
+              border: isActive
+                ? '1px solid rgba(0,255,65,0.3)'
+                : '1px solid transparent',
               background: isActive
-                ? 'var(--accent-glow)'
-                : isDone ? 'var(--green-glow)' : 'transparent',
+                ? 'rgba(0,255,65,0.08)'
+                : 'transparent',
               color: isActive
-                ? 'var(--accent2)'
-                : isDone ? 'var(--green)' : 'var(--muted)',
+                ? '#00ff41'
+                : isDone ? 'rgba(0,255,65,0.5)' : 'rgba(0,255,65,0.2)',
               whiteSpace: 'nowrap',
             }}>
               <span style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                width: 22,
-                height: 22,
-                borderRadius: '50%',
+                width: 18,
+                height: 18,
+                border: isActive
+                  ? '1px solid rgba(0,255,65,0.5)'
+                  : isDone ? '1px solid rgba(0,255,65,0.3)' : '1px solid rgba(0,255,65,0.1)',
                 background: isActive
-                  ? 'linear-gradient(135deg, var(--accent), var(--accent2))'
-                  : isDone ? 'var(--green)' : 'var(--surface3)',
-                color: (isActive || isDone) ? '#fff' : 'var(--muted)',
-                fontSize: 10,
+                  ? 'rgba(0,255,65,0.15)'
+                  : isDone ? 'rgba(0,255,65,0.1)' : 'transparent',
+                color: (isActive || isDone) ? '#00ff41' : 'rgba(0,255,65,0.2)',
+                fontSize: 9,
                 fontWeight: 700,
                 flexShrink: 0,
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                boxShadow: isActive ? '0 2px 10px var(--accent-glow)' : 'none',
+                transition: 'all 0.3s',
+                boxShadow: isActive ? '0 0 10px rgba(0,255,65,0.15)' : 'none',
               }}>
-                {isDone ? <Check size={11} strokeWidth={3} /> : step.icon}
+                {isDone ? <Check size={9} strokeWidth={3} /> : step.icon}
               </span>
               {step.label}
             </div>
 
             {i < STEPS.length - 1 && (
               <div style={{
-                width: 28,
-                height: 2,
+                width: 20,
+                height: 1,
                 margin: '0 2px',
-                borderRadius: 1,
                 background: i < currentStep
-                  ? 'var(--green)'
-                  : 'var(--border)',
+                  ? 'rgba(0,255,65,0.4)'
+                  : 'rgba(0,255,65,0.08)',
                 transition: 'background 0.4s ease',
-                opacity: i < currentStep ? 0.6 : 0.4,
               }} />
             )}
           </div>
@@ -136,14 +139,14 @@ export function WorkflowStepper() {
 
       <div style={{
         marginLeft: 'auto',
-        fontSize: 11,
-        color: 'var(--text-secondary)',
-        fontStyle: 'italic',
+        fontSize: 9,
+        color: 'rgba(0,255,65,0.35)',
+        fontFamily: 'var(--font-mono)',
         whiteSpace: 'nowrap',
         paddingLeft: 14,
-        opacity: 0.8,
+        letterSpacing: '0.5px',
       }}>
-        {STEPS[currentStep]?.hint}
+        {'>'} {STEPS[currentStep]?.hint}
       </div>
     </div>
   );

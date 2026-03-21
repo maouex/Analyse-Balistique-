@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Lock, ArrowRight, AlertCircle } from 'lucide-react';
-import { PlombScopeLogo } from '../brand/PlombScopeLogo';
+import { Lock, ArrowRight, AlertCircle, Crosshair } from 'lucide-react';
 
 function simpleHash(str: string): string {
   let h = 0x811c9dc5;
@@ -12,7 +11,6 @@ function simpleHash(str: string): string {
   return (h >>> 0).toString(16).slice(0, 10);
 }
 
-// Pre-compute at module level so we can verify
 const EXPECTED = simpleHash('taradeau');
 
 interface LoginScreenProps {
@@ -44,33 +42,46 @@ export function LoginScreen({ onAuth }: LoginScreenProps) {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'var(--bg)',
+      background: '#010a01',
       position: 'relative',
       overflow: 'hidden',
     }}>
-      {/* Background radial glow */}
+      {/* Scanlines */}
       <div style={{
         position: 'absolute',
-        top: '30%',
-        left: '50%',
-        width: 800,
-        height: 800,
-        transform: 'translate(-50%, -50%)',
-        background: 'radial-gradient(ellipse, var(--accent-glow) 0%, transparent 60%)',
+        inset: 0,
         pointerEvents: 'none',
-        opacity: 0.3,
+        zIndex: 2,
+        background: `repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 2px,
+          rgba(0, 255, 65, 0.015) 2px,
+          rgba(0, 255, 65, 0.015) 4px
+        )`,
       }} />
 
-      {/* Grid pattern */}
+      {/* Grid */}
       <div style={{
         position: 'absolute',
         inset: 0,
         backgroundImage: `
-          linear-gradient(var(--border) 1px, transparent 1px),
-          linear-gradient(90deg, var(--border) 1px, transparent 1px)
+          linear-gradient(rgba(0, 255, 65, 0.025) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(0, 255, 65, 0.025) 1px, transparent 1px)
         `,
         backgroundSize: '60px 60px',
-        opacity: 0.15,
+        pointerEvents: 'none',
+      }} />
+
+      {/* Radial glow */}
+      <div style={{
+        position: 'absolute',
+        top: '30%',
+        left: '50%',
+        width: 600,
+        height: 600,
+        transform: 'translate(-50%, -50%)',
+        background: 'radial-gradient(ellipse, rgba(0,255,65,0.06) 0%, transparent 60%)',
         pointerEvents: 'none',
       }} />
 
@@ -82,9 +93,9 @@ export function LoginScreen({ onAuth }: LoginScreenProps) {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: 32,
+          gap: 28,
           position: 'relative',
-          zIndex: 1,
+          zIndex: 3,
         }}
       >
         {/* Logo */}
@@ -92,8 +103,31 @@ export function LoginScreen({ onAuth }: LoginScreenProps) {
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.15, duration: 0.4 }}
+          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}
         >
-          <PlombScopeLogo size={72} showText textSize={28} />
+          <Crosshair size={48} color="#00ff41" strokeWidth={1} style={{ filter: 'drop-shadow(0 0 15px rgba(0,255,65,0.3))' }} />
+          <div style={{ textAlign: 'center' }}>
+            <div style={{
+              fontSize: 20,
+              fontWeight: 900,
+              letterSpacing: '4px',
+              color: '#00ff41',
+              textShadow: '0 0 20px rgba(0,255,65,0.3)',
+            }}>
+              PLOMBSCOPE
+            </div>
+            <div style={{
+              fontSize: 9,
+              fontWeight: 600,
+              color: 'rgba(0,255,65,0.35)',
+              letterSpacing: '3px',
+              textTransform: 'uppercase',
+              marginTop: 4,
+              fontFamily: "'JetBrains Mono', 'Courier New', monospace",
+            }}>
+              Analyse balistique
+            </div>
+          </div>
         </motion.div>
 
         {/* Login card */}
@@ -104,23 +138,41 @@ export function LoginScreen({ onAuth }: LoginScreenProps) {
           style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: 16,
-            padding: 28,
-            background: 'var(--surface)',
-            border: '1px solid var(--border)',
-            borderRadius: 'var(--radius-xl)',
-            boxShadow: 'var(--shadow-lg)',
-            width: 340,
+            gap: 14,
+            padding: 24,
+            background: 'rgba(4, 18, 8, 0.9)',
+            border: '1px solid rgba(0,255,65,0.15)',
+            width: 320,
+            position: 'relative',
           }}
         >
+          {/* Top decoration */}
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 1,
+            background: 'linear-gradient(90deg, transparent, rgba(0,255,65,0.3), transparent)',
+          }} />
+
           <div style={{
             display: 'flex',
             alignItems: 'center',
             gap: 8,
-            marginBottom: 4,
+            marginBottom: 2,
           }}>
-            <Lock size={15} color="var(--accent2)" />
-            <span style={{ fontSize: 14, fontWeight: 700 }}>Accès sécurisé</span>
+            <Lock size={12} color="#00ff41" />
+            <span style={{
+              fontSize: 10,
+              fontWeight: 700,
+              letterSpacing: '2px',
+              textTransform: 'uppercase',
+              color: 'rgba(0,255,65,0.6)',
+              fontFamily: "'JetBrains Mono', monospace",
+            }}>
+              Accès sécurisé
+            </span>
           </div>
 
           <div style={{ position: 'relative' }}>
@@ -135,9 +187,9 @@ export function LoginScreen({ onAuth }: LoginScreenProps) {
               }}
               autoFocus
               style={{
-                paddingRight: 44,
-                borderColor: error ? 'var(--red)' : undefined,
-                boxShadow: error ? '0 0 0 3px var(--red-glow)' : undefined,
+                paddingRight: 40,
+                borderColor: error ? '#ff4444' : undefined,
+                boxShadow: error ? '0 0 12px rgba(255,68,68,0.15)' : undefined,
               }}
             />
             <button
@@ -147,13 +199,14 @@ export function LoginScreen({ onAuth }: LoginScreenProps) {
                 right: 4,
                 top: '50%',
                 transform: 'translateY(-50%)',
-                width: 32,
-                height: 32,
-                borderRadius: 6,
-                border: 'none',
+                width: 28,
+                height: 28,
+                border: password.length > 0
+                  ? '1px solid rgba(0,255,65,0.4)'
+                  : '1px solid rgba(0,255,65,0.1)',
                 background: password.length > 0
-                  ? 'linear-gradient(135deg, var(--accent), var(--accent2))'
-                  : 'var(--surface3)',
+                  ? 'rgba(0,255,65,0.15)'
+                  : 'transparent',
                 cursor: password.length > 0 ? 'pointer' : 'default',
                 display: 'flex',
                 alignItems: 'center',
@@ -161,7 +214,7 @@ export function LoginScreen({ onAuth }: LoginScreenProps) {
                 transition: 'all 0.2s ease',
               }}
             >
-              <ArrowRight size={14} color={password.length > 0 ? '#fff' : 'var(--muted)'} />
+              <ArrowRight size={12} color={password.length > 0 ? '#00ff41' : 'rgba(0,255,65,0.2)'} />
             </button>
           </div>
 
@@ -173,27 +226,31 @@ export function LoginScreen({ onAuth }: LoginScreenProps) {
                 display: 'flex',
                 alignItems: 'center',
                 gap: 6,
-                fontSize: 12,
+                fontSize: 10,
                 fontWeight: 600,
-                color: 'var(--red)',
-                padding: '6px 10px',
-                background: 'var(--red-glow)',
-                borderRadius: 6,
+                color: '#ff4444',
+                padding: '5px 8px',
+                background: 'rgba(255,68,68,0.08)',
+                border: '1px solid rgba(255,68,68,0.2)',
+                fontFamily: "'JetBrains Mono', monospace",
+                letterSpacing: '0.5px',
               }}
             >
-              <AlertCircle size={13} />
-              Mot de passe incorrect
+              <AlertCircle size={11} />
+              ERREUR: MOT DE PASSE INCORRECT
             </motion.div>
           )}
         </motion.form>
 
         {/* Footer */}
         <span style={{
-          fontSize: 10,
-          color: 'var(--muted)',
-          letterSpacing: '0.5px',
+          fontSize: 9,
+          color: 'rgba(0,255,65,0.2)',
+          letterSpacing: '2px',
+          fontFamily: "'JetBrains Mono', monospace",
+          textTransform: 'uppercase',
         }}>
-          Journal de chasse — Analyse balistique
+          Système d&apos;analyse v2.0
         </span>
       </motion.div>
     </div>

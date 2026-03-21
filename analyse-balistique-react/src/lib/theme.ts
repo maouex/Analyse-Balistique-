@@ -32,6 +32,7 @@ export const theme = {
   },
   fonts: {
     sans: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    mono: "'JetBrains Mono', 'Courier New', monospace",
   },
   breakpoints: {
     mobile: '680px',
