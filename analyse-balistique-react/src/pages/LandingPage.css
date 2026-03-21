@@ -233,7 +233,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  overflow: visible;
 }
 
 
@@ -369,9 +369,9 @@
 .panel-center {
   left: 50%;
   max-width: 520px;
-  top: auto;
-  bottom: 5%;
-  transform: translateX(-50%);
+  top: auto !important;
+  bottom: 4% !important;
+  transform: translateX(-50%) !important;
 }
 
 
