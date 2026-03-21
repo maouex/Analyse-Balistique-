@@ -107,108 +107,81 @@ function ScrollPanel({ progress, range, side, children }: {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   WEAPON BLUEPRINT — Exploded→Assembled vertical pan
-   SVG layout: Y<400 = separated parts, Y≥400 = complete weapon
+   WEAPON BLUEPRINT — Piece-by-piece assembly from real SVG
+   Complete weapon (Y≥400 in SVG) clipped into 6 horizontal
+   zones, each fading in during its scroll phase.
    ═══════════════════════════════════════════════════════════ */
 
-/* Part Y-centers in the SVG (viewBox 1024×558):
-   Phase 1 — Canon (Barrel):      Y ≈ 65
-   Phase 2 — Détente (Trigger):    Y ≈ 125
-   Phase 3 — Garde-main (Magazine): Y ≈ 200
-   Phase 4 — Crosse (Stock/Frame):  Y ≈ 264
-   Phase 5 — Boîtier (Assembly):    Y ≈ 340
-   Phase 6 — Système complet:       Y ≈ 479  (complete weapon)
-*/
-
-const PHASE_LABELS = [
-  { key: 'canon',   text: 'CANON',              dim: '76 cm' },
-  { key: 'detente', text: 'DÉTENTE',             dim: null },
-  { key: 'magasin', text: 'GARDE-MAIN',          dim: 'MAG. TUBULAIRE' },
-  { key: 'crosse',  text: 'CROSSE',              dim: '36 cm' },
-  { key: 'boitier', text: 'BOÎTIER DE CULASSE',  dim: null },
-  { key: 'complet', text: 'SYSTÈME OPÉRATIONNEL', dim: null },
+/* Horizontal clip zones of the complete weapon (% of viewport width) */
+const WEAPON_SLICES = [
+  { clip: 'inset(0 83% 0 0)',     label: 'CROSSE',              dim: '36 cm' },
+  { clip: 'inset(0 62% 0 17%)',   label: 'BOÎTIER DE CULASSE',  dim: null },
+  { clip: 'inset(0 45% 0 38%)',   label: 'MÉCANISME DE TIR',    dim: null },
+  { clip: 'inset(0 28% 0 55%)',   label: 'GARDE-MAIN',          dim: 'MAG. TUBULAIRE' },
+  { clip: 'inset(0 10% 0 72%)',   label: 'CANON',               dim: '76 cm' },
+  { clip: 'inset(0 0  0 90%)',    label: 'SYSTÈME OPÉRATIONNEL', dim: null },
 ];
 
 function WeaponBlueprint({ progress }: { progress: MotionValue<number> }) {
-  /*
-   * Viewport shows ~170 SVG units of height at a time.
-   * The image (1024×558) is wider than tall, rendered at 100% width.
-   * translateY (% of image height) pans from top parts → complete weapon.
-   *
-   * Target viewport-top for each phase center:
-   *   center - 85 (half viewport), clamped, then / 558 → percentage
-   */
-  const yPan = useTransform(
-    progress,
-    [0, 0.167, 0.333, 0.5, 0.667, 0.833, 1.0],
-    ['0%', '-7%', '-21%', '-32%', '-46%', '-70%', '-70%'],
+  // Each slice fades in during its phase
+  const sliceOps = [
+    useTransform(progress, [0, 0.05, 0.14],     [0.04, 0.6, 1]),
+    useTransform(progress, [0.12, 0.20, 0.30],   [0.04, 0.6, 1]),
+    useTransform(progress, [0.28, 0.38, 0.47],   [0.04, 0.6, 1]),
+    useTransform(progress, [0.44, 0.54, 0.63],   [0.04, 0.6, 1]),
+    useTransform(progress, [0.60, 0.70, 0.80],   [0.04, 0.6, 1]),
+    useTransform(progress, [0.76, 0.86, 0.94],   [0.04, 0.6, 1]),
+  ];
+
+  // Phase labels
+  const lbl1 = useTransform(progress, [0, 0.03, 0.12, 0.167],       [0, 1, 1, 0.15]);
+  const lbl2 = useTransform(progress, [0.167, 0.20, 0.29, 0.333],   [0, 1, 1, 0.15]);
+  const lbl3 = useTransform(progress, [0.333, 0.37, 0.46, 0.5],     [0, 1, 1, 0.15]);
+  const lbl4 = useTransform(progress, [0.5, 0.53, 0.62, 0.667],     [0, 1, 1, 0.15]);
+  const lbl5 = useTransform(progress, [0.667, 0.70, 0.79, 0.833],   [0, 1, 1, 0.15]);
+  const lbl6 = useTransform(progress, [0.833, 0.87, 0.95, 1],       [0, 1, 1, 1]);
+  const labelOps = [lbl1, lbl2, lbl3, lbl4, lbl5, lbl6];
+
+  // Scan line follows the latest revealed edge
+  const scanLeftPct = useTransform(progress,
+    [0, 0.14, 0.167, 0.30, 0.333, 0.47, 0.5, 0.63, 0.667, 0.80, 0.833, 0.94],
+    [0, 17, 17, 38, 38, 55, 55, 72, 72, 90, 90, 100],
   );
+  const scanLeft = useTransform(scanLeftPct, (v: number) => `${v}%`);
+  const scanOpacity = useTransform(progress, [0, 0.02, 0.92, 0.95], [0, 0.7, 0.7, 0]);
 
-  // Glow intensifies as we progress
-  const mainOpacity = useTransform(progress, [0, 0.4, 0.85, 1], [0.6, 0.8, 0.9, 1]);
-
-  // Horizontal scan line (sweeps vertically through viewport at each phase transition)
-  const scanY = useTransform(progress, (v: number) => {
-    const phase = v * 6;
-    const frac = phase - Math.floor(phase); // 0→1 within each phase
-    return `${frac * 100}%`;
-  });
-  const scanOpacity = useTransform(progress, (v: number) => {
-    const phase = v * 6;
-    const frac = phase - Math.floor(phase);
-    // Bright at start of phase, fades out
-    return frac < 0.3 ? 0.7 * (1 - frac / 0.3) : 0;
-  });
-
-  // Phase labels — appear/disappear per phase
-  const lbl1 = useTransform(progress, [0, 0.03, 0.12, 0.167], [0, 1, 1, 0]);
-  const lbl2 = useTransform(progress, [0.167, 0.20, 0.29, 0.333], [0, 1, 1, 0]);
-  const lbl3 = useTransform(progress, [0.333, 0.37, 0.46, 0.5], [0, 1, 1, 0]);
-  const lbl4 = useTransform(progress, [0.5, 0.53, 0.62, 0.667], [0, 1, 1, 0]);
-  const lbl5 = useTransform(progress, [0.667, 0.70, 0.79, 0.833], [0, 1, 1, 0]);
-  const lbl6 = useTransform(progress, [0.833, 0.87, 0.95, 1], [0, 1, 1, 1]);
-  const labelOpacities = [lbl1, lbl2, lbl3, lbl4, lbl5, lbl6];
-
-  // Muzzle flash on the complete weapon (phase 6)
-  const flashOp = useTransform(progress, [0.90, 0.96, 1.0], [0, 1, 0.5]);
-  const flashScale = useTransform(progress, [0.90, 0.96, 1.0], [0.3, 1.5, 1]);
+  // Muzzle flash
+  const flashOp = useTransform(progress, [0.91, 0.96, 1.0], [0, 1, 0.5]);
+  const flashScale = useTransform(progress, [0.91, 0.96, 1.0], [0.3, 1.3, 0.9]);
 
   return (
     <div className="weapon-container">
-      {/* Viewport — clips the visible area */}
+      {/* Viewport — shows only the complete weapon section */}
       <div className="weapon-viewport">
-        {/* Ghost: very faint full image, no pan */}
-        <img
-          src={weaponSvgUrl}
-          className="weapon-img weapon-ghost"
-          alt="" draggable={false}
-        />
+        {/* Ghost: faint full weapon silhouette */}
+        <img src={weaponSvgUrl} className="weapon-img weapon-ghost" alt="" draggable={false} />
 
-        {/* Main image: pans vertically with scroll */}
-        <motion.img
-          src={weaponSvgUrl}
-          className="weapon-img weapon-main"
-          style={{ y: yPan, opacity: mainOpacity }}
-          alt="" draggable={false}
-        />
+        {/* 6 clipped slices — each fades in during its phase */}
+        {WEAPON_SLICES.map((slice, i) => (
+          <motion.div key={i} className="weapon-slice" style={{ clipPath: slice.clip, opacity: sliceOps[i] }}>
+            <img src={weaponSvgUrl} className="weapon-img weapon-main" alt="" draggable={false} />
+          </motion.div>
+        ))}
 
-        {/* Horizontal scan line */}
-        <motion.div
-          className="weapon-scanline-h"
-          style={{ top: scanY, opacity: scanOpacity }}
-        />
+        {/* Vertical scan line at the latest reveal edge */}
+        <motion.div className="weapon-scanline" style={{ left: scanLeft, opacity: scanOpacity }} />
       </div>
 
-      {/* Phase labels — fixed to viewport, not panning */}
+      {/* Phase labels */}
       <div className="weapon-label-layer">
-        {PHASE_LABELS.map((lbl, i) => (
+        {WEAPON_SLICES.map((slice, i) => (
           <motion.div
-            key={lbl.key}
+            key={i}
             className={`weapon-label ${i === 5 ? 'weapon-label-final' : ''}`}
-            style={{ opacity: labelOpacities[i] }}
+            style={{ opacity: labelOps[i] }}
           >
-            <span className="weapon-label-text">{lbl.text}</span>
-            {lbl.dim && <span className="weapon-label-dim">{lbl.dim}</span>}
+            <span className="weapon-label-text">{slice.label}</span>
+            {slice.dim && <span className="weapon-label-dim">{slice.dim}</span>}
           </motion.div>
         ))}
       </div>
