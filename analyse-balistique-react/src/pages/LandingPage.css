@@ -222,7 +222,7 @@
    ═══════════════════════════════════════════════════════════ */
 .weapon-track {
   position: relative;
-  height: 700vh;
+  height: 850vh;
   z-index: 2;
 }
 
@@ -370,7 +370,7 @@
   left: 50%;
   max-width: 520px;
   top: auto !important;
-  bottom: 4% !important;
+  bottom: 2% !important;
   transform: translateX(-50%) !important;
 }
 
