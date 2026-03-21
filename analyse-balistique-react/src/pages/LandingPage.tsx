@@ -5,7 +5,7 @@ import {
   Crosshair, Target, Radar, Shield,
   ChevronDown, ArrowRight, Cpu, BarChart3, Layers, Eye
 } from 'lucide-react';
-import { ParticleField } from '../components/landing/ParticleField';
+import SoftAurora from '../components/landing/SoftAurora';
 import { CursorEffect } from '../components/landing/CursorEffect';
 import './LandingPage.css';
 
@@ -493,7 +493,24 @@ export function LandingPage() {
 
   return (
     <div className="landing-root" ref={containerRef}>
-      <ParticleField />
+      <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none' }}>
+        <SoftAurora
+          speed={0.4}
+          scale={1.5}
+          brightness={0.6}
+          color1="#00ff41"
+          color2="#004a12"
+          noiseFrequency={2.5}
+          noiseAmplitude={1}
+          bandHeight={0.5}
+          bandSpread={1}
+          octaveDecay={0.1}
+          layerOffset={0}
+          colorSpeed={0.8}
+          enableMouseInteraction
+          mouseInfluence={0.2}
+        />
+      </div>
       <CursorEffect />
       <div className="scanlines" />
       <div className="tactical-grid" />
