@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { ParticleField } from '../components/landing/ParticleField';
 import { CursorEffect } from '../components/landing/CursorEffect';
+import weaponSvgUrl from '../assets/weapon/vectorised-1774111953907.svg';
 import './LandingPage.css';
 
 /* ═══════════════════════════════════════════════════════════
@@ -106,227 +107,125 @@ function ScrollPanel({ progress, range, side, children }: {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   WEAPON BLUEPRINT — SVG shotgun that assembles on scroll
+   WEAPON BLUEPRINT — Real SVG with CSS night-vision filter
+   Progressive clip-path reveal driven by scroll
    ═══════════════════════════════════════════════════════════ */
 function WeaponBlueprint({ progress }: { progress: MotionValue<number> }) {
-  // Part opacities — each part fades in during its phase
-  const stockOp = useTransform(progress, [0, 0.05, 0.14], [0.04, 0.6, 1]);
-  const receiverOp = useTransform(progress, [0.12, 0.20, 0.30], [0.04, 0.6, 1]);
-  const barrelOp = useTransform(progress, [0.28, 0.38, 0.47], [0.04, 0.6, 1]);
-  const triggerOp = useTransform(progress, [0.44, 0.54, 0.63], [0.04, 0.6, 1]);
-  const forendOp = useTransform(progress, [0.60, 0.70, 0.80], [0.04, 0.6, 1]);
-  const detailsOp = useTransform(progress, [0.76, 0.86, 0.94], [0.04, 0.6, 1]);
+  // Progressive reveal from left (stock) to right (muzzle)
+  const revealPct = useTransform(progress, [0, 0.85], [0, 100]);
+  const clipPath = useTransform(revealPct, (v: number) => `inset(0 ${100 - v}% 0 0)`);
 
-  // Labels per phase
+  // Scan line follows the reveal edge
+  const scanLeft = useTransform(revealPct, (v: number) => `${v}%`);
+  const scanOpacity = useTransform(progress, [0, 0.02, 0.83, 0.86], [0, 0.8, 0.8, 0]);
+
+  // Overall glow intensifies
+  const mainOpacity = useTransform(progress, [0, 0.5, 1], [0.7, 0.85, 1]);
+
+  // Phase labels
   const lbl1 = useTransform(progress, [0, 0.03, 0.12, 0.167], [0, 1, 1, 0.15]);
   const lbl2 = useTransform(progress, [0.167, 0.20, 0.29, 0.333], [0, 1, 1, 0.15]);
   const lbl3 = useTransform(progress, [0.333, 0.37, 0.46, 0.5], [0, 1, 1, 0.15]);
   const lbl4 = useTransform(progress, [0.5, 0.53, 0.62, 0.667], [0, 1, 1, 0.15]);
   const lbl5 = useTransform(progress, [0.667, 0.70, 0.79, 0.833], [0, 1, 1, 0.15]);
-  const lbl6 = useTransform(progress, [0.833, 0.86, 0.95, 1], [0, 1, 1, 1]);
+  const lbl6 = useTransform(progress, [0.833, 0.87, 0.95, 1], [0, 1, 1, 1]);
 
   // Muzzle flash
-  const flashOp = useTransform(progress, [0.91, 0.96, 1.0], [0, 1, 0.5]);
-  const flashScale = useTransform(progress, [0.91, 0.96, 1.0], [0.3, 1.3, 0.9]);
+  const flashOp = useTransform(progress, [0.88, 0.94, 1.0], [0, 1, 0.5]);
+  const flashScale = useTransform(progress, [0.88, 0.94, 1.0], [0.3, 1.5, 1]);
 
   return (
     <div className="weapon-container">
-      <svg viewBox="0 0 820 300" className="weapon-svg" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <filter id="wp-glow">
-            <feGaussianBlur stdDeviation="2.5" result="blur" />
-            <feComposite in="SourceGraphic" in2="blur" operator="over" />
-          </filter>
-          <filter id="wp-glow-strong">
-            <feGaussianBlur stdDeviation="5" result="blur" />
-            <feComposite in="SourceGraphic" in2="blur" operator="over" />
-          </filter>
-        </defs>
+      {/* Ghost: always visible, very faint outline */}
+      <img src={weaponSvgUrl} className="weapon-img weapon-ghost" alt="" draggable={false} />
 
-        {/* ── Blueprint grid ── */}
-        {Array.from({ length: 16 }, (_, i) => (
-          <line key={`gh${i}`} x1="0" y1={i * 20} x2="820" y2={i * 20}
-            stroke="rgba(0,255,65,0.025)" strokeWidth="0.5" />
-        ))}
-        {Array.from({ length: 42 }, (_, i) => (
-          <line key={`gv${i}`} x1={i * 20} y1="0" x2={i * 20} y2="300"
-            stroke="rgba(0,255,65,0.025)" strokeWidth="0.5" />
-        ))}
-        {/* Center lines */}
-        <line x1="0" y1="150" x2="820" y2="150"
-          stroke="rgba(0,255,65,0.04)" strokeWidth="0.5" strokeDasharray="6 4" />
-        <line x1="410" y1="0" x2="410" y2="300"
-          stroke="rgba(0,255,65,0.04)" strokeWidth="0.5" strokeDasharray="6 4" />
+      {/* Main: progressively revealed from left to right */}
+      <motion.div className="weapon-reveal" style={{ clipPath }}>
+        <motion.img
+          src={weaponSvgUrl}
+          className="weapon-img weapon-main"
+          style={{ opacity: mainOpacity }}
+          alt=""
+          draggable={false}
+        />
+      </motion.div>
 
-        {/* ══════ Phase 1 : CROSSE ══════ */}
-        <motion.g style={{ opacity: stockOp }} filter="url(#wp-glow)">
-          {/* Buttpad */}
-          <rect x="52" y="108" width="9" height="96"
-            fill="rgba(0,255,65,0.06)" stroke="#00ff41" strokeWidth="1.5" />
-          {/* Stock body */}
-          <path d={`
-            M 61,108 L 225,95 L 237,95 L 237,200
-            L 225,200 L 225,212 L 202,230 L 182,234 L 61,204 Z
-          `} fill="rgba(0,255,65,0.03)" stroke="#00ff41" strokeWidth="1.5" />
-          {/* Grip checkering */}
-          <line x1="182" y1="198" x2="210" y2="220" stroke="rgba(0,255,65,0.18)" strokeWidth="0.5" />
-          <line x1="172" y1="198" x2="200" y2="220" stroke="rgba(0,255,65,0.18)" strokeWidth="0.5" />
-          <line x1="162" y1="198" x2="190" y2="220" stroke="rgba(0,255,65,0.18)" strokeWidth="0.5" />
-          <line x1="152" y1="196" x2="180" y2="218" stroke="rgba(0,255,65,0.12)" strokeWidth="0.5" />
-        </motion.g>
+      {/* Scan line at the reveal edge */}
+      <motion.div className="weapon-scanline" style={{ left: scanLeft, opacity: scanOpacity }} />
+
+      {/* Blueprint labels overlay (positioned to match 1140x912 viewBox) */}
+      <svg viewBox="0 0 1140 912" className="weapon-labels" preserveAspectRatio="xMidYMid meet">
+        {/* Phase 1: CROSSE (Stock area, left side) */}
         <motion.g style={{ opacity: lbl1 }}>
-          <text x="145" y="268" className="bp-label" textAnchor="middle">CROSSE</text>
-          <line x1="145" y1="258" x2="145" y2="238"
-            stroke="rgba(0,255,65,0.35)" strokeWidth="0.5" strokeDasharray="2 2" />
+          <text x="180" y="590" className="bp-label" textAnchor="middle">CROSSE</text>
+          <line x1="180" y1="578" x2="180" y2="545"
+            stroke="rgba(0,255,65,0.4)" strokeWidth="1" strokeDasharray="3 3" />
+          {/* Dimension */}
+          <line x1="70" y1="360" x2="300" y2="360"
+            stroke="rgba(0,255,65,0.12)" strokeWidth="0.5" />
+          <line x1="70" y1="354" x2="70" y2="366"
+            stroke="rgba(0,255,65,0.12)" strokeWidth="0.5" />
+          <line x1="300" y1="354" x2="300" y2="366"
+            stroke="rgba(0,255,65,0.12)" strokeWidth="0.5" />
+          <text x="185" y="355" className="bp-dim" textAnchor="middle">36 cm</text>
         </motion.g>
 
-        {/* ══════ Phase 2 : BOÎTIER / RECEIVER ══════ */}
-        <motion.g style={{ opacity: receiverOp }} filter="url(#wp-glow)">
-          {/* Main body */}
-          <rect x="237" y="86" width="205" height="84"
-            fill="rgba(0,255,65,0.03)" stroke="#00ff41" strokeWidth="1.5" />
-          {/* Top rail (Picatinny) */}
-          <rect x="237" y="78" width="205" height="10"
-            fill="rgba(0,255,65,0.05)" stroke="#00ff41" strokeWidth="1" />
-          {/* Rail notches */}
-          {Array.from({ length: 15 }, (_, i) => (
-            <line key={`rail${i}`}
-              x1={245 + i * 13} y1="78" x2={245 + i * 13} y2="88"
-              stroke="rgba(0,255,65,0.1)" strokeWidth="0.5" />
-          ))}
-          {/* Ejection port */}
-          <rect x="295" y="96" width="58" height="30"
-            fill="none" stroke="rgba(0,255,65,0.35)" strokeWidth="1" strokeDasharray="3 2" />
-          {/* Bolt */}
-          <line x1="365" y1="96" x2="365" y2="126"
-            stroke="rgba(0,255,65,0.3)" strokeWidth="2" />
-          <line x1="360" y1="110" x2="370" y2="110"
-            stroke="rgba(0,255,65,0.3)" strokeWidth="1.5" />
-        </motion.g>
+        {/* Phase 2: BOÎTIER DE CULASSE (Receiver, center) */}
         <motion.g style={{ opacity: lbl2 }}>
-          <text x="340" y="58" className="bp-label" textAnchor="middle">BOÎTIER DE CULASSE</text>
-          <line x1="340" y1="64" x2="340" y2="76"
-            stroke="rgba(0,255,65,0.35)" strokeWidth="0.5" strokeDasharray="2 2" />
+          <text x="430" y="340" className="bp-label" textAnchor="middle">BOÎTIER DE CULASSE</text>
+          <line x1="430" y1="348" x2="430" y2="375"
+            stroke="rgba(0,255,65,0.4)" strokeWidth="1" strokeDasharray="3 3" />
         </motion.g>
 
-        {/* ══════ Phase 3 : CANON / BARREL ══════ */}
-        <motion.g style={{ opacity: barrelOp }} filter="url(#wp-glow)">
-          {/* Main barrel */}
-          <rect x="442" y="94" width="345" height="22"
-            fill="rgba(0,255,65,0.03)" stroke="#00ff41" strokeWidth="1.5" />
-          {/* Vent rib */}
-          <line x1="442" y1="90" x2="768" y2="90"
-            stroke="#00ff41" strokeWidth="1" />
-          {/* Muzzle end */}
-          <rect x="785" y="88" width="14" height="30"
-            fill="rgba(0,255,65,0.05)" stroke="#00ff41" strokeWidth="1.5" />
-          {/* Bore center line */}
-          <line x1="444" y1="105" x2="784" y2="105"
-            stroke="rgba(0,255,65,0.12)" strokeWidth="0.5" strokeDasharray="10 5" />
-        </motion.g>
+        {/* Phase 3: CANON (Barrel, right side) */}
         <motion.g style={{ opacity: lbl3 }}>
-          <text x="610" y="58" className="bp-label" textAnchor="middle">CANON</text>
-          <line x1="610" y1="64" x2="610" y2="88"
-            stroke="rgba(0,255,65,0.35)" strokeWidth="0.5" strokeDasharray="2 2" />
-          {/* Dimension line */}
-          <line x1="442" y1="70" x2="787" y2="70"
-            stroke="rgba(0,255,65,0.15)" strokeWidth="0.5" />
-          <line x1="442" y1="66" x2="442" y2="74"
-            stroke="rgba(0,255,65,0.15)" strokeWidth="0.5" />
-          <line x1="787" y1="66" x2="787" y2="74"
-            stroke="rgba(0,255,65,0.15)" strokeWidth="0.5" />
-          <text x="615" y="67" className="bp-dim" textAnchor="middle">76 cm</text>
+          <text x="750" y="340" className="bp-label" textAnchor="middle">CANON</text>
+          <line x1="750" y1="348" x2="750" y2="375"
+            stroke="rgba(0,255,65,0.4)" strokeWidth="1" strokeDasharray="3 3" />
+          {/* Barrel dimension */}
+          <line x1="540" y1="362" x2="1050" y2="362"
+            stroke="rgba(0,255,65,0.12)" strokeWidth="0.5" />
+          <line x1="540" y1="356" x2="540" y2="368"
+            stroke="rgba(0,255,65,0.12)" strokeWidth="0.5" />
+          <line x1="1050" y1="356" x2="1050" y2="368"
+            stroke="rgba(0,255,65,0.12)" strokeWidth="0.5" />
+          <text x="795" y="358" className="bp-dim" textAnchor="middle">76 cm</text>
         </motion.g>
 
-        {/* ══════ Phase 4 : DÉTENTE / TRIGGER ══════ */}
-        <motion.g style={{ opacity: triggerOp }} filter="url(#wp-glow)">
-          {/* Trigger guard */}
-          <path d="M 300,170 L 300,218 Q 305,238 325,238 L 365,238 Q 385,238 385,218 L 385,170"
-            fill="none" stroke="#00ff41" strokeWidth="1.5" />
-          {/* Trigger */}
-          <path d="M 345,178 L 340,220"
-            fill="none" stroke="#00ff41" strokeWidth="2.5" strokeLinecap="round" />
-          {/* Safety switch */}
-          <circle cx="262" cy="88" r="5"
-            fill="none" stroke="#00ff41" strokeWidth="1" />
-          <circle cx="262" cy="88" r="2"
-            fill="#00ff41" />
-          {/* Pin */}
-          <circle cx="395" cy="130" r="3"
-            fill="none" stroke="rgba(0,255,65,0.4)" strokeWidth="1" />
-        </motion.g>
+        {/* Phase 4: DÉTENTE (Trigger guard area) */}
         <motion.g style={{ opacity: lbl4 }}>
-          <text x="345" y="268" className="bp-label" textAnchor="middle">DÉTENTE</text>
-          <line x1="345" y1="258" x2="345" y2="242"
-            stroke="rgba(0,255,65,0.35)" strokeWidth="0.5" strokeDasharray="2 2" />
+          <text x="360" y="590" className="bp-label" textAnchor="middle">DÉTENTE</text>
+          <line x1="360" y1="578" x2="360" y2="550"
+            stroke="rgba(0,255,65,0.4)" strokeWidth="1" strokeDasharray="3 3" />
         </motion.g>
 
-        {/* ══════ Phase 5 : GARDE-MAIN + MAGASIN ══════ */}
-        <motion.g style={{ opacity: forendOp }} filter="url(#wp-glow)">
-          {/* Forend / pump handle */}
-          <rect x="480" y="84" width="130" height="62"
-            fill="rgba(0,255,65,0.04)" stroke="#00ff41" strokeWidth="1.5" />
-          {/* Forend ribs */}
-          {Array.from({ length: 6 }, (_, i) => (
-            <line key={`frib${i}`}
-              x1={492 + i * 20} y1="87" x2={492 + i * 20} y2="143"
-              stroke="rgba(0,255,65,0.12)" strokeWidth="0.5" />
-          ))}
-          {/* Magazine tube */}
-          <rect x="442" y="122" width="275" height="14"
-            fill="rgba(0,255,65,0.03)" stroke="#00ff41" strokeWidth="1" />
-          {/* Mag cap */}
-          <circle cx="720" cy="129" r="8"
-            fill="none" stroke="#00ff41" strokeWidth="1.5" />
-          <circle cx="720" cy="129" r="3"
-            fill="rgba(0,255,65,0.2)" stroke="rgba(0,255,65,0.4)" strokeWidth="0.5" />
-        </motion.g>
+        {/* Phase 5: GARDE-MAIN + MAGASIN */}
         <motion.g style={{ opacity: lbl5 }}>
-          <text x="545" y="165" className="bp-label" textAnchor="middle">GARDE-MAIN</text>
-          <text x="582" y="148" className="bp-dim" textAnchor="start">MAG. TUBULAIRE</text>
+          <text x="550" y="560" className="bp-label" textAnchor="middle">GARDE-MAIN</text>
+          <text x="680" y="530" className="bp-dim" textAnchor="middle">MAG. TUBULAIRE</text>
         </motion.g>
 
-        {/* ══════ Phase 6 : DÉTAILS FINAUX ══════ */}
-        <motion.g style={{ opacity: detailsOp }} filter="url(#wp-glow)">
-          {/* Front sight */}
-          <polygon points="768,85 775,90 761,90"
-            fill="#00ff41" stroke="#00ff41" strokeWidth="0.5" />
-          {/* Rear sight */}
-          <path d="M 242,78 L 242,72 L 252,72 L 252,78"
-            fill="none" stroke="#00ff41" strokeWidth="1" />
-          {/* Sling swivels */}
-          <circle cx="476" cy="143" r="3"
-            fill="none" stroke="rgba(0,255,65,0.5)" strokeWidth="1" />
-          <circle cx="82" cy="202" r="3"
-            fill="none" stroke="rgba(0,255,65,0.5)" strokeWidth="1" />
-          {/* Shell in chamber */}
-          <ellipse cx="325" cy="112" rx="20" ry="10"
-            fill="rgba(0,255,65,0.08)" stroke="rgba(0,255,65,0.4)" strokeWidth="1" />
-          {/* Shell head */}
-          <line x1="305" y1="104" x2="305" y2="120"
-            stroke="rgba(0,255,65,0.3)" strokeWidth="1" />
-        </motion.g>
+        {/* Phase 6: SYSTÈME COMPLET */}
         <motion.g style={{ opacity: lbl6 }}>
-          <text x="410" y="285" className="bp-label-lg" textAnchor="middle">
+          <text x="570" y="660" className="bp-label-lg" textAnchor="middle">
             SYSTÈME OPÉRATIONNEL
           </text>
-          <line x1="220" y1="280" x2="600" y2="280"
-            stroke="rgba(0,255,65,0.12)" strokeWidth="0.5" />
+          <line x1="300" y1="650" x2="840" y2="650"
+            stroke="rgba(0,255,65,0.12)" strokeWidth="1" />
         </motion.g>
 
-        {/* ══════ MUZZLE FLASH ══════ */}
-        <motion.g style={{ opacity: flashOp, scale: flashScale, transformOrigin: '799px 105px' }}>
-          <line x1="800" y1="105" x2="850" y2="80" stroke="#00ff41" strokeWidth="2.5" />
-          <line x1="800" y1="105" x2="860" y2="98" stroke="#00ff41" strokeWidth="2.5" />
-          <line x1="800" y1="105" x2="860" y2="112" stroke="#00ff41" strokeWidth="2.5" />
-          <line x1="800" y1="105" x2="850" y2="130" stroke="#00ff41" strokeWidth="2.5" />
-          <line x1="800" y1="105" x2="835" y2="140" stroke="rgba(0,255,65,0.5)" strokeWidth="1.5" />
-          <line x1="800" y1="105" x2="835" y2="70" stroke="rgba(0,255,65,0.5)" strokeWidth="1.5" />
-          <circle cx="800" cy="105" r="10" fill="rgba(0,255,65,0.4)" />
-          <circle cx="800" cy="105" r="20" fill="none" stroke="rgba(0,255,65,0.2)" strokeWidth="1.5" />
-          <circle cx="800" cy="105" r="30" fill="none" stroke="rgba(0,255,65,0.08)" strokeWidth="1" />
-        </motion.g>
+        {/* Blueprint center lines */}
+        <line x1="0" y1="456" x2="1140" y2="456"
+          stroke="rgba(0,255,65,0.03)" strokeWidth="0.5" strokeDasharray="8 6" />
+        <line x1="570" y1="300" x2="570" y2="650"
+          stroke="rgba(0,255,65,0.03)" strokeWidth="0.5" strokeDasharray="8 6" />
       </svg>
+
+      {/* Muzzle flash */}
+      <motion.div
+        className="muzzle-flash"
+        style={{ opacity: flashOp, scale: flashScale }}
+      />
     </div>
   );
 }
