@@ -1,5 +1,5 @@
 import { Suspense, useState, useMemo, useRef, useCallback } from 'react';
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { useAnalysisStore } from '../../stores/analysisStore';
 import { computeFullAnalysis } from '../../lib/ballistics';
@@ -143,6 +143,13 @@ export function Scene3D({
     link.click();
   };
 
+  // Component that clears fog from the scene when not in simulation mode
+  function ClearFog() {
+    const { scene } = useThree();
+    scene.fog = null;
+    return null;
+  }
+
   // Reset sim time when switching to/from sim mode
   const handleModeChange = useCallback((mode: View3DMode) => {
     setActiveMode(mode);
@@ -275,6 +282,7 @@ export function Scene3D({
 
           {!isSimMode && (
             <>
+              <ClearFog />
               <ambientLight intensity={0.4} />
               <directionalLight position={[5, 10, 5]} intensity={0.8} />
               <directionalLight position={[-3, 8, -3]} intensity={0.3} color="#44aaff" />
