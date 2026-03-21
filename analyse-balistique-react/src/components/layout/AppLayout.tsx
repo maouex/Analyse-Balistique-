@@ -1,7 +1,11 @@
 import { Outlet, useLocation } from 'react-router-dom';
 import { Header } from './Header';
 
-export function AppLayout() {
+interface AppLayoutProps {
+  onLogout?: () => void;
+}
+
+export function AppLayout({ onLogout }: AppLayoutProps) {
   const location = useLocation();
   const isHome = location.pathname === '/';
 
@@ -35,7 +39,7 @@ export function AppLayout() {
         backgroundSize: '60px 60px',
       }} />
 
-      <Header />
+      <Header onLogout={onLogout} />
       <div style={{ flex: 1, overflow: isHome ? 'auto' : 'hidden', position: 'relative', zIndex: 1 }}>
         <Outlet />
       </div>
