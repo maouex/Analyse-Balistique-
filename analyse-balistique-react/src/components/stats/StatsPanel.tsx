@@ -11,12 +11,13 @@ interface StatsPanelProps {
   onSaveMunition: () => void;
   collapsed?: boolean;
   pinned?: boolean;
+  canCollapse?: boolean;
   onPin?: () => void;
   onExpand?: () => void;
   onCollapse?: () => void;
 }
 
-export function StatsPanel({ onExport, onSaveMunition, collapsed, pinned, onPin, onExpand, onCollapse }: StatsPanelProps) {
+export function StatsPanel({ onExport, onSaveMunition, collapsed, pinned, canCollapse, onPin, onExpand, onCollapse }: StatsPanelProps) {
   const navigate = useTransitionNavigate();
   const { impacts, center, circle1, circle2, scale } = useAnalysisStore();
 
@@ -40,8 +41,8 @@ export function StatsPanel({ onExport, onSaveMunition, collapsed, pinned, onPin,
         flexShrink: 0,
         position: 'relative',
       }}
-      onMouseEnter={collapsed ? onExpand : undefined}
-      onMouseLeave={collapsed ? onCollapse : undefined}
+      onMouseEnter={onExpand}
+      onMouseLeave={onCollapse}
     >
       {/* Top decoration */}
       <div style={{
@@ -63,7 +64,7 @@ export function StatsPanel({ onExport, onSaveMunition, collapsed, pinned, onPin,
       )}
 
       {/* Pin button */}
-      {onPin && !collapsed && (
+      {canCollapse && onPin && !collapsed && (
         <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
           <button
             className={`sidebar-pin-btn ${pinned ? 'pinned' : ''}`}
