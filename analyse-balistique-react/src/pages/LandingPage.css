@@ -237,7 +237,7 @@
 }
 
 
-/* ─── Weapon Image ───────────────────────────────────────── */
+/* ─── Weapon — Viewport + vertical pan ──────────────────── */
 .weapon-container {
   position: relative;
   width: 55%;
@@ -246,8 +246,20 @@
   pointer-events: none;
 }
 
-/* Night-vision green filter: dark SVG → green on transparent */
+/* Viewport clips the visible portion of the panning image */
+.weapon-viewport {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1024 / 170;
+  overflow: hidden;
+  border-radius: 4px;
+}
+
+/* Night-vision green filter applied to the SVG strokes */
 .weapon-img {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: auto;
   display: block;
@@ -255,51 +267,85 @@
   mix-blend-mode: screen;
 }
 
-/* Ghost: faint full outline always visible */
+/* Ghost: faint full image, no pan, always visible */
 .weapon-ghost {
-  position: absolute;
-  top: 0;
-  left: 0;
-  opacity: 0.04;
+  opacity: 0.03;
+  z-index: 1;
 }
 
-/* Reveal container with animated clip-path */
-.weapon-reveal {
-  position: relative;
+/* Main image: pans vertically via motion style */
+.weapon-main {
+  z-index: 2;
 }
 
-/* Vertical scan line at reveal edge */
-.weapon-scanline {
+/* Horizontal scan line that sweeps through viewport */
+.weapon-scanline-h {
   position: absolute;
-  top: 15%;
-  bottom: 15%;
-  width: 2px;
+  left: 10%;
+  right: 10%;
+  height: 1px;
   background: var(--nv-green);
   box-shadow:
-    0 0 8px var(--nv-green),
-    0 0 20px rgba(0, 255, 65, 0.4),
-    0 0 40px rgba(0, 255, 65, 0.15);
+    0 0 6px var(--nv-green),
+    0 0 18px rgba(0, 255, 65, 0.4),
+    0 0 36px rgba(0, 255, 65, 0.12);
+  z-index: 5;
+  pointer-events: none;
+}
+
+/* ─── Phase label layer (fixed to viewport, not panning) ── */
+.weapon-label-layer {
+  position: absolute;
+  bottom: -48px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
   z-index: 10;
   pointer-events: none;
 }
 
-/* Labels overlay (SVG positioned on top of weapon) */
-.weapon-labels {
+.weapon-label {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.weapon-label-text {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--nv-green-dim);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.weapon-label-dim {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  color: rgba(0, 255, 65, 0.35);
+  letter-spacing: 2px;
+}
+
+.weapon-label-final .weapon-label-text {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--nv-green);
+  letter-spacing: 4px;
+  text-shadow: 0 0 12px rgba(0, 255, 65, 0.4);
 }
 
 /* Muzzle flash */
 .muzzle-flash {
   position: absolute;
   right: -4%;
-  top: 38%;
-  width: 90px;
-  height: 90px;
+  top: 30%;
+  width: 80px;
+  height: 80px;
   background: radial-gradient(
     circle,
     rgba(0, 255, 65, 0.7) 0%,
@@ -311,34 +357,6 @@
   z-index: 10;
   pointer-events: none;
   transform-origin: center;
-}
-
-/* Blueprint labels */
-.bp-label {
-  font-family: 'JetBrains Mono', 'Courier New', monospace;
-  font-size: 24px;
-  font-weight: 600;
-  fill: rgba(0, 255, 65, 0.6);
-  letter-spacing: 4px;
-  text-transform: uppercase;
-}
-
-.bp-label-lg {
-  font-family: 'JetBrains Mono', 'Courier New', monospace;
-  font-size: 32px;
-  font-weight: 700;
-  fill: var(--nv-green);
-  letter-spacing: 5px;
-  text-transform: uppercase;
-  filter: drop-shadow(0 0 8px rgba(0, 255, 65, 0.4));
-}
-
-.bp-dim {
-  font-family: 'JetBrains Mono', 'Courier New', monospace;
-  font-size: 18px;
-  font-weight: 500;
-  fill: rgba(0, 255, 65, 0.35);
-  letter-spacing: 2px;
 }
 
 
