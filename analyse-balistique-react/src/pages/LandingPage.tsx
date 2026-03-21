@@ -163,438 +163,373 @@ function WeaponBlueprint({ progress }: { progress: MotionValue<number> }) {
         <line x1="410" y1="0" x2="410" y2="300"
           stroke="rgba(0,255,65,0.04)" strokeWidth="0.5" strokeDasharray="6 4" />
 
-        {/* ══════ Phase 1 : CROSSE (Browning Auto-5) ══════ */}
+
+        {/* ══════ Phase 1 : CROSSE + PLAQUE DE COUCHE ══════ */}
         <motion.g style={{ opacity: stockOp }} filter="url(#wp-glow)">
-          {/* Buttpad — slightly concave rubber pad */}
-          <path d="M 60,106 Q 52,156 60,206 L 55,206 Q 47,156 55,106 Z"
-            fill="rgba(0,255,65,0.06)" stroke="#00ff41" strokeWidth="1.2" />
+          {/* Plaque de couche — thin angled rubber pad, slightly concave */}
+          <path d={`
+            M 62,98
+            L 52,96
+            Q 45,158 50,220
+            L 60,222
+            Q 61,158 62,98
+            Z
+          `} fill="rgba(0,255,65,0.06)" stroke="#00ff41" strokeWidth="1.2" />
           {/* Buttpad grooves */}
-          {[120, 135, 150, 165, 180, 195].map(yy => (
-            <line key={`bp${yy}`} x1="53" y1={yy} x2="59" y2={yy}
+          {[115, 132, 150, 168, 185, 202].map(yy => (
+            <line key={`bpg${yy}`} x1={51 + (yy - 115) * 0.02} y1={yy} x2="60" y2={yy}
               stroke="rgba(0,255,65,0.2)" strokeWidth="0.4" />
           ))}
 
-          {/* Stock body — Auto-5 semi-pistol grip profile */}
+          {/* Corps de crosse — profil semi-pistol grip fidèle à la référence */}
           <path d={`
-            M 240,84
-            C 225,85 210,87 190,90
-            L 105,99
-            Q 80,102 65,107
-            L 60,106
-            Q 52,156 60,206
-            L 68,208
-            Q 85,213 120,218
-            L 178,225
-            C 198,229 212,234 222,237
-            Q 232,239 236,230
-            C 239,222 240,210 240,170
+            M 270,82
+            C 255,83 235,86 210,89
+            C 175,93 135,96 100,99
+            Q 80,100 62,98
+            Q 61,158 60,222
+            C 80,226 120,232 155,234
+            C 180,234 200,230 215,222
+            C 228,214 238,200 245,186
+            C 252,170 260,155 268,145
+            L 270,140
             Z
           `} fill="rgba(0,255,65,0.03)" stroke="#00ff41" strokeWidth="1.5" />
 
-          {/* Comb line — subtle interior detail */}
-          <path d="M 195,90 Q 150,94 105,99"
-            fill="none" stroke="rgba(0,255,65,0.06)" strokeWidth="0.5" />
-
-          {/* Wrist grain lines */}
-          <path d="M 230,95 Q 228,130 232,165"
+          {/* Grain de bois — courbes naturelles du noyer */}
+          <path d="M 85,115 Q 155,112 225,105"
             fill="none" stroke="rgba(0,255,65,0.04)" strokeWidth="0.5" />
-          <path d="M 222,93 Q 220,130 224,168"
-            fill="none" stroke="rgba(0,255,65,0.04)" strokeWidth="0.5" />
+          <path d="M 80,135 Q 150,132 220,124"
+            fill="none" stroke="rgba(0,255,65,0.035)" strokeWidth="0.5" />
+          <path d="M 78,158 Q 148,155 218,145"
+            fill="none" stroke="rgba(0,255,65,0.03)" strokeWidth="0.5" />
+          <path d="M 78,180 Q 140,178 200,168"
+            fill="none" stroke="rgba(0,255,65,0.025)" strokeWidth="0.5" />
 
-          {/* Checkering — diamond cross-hatch on grip area */}
-          {Array.from({ length: 10 }, (_, i) => (
+          {/* Checkering — motif diamant sur la poignée */}
+          {Array.from({ length: 12 }, (_, i) => (
             <line key={`ckf${i}`}
-              x1={186 + i * 5} y1="210"
-              x2={192 + i * 5} y2="233"
-              stroke="rgba(0,255,65,0.10)" strokeWidth="0.4" />
+              x1={195 + i * 5} y1="200"
+              x2={205 + i * 5} y2="228"
+              stroke="rgba(0,255,65,0.09)" strokeWidth="0.4" />
           ))}
-          {Array.from({ length: 10 }, (_, i) => (
+          {Array.from({ length: 12 }, (_, i) => (
             <line key={`ckb${i}`}
-              x1={196 + i * 5} y1="210"
-              x2={190 + i * 5} y2="233"
-              stroke="rgba(0,255,65,0.10)" strokeWidth="0.4" />
+              x1={205 + i * 5} y1="200"
+              x2={195 + i * 5} y2="228"
+              stroke="rgba(0,255,65,0.09)" strokeWidth="0.4" />
           ))}
 
-          {/* Stock through-bolt */}
-          <circle cx="130" cy="155" r="3"
-            fill="none" stroke="rgba(0,255,65,0.3)" strokeWidth="0.8" />
-          <circle cx="130" cy="155" r="1"
-            fill="rgba(0,255,65,0.2)" />
+          {/* Vis de crosse traversante */}
+          <circle cx="145" cy="162" r="3.5"
+            fill="none" stroke="rgba(0,255,65,0.25)" strokeWidth="0.8" />
+          <circle cx="145" cy="162" r="1.2"
+            fill="rgba(0,255,65,0.15)" />
 
-          {/* Sling swivel stud — rear */}
-          <circle cx="80" cy="210" r="2"
-            fill="none" stroke="rgba(0,255,65,0.3)" strokeWidth="0.8" />
+          {/* Grenadière arrière (sling stud) */}
+          <circle cx="85" cy="215" r="2"
+            fill="none" stroke="rgba(0,255,65,0.25)" strokeWidth="0.7" />
         </motion.g>
         <motion.g style={{ opacity: lbl1 }}>
-          <text x="145" y="262" className="bp-label" textAnchor="middle">CROSSE</text>
-          <line x1="145" y1="252" x2="145" y2="240"
+          <text x="100" y="262" className="bp-label" textAnchor="middle">CROSSE</text>
+          <line x1="100" y1="254" x2="100" y2="240"
             stroke="rgba(0,255,65,0.35)" strokeWidth="0.5" strokeDasharray="2 2" />
+          <text x="55" y="260" className="bp-dim" textAnchor="middle">PLAQUE</text>
         </motion.g>
 
-        {/* ══════ Phase 2 : BOÎTIER DE CULASSE — HUMPBACK ══════ */}
+        {/* ══════ Phase 2 : BLOC DE CULASSE + CHIEN ══════ */}
         <motion.g style={{ opacity: receiverOp }} filter="url(#wp-glow)">
-          {/* Receiver body — signature humpback profile */}
+          {/* Bloc de culasse — compact break-action receiver */}
           <path d={`
-            M 240,84
-            L 240,170
-            L 340,170
-            L 340,165
-            Q 380,165 420,155
-            C 435,150 442,140 445,125
-            L 445,92
-            Q 443,90 440,89
-            L 420,87
-            C 400,85 380,82 360,78
-            C 340,74 310,68 285,66
-            Q 265,65 250,68
-            C 245,70 242,75 240,84
-            Z
-          `} fill="rgba(0,255,65,0.03)" stroke="#00ff41" strokeWidth="1.5" />
-
-          {/* Hump interior arch — recoil spring housing detail */}
-          <path d="M 252,76 C 270,70 310,68 340,74 Q 370,78 400,84"
-            fill="none" stroke="rgba(0,255,65,0.08)" strokeWidth="0.5" />
-
-          {/* Top surface rib / sight channel */}
-          <path d="M 252,72 C 280,67 320,66 360,72"
-            fill="none" stroke="rgba(0,255,65,0.12)" strokeWidth="0.6" />
-
-          {/* Ejection port — oval cutout (Auto-5 style) */}
-          <path d={`
-            M 300,82 Q 310,78 330,78 Q 350,78 358,82
-            L 358,112
-            Q 350,116 330,116 Q 310,116 300,112 Z
-          `} fill="rgba(0,255,65,0.02)" stroke="rgba(0,255,65,0.35)" strokeWidth="1"
-            strokeDasharray="3 2" />
-
-          {/* Bolt face visible through port */}
-          <line x1="305" y1="97" x2="355" y2="97"
-            stroke="rgba(0,255,65,0.15)" strokeWidth="0.8" />
-
-          {/* Charging handle */}
-          <path d="M 352,83 L 362,80 L 365,83 L 355,86 Z"
-            fill="rgba(0,255,65,0.08)" stroke="#00ff41" strokeWidth="0.8" />
-
-          {/* Loading port — underside opening */}
-          <rect x="310" y="166" width="65" height="6" rx="2"
-            fill="none" stroke="rgba(0,255,65,0.25)" strokeWidth="0.8" strokeDasharray="3 2" />
-
-          {/* Barrel ring — front of receiver where barrel inserts */}
-          <path d={`
-            M 440,89 L 448,89 L 448,122 L 440,122
-          `} fill="rgba(0,255,65,0.05)" stroke="#00ff41" strokeWidth="1.2" />
-          {/* Barrel ring inner circle */}
-          <circle cx="444" cy="105" r="14"
-            fill="none" stroke="rgba(0,255,65,0.15)" strokeWidth="0.6" />
-
-          {/* Receiver pins */}
-          <circle cx="270" cy="130" r="2"
-            fill="none" stroke="rgba(0,255,65,0.3)" strokeWidth="0.7" />
-          <circle cx="400" cy="120" r="2"
-            fill="none" stroke="rgba(0,255,65,0.3)" strokeWidth="0.7" />
-
-          {/* Tang screw */}
-          <circle cx="244" cy="90" r="1.5"
-            fill="rgba(0,255,65,0.15)" stroke="rgba(0,255,65,0.3)" strokeWidth="0.5" />
-        </motion.g>
-        <motion.g style={{ opacity: lbl2 }}>
-          <text x="310" y="52" className="bp-label" textAnchor="middle">BOÎTIER DE CULASSE</text>
-          <line x1="310" y1="56" x2="310" y2="65"
-            stroke="rgba(0,255,65,0.35)" strokeWidth="0.5" strokeDasharray="2 2" />
-        </motion.g>
-
-        {/* ══════ Phase 3 : CANON ══════ */}
-        <motion.g style={{ opacity: barrelOp }} filter="url(#wp-glow)">
-          {/* Barrel body — slight taper from breech to muzzle */}
-          <path d={`
-            M 448,92 L 790,94
-            Q 794,94 796,96
-            L 796,114
-            Q 794,116 790,116
-            L 448,118
-            Z
-          `} fill="rgba(0,255,65,0.03)" stroke="#00ff41" strokeWidth="1.5" />
-
-          {/* Chamber area — slightly thicker at breech */}
-          <path d="M 448,90 Q 455,89 470,90 L 470,92 L 448,92 Z"
-            fill="rgba(0,255,65,0.04)" stroke="rgba(0,255,65,0.2)" strokeWidth="0.5" />
-          <path d="M 448,118 L 470,118 L 470,120 Q 455,121 448,120 Z"
-            fill="rgba(0,255,65,0.04)" stroke="rgba(0,255,65,0.2)" strokeWidth="0.5" />
-
-          {/* Ventilated rib — two parallel rails */}
-          <line x1="455" y1="89" x2="790" y2="91"
-            stroke="#00ff41" strokeWidth="0.8" />
-          <line x1="455" y1="86" x2="790" y2="88"
-            stroke="#00ff41" strokeWidth="0.8" />
-
-          {/* Rib ventilation holes */}
-          {Array.from({ length: 18 }, (_, i) => (
-            <circle key={`vent${i}`}
-              cx={470 + i * 18} cy={87.5 + i * 0.11}
-              r="1.2"
-              fill="rgba(0,255,65,0.04)" stroke="rgba(0,255,65,0.15)" strokeWidth="0.4" />
-          ))}
-
-          {/* Rib posts — connect rib to barrel top */}
-          {Array.from({ length: 8 }, (_, i) => (
-            <line key={`post${i}`}
-              x1={475 + i * 40} y1={89 + i * 0.25}
-              x2={475 + i * 40} y2={92 + i * 0.25}
-              stroke="rgba(0,255,65,0.2)" strokeWidth="0.6" />
-          ))}
-
-          {/* Front bead sight */}
-          <circle cx="788" cy="88" r="2.5"
-            fill="rgba(0,255,65,0.3)" stroke="#00ff41" strokeWidth="0.8" />
-          {/* Bead stanchion */}
-          <line x1="788" y1="90" x2="788" y2="93"
-            stroke="#00ff41" strokeWidth="0.8" />
-
-          {/* Muzzle / choke area */}
-          <path d={`
-            M 790,94 Q 795,93 798,94
-            L 798,116
-            Q 795,117 790,116
-          `} fill="rgba(0,255,65,0.05)" stroke="#00ff41" strokeWidth="1" />
-          {/* Choke internal rings */}
-          <line x1="793" y1="97" x2="793" y2="113" stroke="rgba(0,255,65,0.1)" strokeWidth="0.4" />
-          <line x1="795" y1="98" x2="795" y2="112" stroke="rgba(0,255,65,0.08)" strokeWidth="0.4" />
-
-          {/* Bore center line */}
-          <line x1="450" y1="105" x2="790" y2="105"
-            stroke="rgba(0,255,65,0.10)" strokeWidth="0.5" strokeDasharray="10 5" />
-        </motion.g>
-        <motion.g style={{ opacity: lbl3 }}>
-          <text x="620" y="56" className="bp-label" textAnchor="middle">CANON</text>
-          <line x1="620" y1="60" x2="620" y2="84"
-            stroke="rgba(0,255,65,0.35)" strokeWidth="0.5" strokeDasharray="2 2" />
-          {/* Dimension line */}
-          <line x1="448" y1="72" x2="796" y2="72"
-            stroke="rgba(0,255,65,0.15)" strokeWidth="0.5" />
-          <line x1="448" y1="68" x2="448" y2="76"
-            stroke="rgba(0,255,65,0.15)" strokeWidth="0.5" />
-          <line x1="796" y1="68" x2="796" y2="76"
-            stroke="rgba(0,255,65,0.15)" strokeWidth="0.5" />
-          <text x="622" y="69" className="bp-dim" textAnchor="middle">71 cm</text>
-        </motion.g>
-
-        {/* ══════ Phase 4 : DÉTENTE ══════ */}
-        <motion.g style={{ opacity: triggerOp }} filter="url(#wp-glow)">
-          {/* Trigger group housing — drops below receiver */}
-          <path d={`
-            M 298,170 L 298,178
-            Q 298,182 302,182
-            L 382,182
-            Q 386,182 386,178
-            L 386,170
-          `} fill="rgba(0,255,65,0.02)" stroke="#00ff41" strokeWidth="1" />
-
-          {/* Trigger guard — rounded Auto-5 profile */}
-          <path d={`
-            M 298,182
-            L 298,218
-            Q 298,240 316,244
-            L 345,244
-            Q 375,244 386,228
-            L 386,182
-          `} fill="none" stroke="#00ff41" strokeWidth="1.5" />
-
-          {/* Trigger guard inner edge */}
-          <path d={`
-            M 302,182
-            L 302,216
-            Q 302,236 318,240
-            L 343,240
-            Q 371,240 382,226
-            L 382,182
-          `} fill="none" stroke="rgba(0,255,65,0.08)" strokeWidth="0.5" />
-
-          {/* Trigger blade — curved with shoe */}
-          <path d={`
-            M 344,186
-            C 342,192 340,200 339,210
-            Q 338,218 336,222
-            L 340,224
-            Q 344,224 346,222
-            C 346,216 345,206 345,196
-            Z
-          `} fill="rgba(0,255,65,0.06)" stroke="#00ff41" strokeWidth="1.2" />
-
-          {/* Cross-bolt safety — behind trigger guard */}
-          <rect x="300" y="174" width="14" height="5" rx="2.5"
-            fill="rgba(0,255,65,0.1)" stroke="#00ff41" strokeWidth="0.8" />
-          {/* Safety indicator dot */}
-          <circle cx="307" cy="176.5" r="1"
-            fill="#00ff41" />
-
-          {/* Trigger pin */}
-          <circle cx="340" cy="186" r="2"
-            fill="none" stroke="rgba(0,255,65,0.35)" strokeWidth="0.7" />
-          {/* Hammer pin */}
-          <circle cx="365" cy="176" r="2"
-            fill="none" stroke="rgba(0,255,65,0.35)" strokeWidth="0.7" />
-
-          {/* Carrier/shell lifter — visible at loading port */}
-          <path d="M 315,166 L 370,166 L 368,170 L 317,170 Z"
-            fill="rgba(0,255,65,0.04)" stroke="rgba(0,255,65,0.2)" strokeWidth="0.5" />
-
-          {/* Barrel release lever — in front of trigger guard (Auto-5 specific) */}
-          <path d="M 388,175 Q 395,172 400,175 L 398,180 Q 392,182 388,180 Z"
-            fill="rgba(0,255,65,0.05)" stroke="rgba(0,255,65,0.35)" strokeWidth="0.7" />
-        </motion.g>
-        <motion.g style={{ opacity: lbl4 }}>
-          <text x="342" y="268" className="bp-label" textAnchor="middle">DÉTENTE</text>
-          <line x1="342" y1="258" x2="342" y2="248"
-            stroke="rgba(0,255,65,0.35)" strokeWidth="0.5" strokeDasharray="2 2" />
-        </motion.g>
-
-        {/* ══════ Phase 5 : GARDE-MAIN FIXE + MAGASIN ══════ */}
-        <motion.g style={{ opacity: forendOp }} filter="url(#wp-glow)">
-          {/* Forearm — fixed (semi-auto, not pump), ergonomic rounded profile */}
-          <path d={`
-            M 455,88
-            Q 465,84 490,82
-            L 600,82
-            Q 615,83 620,88
-            L 620,122
-            Q 615,128 600,130
-            L 490,130
-            Q 465,128 455,122
+            M 270,82
+            L 270,140
+            Q 270,148 278,150
+            L 310,150
+            Q 318,148 318,140
+            L 318,95
+            Q 316,88 310,86
+            L 278,83
+            Q 274,82 270,82
             Z
           `} fill="rgba(0,255,65,0.04)" stroke="#00ff41" strokeWidth="1.5" />
 
-          {/* Forearm longitudinal grooves — characteristic wood lines */}
-          {Array.from({ length: 6 }, (_, i) => (
-            <path key={`fg${i}`}
-              d={`M ${465 + i * 2},${90 + i * 6} Q ${540},${88 + i * 6.5} ${615 - i * 2},${90 + i * 6}`}
-              fill="none"
-              stroke="rgba(0,255,65,0.08)" strokeWidth="0.4" />
-          ))}
-
-          {/* Forearm checkering */}
-          {Array.from({ length: 8 }, (_, i) => (
-            <line key={`fcf${i}`}
-              x1={500 + i * 10} y1="95"
-              x2={505 + i * 10} y2="118"
-              stroke="rgba(0,255,65,0.06)" strokeWidth="0.3" />
-          ))}
-          {Array.from({ length: 8 }, (_, i) => (
-            <line key={`fcb${i}`}
-              x1={505 + i * 10} y1="95"
-              x2={500 + i * 10} y2="118"
-              stroke="rgba(0,255,65,0.06)" strokeWidth="0.3" />
-          ))}
-
-          {/* Magazine tube — cylindrical, extends beyond forearm */}
+          {/* Chien (external hammer) — visible on top */}
           <path d={`
-            M 448,122 L 710,122
-            Q 715,122 715,126
-            L 715,132
-            Q 715,136 710,136
-            L 448,136
-            Z
-          `} fill="rgba(0,255,65,0.03)" stroke="#00ff41" strokeWidth="1" />
-
-          {/* Magazine tube spring (internal, dashed) */}
-          <line x1="455" y1="129" x2="705" y2="129"
-            stroke="rgba(0,255,65,0.06)" strokeWidth="0.4" strokeDasharray="4 3" />
-
-          {/* Magazine cap — threaded end cap */}
-          <path d={`
-            M 715,120 Q 724,120 726,125
-            L 726,133
-            Q 724,138 715,138
+            M 280,82
+            L 278,72
+            Q 278,65 284,62
+            L 290,62
+            Q 296,65 296,72
+            L 294,82
           `} fill="rgba(0,255,65,0.06)" stroke="#00ff41" strokeWidth="1.2" />
-          {/* Cap knurling */}
-          {[123, 126, 129, 132, 135].map(yy => (
-            <line key={`knrl${yy}`} x1="717" y1={yy} x2="724" y2={yy}
-              stroke="rgba(0,255,65,0.12)" strokeWidth="0.3" />
+          {/* Hammer spur texture */}
+          <line x1="282" y1="66" x2="292" y2="66"
+            stroke="rgba(0,255,65,0.2)" strokeWidth="0.4" />
+          <line x1="281" y1="69" x2="293" y2="69"
+            stroke="rgba(0,255,65,0.15)" strokeWidth="0.4" />
+
+          {/* Hinge pin — front of receiver (break-action pivot) */}
+          <circle cx="314" cy="115" r="4"
+            fill="none" stroke="#00ff41" strokeWidth="1" />
+          <circle cx="314" cy="115" r="1.5"
+            fill="rgba(0,255,65,0.2)" />
+
+          {/* Top lever / ouverture — on receiver top */}
+          <path d="M 296,83 L 296,80 Q 302,78 308,80 L 308,83"
+            fill="rgba(0,255,65,0.05)" stroke="rgba(0,255,65,0.4)" strokeWidth="0.7" />
+
+          {/* Receiver engraving lines — decorative */}
+          <path d="M 275,100 Q 292,96 312,100"
+            fill="none" stroke="rgba(0,255,65,0.06)" strokeWidth="0.4" />
+          <path d="M 275,130 Q 292,126 312,130"
+            fill="none" stroke="rgba(0,255,65,0.06)" strokeWidth="0.4" />
+
+          {/* Receiver pin — trigger attachment */}
+          <circle cx="290" cy="142" r="1.5"
+            fill="none" stroke="rgba(0,255,65,0.3)" strokeWidth="0.6" />
+
+          {/* Tang (extension into stock) */}
+          <path d="M 270,82 L 270,86 L 262,87 L 262,83 Z"
+            fill="rgba(0,255,65,0.03)" stroke="rgba(0,255,65,0.2)" strokeWidth="0.5" />
+        </motion.g>
+        <motion.g style={{ opacity: lbl2 }}>
+          <text x="294" y="52" className="bp-label" textAnchor="middle">BLOC DE CULASSE</text>
+          <line x1="294" y1="55" x2="294" y2="61"
+            stroke="rgba(0,255,65,0.35)" strokeWidth="0.5" strokeDasharray="2 2" />
+          <text x="287" y="48" className="bp-dim" textAnchor="middle">CHIEN</text>
+        </motion.g>
+
+        {/* ══════ Phase 3 : CANON + BANDE VENTILÉE ══════ */}
+        <motion.g style={{ opacity: barrelOp }} filter="url(#wp-glow)">
+          {/* Corps du canon — slight taper breech to muzzle */}
+          <path d={`
+            M 318,96
+            L 790,97
+            Q 795,97 797,100
+            L 797,112
+            Q 795,115 790,115
+            L 318,116
+            Z
+          `} fill="rgba(0,255,65,0.03)" stroke="#00ff41" strokeWidth="1.5" />
+
+          {/* Chamber — slightly thicker at breech */}
+          <path d="M 318,94 Q 330,93 345,94 L 345,96 L 318,96 Z"
+            fill="rgba(0,255,65,0.04)" stroke="rgba(0,255,65,0.15)" strokeWidth="0.5" />
+          <path d="M 318,116 L 345,116 L 345,118 Q 330,119 318,118 Z"
+            fill="rgba(0,255,65,0.04)" stroke="rgba(0,255,65,0.15)" strokeWidth="0.5" />
+
+          {/* Bande ventilée — two parallel rails with rib posts */}
+          <line x1="325" y1="93" x2="790" y2="94"
+            stroke="#00ff41" strokeWidth="0.7" />
+          <line x1="325" y1="90" x2="790" y2="91"
+            stroke="#00ff41" strokeWidth="0.7" />
+
+          {/* Ventilation holes between rib rails */}
+          {Array.from({ length: 22 }, (_, i) => (
+            <circle key={`vent${i}`}
+              cx={340 + i * 20} cy={91.5 + i * 0.045}
+              r="1"
+              fill="rgba(0,255,65,0.04)" stroke="rgba(0,255,65,0.12)" strokeWidth="0.3" />
           ))}
 
-          {/* Barrel clamp — connects magazine tube to barrel */}
-          <rect x="695" y="116" width="6" height="8" rx="1"
-            fill="rgba(0,255,65,0.04)" stroke="rgba(0,255,65,0.3)" strokeWidth="0.7" />
-          <rect x="695" y="132" width="6" height="6" rx="1"
-            fill="rgba(0,255,65,0.04)" stroke="rgba(0,255,65,0.3)" strokeWidth="0.7" />
+          {/* Rib support posts */}
+          {Array.from({ length: 10 }, (_, i) => (
+            <line key={`post${i}`}
+              x1={350 + i * 45} y1={93 + i * 0.1}
+              x2={350 + i * 45} y2={96 + i * 0.1}
+              stroke="rgba(0,255,65,0.18)" strokeWidth="0.5" />
+          ))}
 
-          {/* Friction ring — key Auto-5 recoil mechanism element */}
-          <rect x="452" y="120" width="8" height="18" rx="1"
-            fill="rgba(0,255,65,0.05)" stroke="rgba(0,255,65,0.25)" strokeWidth="0.6" />
-          <text x="456" y="148" className="bp-dim" textAnchor="middle"
-            style={{ fontSize: '5px' }}>FR</text>
+          {/* Guidon (front bead) */}
+          <circle cx="789" cy="90" r="2.5"
+            fill="rgba(0,255,65,0.35)" stroke="#00ff41" strokeWidth="0.8" />
+          <line x1="789" y1="92" x2="789" y2="96"
+            stroke="#00ff41" strokeWidth="0.8" />
+
+          {/* Bouche (muzzle) */}
+          <path d={`
+            M 790,97 Q 796,96 798,98
+            L 798,114
+            Q 796,116 790,115
+          `} fill="rgba(0,255,65,0.05)" stroke="#00ff41" strokeWidth="1" />
+
+          {/* Bore center line */}
+          <line x1="320" y1="106" x2="792" y2="106"
+            stroke="rgba(0,255,65,0.08)" strokeWidth="0.5" strokeDasharray="10 5" />
+        </motion.g>
+        <motion.g style={{ opacity: lbl3 }}>
+          <text x="560" y="56" className="bp-label" textAnchor="middle">CANON</text>
+          <line x1="560" y1="60" x2="560" y2="88"
+            stroke="rgba(0,255,65,0.35)" strokeWidth="0.5" strokeDasharray="2 2" />
+          <text x="560" y="84" className="bp-dim" textAnchor="middle">BANDE VENTILÉE</text>
+          {/* Dimension line */}
+          <line x1="318" y1="74" x2="797" y2="74"
+            stroke="rgba(0,255,65,0.12)" strokeWidth="0.5" />
+          <line x1="318" y1="70" x2="318" y2="78"
+            stroke="rgba(0,255,65,0.12)" strokeWidth="0.5" />
+          <line x1="797" y1="70" x2="797" y2="78"
+            stroke="rgba(0,255,65,0.12)" strokeWidth="0.5" />
+          <text x="558" y="71" className="bp-dim" textAnchor="middle">76 cm</text>
+          {/* Bouche label */}
+          <text x="797" y="128" className="bp-dim" textAnchor="middle">BOUCHE</text>
+        </motion.g>
+
+        {/* ══════ Phase 4 : DÉTENTE + PONTET ══════ */}
+        <motion.g style={{ opacity: triggerOp }} filter="url(#wp-glow)">
+          {/* Pontet (trigger guard) — rounded oval profile */}
+          <path d={`
+            M 278,150
+            L 278,172
+            Q 278,198 296,202
+            L 306,202
+            Q 318,198 318,172
+            L 318,150
+          `} fill="none" stroke="#00ff41" strokeWidth="1.5" />
+
+          {/* Pontet inner edge */}
+          <path d={`
+            M 282,150
+            L 282,170
+            Q 282,194 298,198
+            L 304,198
+            Q 314,194 314,170
+            L 314,150
+          `} fill="none" stroke="rgba(0,255,65,0.06)" strokeWidth="0.4" />
+
+          {/* Détente (trigger blade) — curved, with shoe at bottom */}
+          <path d={`
+            M 300,156
+            C 298,164 296,174 295,182
+            Q 294,188 293,190
+            L 296,192
+            Q 300,192 302,190
+            C 302,184 301,172 301,162
+            Z
+          `} fill="rgba(0,255,65,0.06)" stroke="#00ff41" strokeWidth="1" />
+
+          {/* Trigger pin */}
+          <circle cx="300" cy="155" r="1.5"
+            fill="none" stroke="rgba(0,255,65,0.35)" strokeWidth="0.6" />
+
+          {/* Sûreté — safety button on tang */}
+          <rect x="268" y="84" width="6" height="4" rx="1.5"
+            fill="rgba(0,255,65,0.12)" stroke="#00ff41" strokeWidth="0.7" />
+        </motion.g>
+        <motion.g style={{ opacity: lbl4 }}>
+          <text x="298" y="222" className="bp-label" textAnchor="middle">PONTET</text>
+          <line x1="298" y1="216" x2="298" y2="206"
+            stroke="rgba(0,255,65,0.35)" strokeWidth="0.5" strokeDasharray="2 2" />
+          <text x="298" y="232" className="bp-dim" textAnchor="middle">DÉTENTE</text>
+        </motion.g>
+
+        {/* ══════ Phase 5 : FÛT (Garde-main) ══════ */}
+        <motion.g style={{ opacity: forendOp }} filter="url(#wp-glow)">
+          {/* Fût — wood forearm, tapered ergonomic shape below barrel */}
+          <path d={`
+            M 328,118
+            Q 340,120 365,124
+            C 390,128 410,130 430,130
+            Q 442,128 448,124
+            L 448,134
+            Q 442,142 430,144
+            C 410,146 390,146 365,144
+            Q 340,142 328,138
+            Z
+          `} fill="rgba(0,255,65,0.04)" stroke="#00ff41" strokeWidth="1.5" />
+
+          {/* Wood grain — longitudinal lines following the fût shape */}
+          <path d="M 335,124 Q 388,126 440,126"
+            fill="none" stroke="rgba(0,255,65,0.06)" strokeWidth="0.4" />
+          <path d="M 332,130 Q 388,132 445,130"
+            fill="none" stroke="rgba(0,255,65,0.05)" strokeWidth="0.4" />
+          <path d="M 333,136 Q 388,138 443,136"
+            fill="none" stroke="rgba(0,255,65,0.04)" strokeWidth="0.4" />
+
+          {/* Fût checkering — subtle finger grip texture */}
+          {Array.from({ length: 8 }, (_, i) => (
+            <line key={`ftc1${i}`}
+              x1={358 + i * 8} y1="124"
+              x2={362 + i * 8} y2="142"
+              stroke="rgba(0,255,65,0.06)" strokeWidth="0.3" />
+          ))}
+          {Array.from({ length: 8 }, (_, i) => (
+            <line key={`ftc2${i}`}
+              x1={362 + i * 8} y1="124"
+              x2={358 + i * 8} y2="142"
+              stroke="rgba(0,255,65,0.06)" strokeWidth="0.3" />
+          ))}
+
+          {/* Forearm latch — front attachment to barrel */}
+          <path d="M 448,122 L 455,120 L 455,132 L 448,134"
+            fill="rgba(0,255,65,0.03)" stroke="rgba(0,255,65,0.25)" strokeWidth="0.6" />
+
+          {/* Forearm screw */}
+          <circle cx="340" cy="131" r="1.5"
+            fill="none" stroke="rgba(0,255,65,0.2)" strokeWidth="0.5" />
         </motion.g>
         <motion.g style={{ opacity: lbl5 }}>
-          <text x="540" y="152" className="bp-label" textAnchor="middle">GARDE-MAIN</text>
-          <text x="600" y="145" className="bp-dim" textAnchor="start">MAG. TUBULAIRE</text>
+          <text x="390" y="162" className="bp-label" textAnchor="middle">FÛT</text>
+          <line x1="390" y1="156" x2="390" y2="148"
+            stroke="rgba(0,255,65,0.35)" strokeWidth="0.5" strokeDasharray="2 2" />
         </motion.g>
 
         {/* ══════ Phase 6 : DÉTAILS FINAUX ══════ */}
         <motion.g style={{ opacity: detailsOp }} filter="url(#wp-glow)">
-          {/* Front bead sight — improved with glow halo */}
-          <circle cx="788" cy="86" r="4"
-            fill="none" stroke="rgba(0,255,65,0.12)" strokeWidth="0.5" />
-          <circle cx="788" cy="86" r="2"
+          {/* Guidon — front bead glow halo */}
+          <circle cx="789" cy="89" r="5"
+            fill="none" stroke="rgba(0,255,65,0.1)" strokeWidth="0.5" />
+          <circle cx="789" cy="89" r="2.5"
             fill="rgba(0,255,65,0.4)" stroke="#00ff41" strokeWidth="0.6" />
 
-          {/* Rear sight — V-notch on receiver (Auto-5 style) */}
-          <path d="M 258,68 L 262,74 L 266,68"
-            fill="none" stroke="#00ff41" strokeWidth="1" />
-          <rect x="255" y="65" width="14" height="3" rx="1"
-            fill="rgba(0,255,65,0.05)" stroke="#00ff41" strokeWidth="0.6" />
+          {/* Sling swivel — front (on fût/barrel) */}
+          <path d="M 448,136 Q 448,144 444,144 Q 440,144 440,136"
+            fill="none" stroke="rgba(0,255,65,0.35)" strokeWidth="0.7" />
+          <circle cx="444" cy="144" r="1.5"
+            fill="none" stroke="rgba(0,255,65,0.25)" strokeWidth="0.5" />
 
-          {/* Sling swivel — front (on mag cap) */}
-          <path d="M 720,140 Q 720,148 716,148 Q 712,148 712,140"
-            fill="none" stroke="rgba(0,255,65,0.4)" strokeWidth="0.8" />
-          <circle cx="716" cy="148" r="1.5"
-            fill="none" stroke="rgba(0,255,65,0.3)" strokeWidth="0.5" />
+          {/* Sling swivel — rear (on crosse) */}
+          <path d="M 85,218 Q 85,226 81,226 Q 77,226 77,218"
+            fill="none" stroke="rgba(0,255,65,0.35)" strokeWidth="0.7" />
+          <circle cx="81" cy="226" r="1.5"
+            fill="none" stroke="rgba(0,255,65,0.25)" strokeWidth="0.5" />
 
-          {/* Sling swivel — rear (on stock) */}
-          <path d="M 80,212 Q 80,220 76,220 Q 72,220 72,212"
-            fill="none" stroke="rgba(0,255,65,0.4)" strokeWidth="0.8" />
-          <circle cx="76" cy="220" r="1.5"
-            fill="none" stroke="rgba(0,255,65,0.3)" strokeWidth="0.5" />
+          {/* Cartouche calibre 12 — dans la chambre */}
+          <rect x="322" y="100" width="20" height="12" rx="1.5"
+            fill="rgba(0,255,65,0.06)" stroke="rgba(0,255,65,0.3)" strokeWidth="0.7" />
+          {/* Culot laiton */}
+          <rect x="318" y="99" width="6" height="14" rx="1"
+            fill="rgba(0,255,65,0.1)" stroke="rgba(0,255,65,0.4)" strokeWidth="0.7" />
+          {/* Amorce */}
+          <circle cx="321" cy="106" r="1.5"
+            fill="rgba(0,255,65,0.06)" stroke="rgba(0,255,65,0.25)" strokeWidth="0.4" />
+          {/* Sertissage étoile */}
+          <line x1="341" y1="103" x2="342" y2="106"
+            stroke="rgba(0,255,65,0.18)" strokeWidth="0.4" />
+          <line x1="341" y1="109" x2="342" y2="106"
+            stroke="rgba(0,255,65,0.18)" strokeWidth="0.4" />
 
-          {/* Shell in chamber — 12 gauge shotshell profile */}
-          {/* Hull */}
-          <rect x="310" y="98" width="42" height="16" rx="2"
-            fill="rgba(0,255,65,0.06)" stroke="rgba(0,255,65,0.35)" strokeWidth="0.8" />
-          {/* Brass head */}
-          <rect x="305" y="97" width="8" height="18" rx="1"
-            fill="rgba(0,255,65,0.1)" stroke="rgba(0,255,65,0.45)" strokeWidth="0.8" />
-          {/* Primer */}
-          <circle cx="309" cy="106" r="2"
-            fill="rgba(0,255,65,0.08)" stroke="rgba(0,255,65,0.3)" strokeWidth="0.5" />
-          {/* Star crimp lines */}
-          <line x1="350" y1="100" x2="352" y2="106"
-            stroke="rgba(0,255,65,0.2)" strokeWidth="0.4" />
-          <line x1="350" y1="112" x2="352" y2="106"
-            stroke="rgba(0,255,65,0.2)" strokeWidth="0.4" />
-          <line x1="349" y1="106" x2="352" y2="106"
-            stroke="rgba(0,255,65,0.2)" strokeWidth="0.4" />
-
-          {/* Manufacturer markings area — decorative blueprint detail */}
-          <rect x="510" y="97" width="60" height="8" rx="1"
-            fill="none" stroke="rgba(0,255,65,0.08)" strokeWidth="0.3" strokeDasharray="2 1" />
-          <line x1="514" y1="101" x2="564" y2="101"
-            stroke="rgba(0,255,65,0.06)" strokeWidth="0.3" />
-          <line x1="514" y1="103" x2="550" y2="103"
+          {/* Marquages gravés sur le bloc de culasse */}
+          <rect x="275" y="105" width="30" height="7" rx="1"
+            fill="none" stroke="rgba(0,255,65,0.06)" strokeWidth="0.3" strokeDasharray="1.5 1" />
+          <line x1="278" y1="108" x2="300" y2="108"
             stroke="rgba(0,255,65,0.04)" strokeWidth="0.3" />
+          <line x1="278" y1="110" x2="295" y2="110"
+            stroke="rgba(0,255,65,0.03)" strokeWidth="0.3" />
 
-          {/* Friction ring detail — Auto-5 recoil system indicator */}
-          <circle cx="456" cy="129" r="5"
-            fill="none" stroke="rgba(0,255,65,0.15)" strokeWidth="0.5" strokeDasharray="2 1" />
-
-          {/* Action bar lock button — left side of receiver */}
-          <rect x="385" y="160" width="10" height="6" rx="2"
-            fill="rgba(0,255,65,0.05)" stroke="rgba(0,255,65,0.25)" strokeWidth="0.6" />
+          {/* Barrel proof marks */}
+          <circle cx="360" cy="110" r="3"
+            fill="none" stroke="rgba(0,255,65,0.06)" strokeWidth="0.3" />
+          <circle cx="372" cy="110" r="3"
+            fill="none" stroke="rgba(0,255,65,0.06)" strokeWidth="0.3" />
         </motion.g>
         <motion.g style={{ opacity: lbl6 }}>
-          <text x="410" y="285" className="bp-label-lg" textAnchor="middle">
+          <text x="450" y="285" className="bp-label-lg" textAnchor="middle">
             SYSTÈME OPÉRATIONNEL
           </text>
-          <line x1="220" y1="280" x2="600" y2="280"
+          <line x1="280" y1="280" x2="620" y2="280"
             stroke="rgba(0,255,65,0.12)" strokeWidth="0.5" />
         </motion.g>
+
 
         {/* ══════ MUZZLE FLASH ══════ */}
         <motion.g style={{ opacity: flashOp, scale: flashScale, transformOrigin: '799px 105px' }}>
