@@ -6,7 +6,7 @@ import {
   ChevronDown, ArrowRight, Cpu, BarChart3, Layers, Eye
 } from 'lucide-react';
 import SoftAurora from '../components/landing/SoftAurora';
-import GlitchText from '../components/landing/GlitchText';
+import FuzzyText from '../components/landing/FuzzyText';
 import { CursorEffect } from '../components/landing/CursorEffect';
 import './LandingPage.css';
 
@@ -541,15 +541,40 @@ export function LandingPage() {
             <span>SYSTÈME D&apos;ANALYSE DE GERBE v2.0</span>
           </div>
           <h1 className="hero-title">
-            <GlitchText speed={1.1} enableShadows enableOnHover={false} className="hero-title-line">
+            <FuzzyText
+              fontSize="clamp(36px, 8vw, 80px)"
+              fontWeight={900}
+              color="#c8ffc8"
+              baseIntensity={0.15}
+              hoverIntensity={0.5}
+              enableHover
+              className="hero-title-line"
+            >
               ANALYSE
-            </GlitchText>
-            <GlitchText speed={0.8} enableShadows enableOnHover={false} className="hero-title-line accent">
+            </FuzzyText>
+            <FuzzyText
+              fontSize="clamp(36px, 8vw, 80px)"
+              fontWeight={900}
+              color="#00ff41"
+              baseIntensity={0.2}
+              hoverIntensity={0.6}
+              enableHover
+              className="hero-title-line accent"
+            >
               BALISTIQUE
-            </GlitchText>
-            <GlitchText speed={1.4} enableShadows enableOnHover={false} className="hero-title-line sub">
+            </FuzzyText>
+            <FuzzyText
+              fontSize="clamp(20px, 4vw, 40px)"
+              fontWeight={400}
+              color="rgba(0,255,65,0.6)"
+              baseIntensity={0.1}
+              hoverIntensity={0.4}
+              enableHover
+              letterSpacing={12}
+              className="hero-title-line sub"
+            >
               AVANCÉE
-            </GlitchText>
+            </FuzzyText>
           </h1>
           <p className="hero-subtitle">
             Plateforme de simulation et d&apos;analyse de dispersion balistique
