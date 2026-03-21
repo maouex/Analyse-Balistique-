@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { ParticleField } from '../components/landing/ParticleField';
 import { CursorEffect } from '../components/landing/CursorEffect';
-import weaponSvgUrl from '../assets/weapon/vectorised-1774111953907.svg';
+import weaponSvgUrl from '../assets/weapon/Gemini_Generated_Image_sc2ixtsc2ixtsc2i (1).svg';
 import './LandingPage.css';
 
 /* ═══════════════════════════════════════════════════════════
@@ -107,119 +107,111 @@ function ScrollPanel({ progress, range, side, children }: {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   WEAPON BLUEPRINT — Real SVG with CSS night-vision filter
-   Progressive clip-path reveal driven by scroll
+   WEAPON BLUEPRINT — Exploded→Assembled vertical pan
+   SVG layout: Y<400 = separated parts, Y≥400 = complete weapon
    ═══════════════════════════════════════════════════════════ */
+
+/* Part Y-centers in the SVG (viewBox 1024×558):
+   Phase 1 — Canon (Barrel):      Y ≈ 65
+   Phase 2 — Détente (Trigger):    Y ≈ 125
+   Phase 3 — Garde-main (Magazine): Y ≈ 200
+   Phase 4 — Crosse (Stock/Frame):  Y ≈ 264
+   Phase 5 — Boîtier (Assembly):    Y ≈ 340
+   Phase 6 — Système complet:       Y ≈ 479  (complete weapon)
+*/
+
+const PHASE_LABELS = [
+  { key: 'canon',   text: 'CANON',              dim: '76 cm' },
+  { key: 'detente', text: 'DÉTENTE',             dim: null },
+  { key: 'magasin', text: 'GARDE-MAIN',          dim: 'MAG. TUBULAIRE' },
+  { key: 'crosse',  text: 'CROSSE',              dim: '36 cm' },
+  { key: 'boitier', text: 'BOÎTIER DE CULASSE',  dim: null },
+  { key: 'complet', text: 'SYSTÈME OPÉRATIONNEL', dim: null },
+];
+
 function WeaponBlueprint({ progress }: { progress: MotionValue<number> }) {
-  // Progressive reveal from left (stock) to right (muzzle)
-  const revealPct = useTransform(progress, [0, 0.85], [0, 100]);
-  const clipPath = useTransform(revealPct, (v: number) => `inset(0 ${100 - v}% 0 0)`);
+  /*
+   * Viewport shows ~170 SVG units of height at a time.
+   * The image (1024×558) is wider than tall, rendered at 100% width.
+   * translateY (% of image height) pans from top parts → complete weapon.
+   *
+   * Target viewport-top for each phase center:
+   *   center - 85 (half viewport), clamped, then / 558 → percentage
+   */
+  const yPan = useTransform(
+    progress,
+    [0, 0.167, 0.333, 0.5, 0.667, 0.833, 1.0],
+    ['0%', '-7%', '-21%', '-32%', '-46%', '-70%', '-70%'],
+  );
 
-  // Scan line follows the reveal edge
-  const scanLeft = useTransform(revealPct, (v: number) => `${v}%`);
-  const scanOpacity = useTransform(progress, [0, 0.02, 0.83, 0.86], [0, 0.8, 0.8, 0]);
+  // Glow intensifies as we progress
+  const mainOpacity = useTransform(progress, [0, 0.4, 0.85, 1], [0.6, 0.8, 0.9, 1]);
 
-  // Overall glow intensifies
-  const mainOpacity = useTransform(progress, [0, 0.5, 1], [0.7, 0.85, 1]);
+  // Horizontal scan line (sweeps vertically through viewport at each phase transition)
+  const scanY = useTransform(progress, (v: number) => {
+    const phase = v * 6;
+    const frac = phase - Math.floor(phase); // 0→1 within each phase
+    return `${frac * 100}%`;
+  });
+  const scanOpacity = useTransform(progress, (v: number) => {
+    const phase = v * 6;
+    const frac = phase - Math.floor(phase);
+    // Bright at start of phase, fades out
+    return frac < 0.3 ? 0.7 * (1 - frac / 0.3) : 0;
+  });
 
-  // Phase labels
-  const lbl1 = useTransform(progress, [0, 0.03, 0.12, 0.167], [0, 1, 1, 0.15]);
-  const lbl2 = useTransform(progress, [0.167, 0.20, 0.29, 0.333], [0, 1, 1, 0.15]);
-  const lbl3 = useTransform(progress, [0.333, 0.37, 0.46, 0.5], [0, 1, 1, 0.15]);
-  const lbl4 = useTransform(progress, [0.5, 0.53, 0.62, 0.667], [0, 1, 1, 0.15]);
-  const lbl5 = useTransform(progress, [0.667, 0.70, 0.79, 0.833], [0, 1, 1, 0.15]);
+  // Phase labels — appear/disappear per phase
+  const lbl1 = useTransform(progress, [0, 0.03, 0.12, 0.167], [0, 1, 1, 0]);
+  const lbl2 = useTransform(progress, [0.167, 0.20, 0.29, 0.333], [0, 1, 1, 0]);
+  const lbl3 = useTransform(progress, [0.333, 0.37, 0.46, 0.5], [0, 1, 1, 0]);
+  const lbl4 = useTransform(progress, [0.5, 0.53, 0.62, 0.667], [0, 1, 1, 0]);
+  const lbl5 = useTransform(progress, [0.667, 0.70, 0.79, 0.833], [0, 1, 1, 0]);
   const lbl6 = useTransform(progress, [0.833, 0.87, 0.95, 1], [0, 1, 1, 1]);
+  const labelOpacities = [lbl1, lbl2, lbl3, lbl4, lbl5, lbl6];
 
-  // Muzzle flash
-  const flashOp = useTransform(progress, [0.88, 0.94, 1.0], [0, 1, 0.5]);
-  const flashScale = useTransform(progress, [0.88, 0.94, 1.0], [0.3, 1.5, 1]);
+  // Muzzle flash on the complete weapon (phase 6)
+  const flashOp = useTransform(progress, [0.90, 0.96, 1.0], [0, 1, 0.5]);
+  const flashScale = useTransform(progress, [0.90, 0.96, 1.0], [0.3, 1.5, 1]);
 
   return (
     <div className="weapon-container">
-      {/* Ghost: always visible, very faint outline */}
-      <img src={weaponSvgUrl} className="weapon-img weapon-ghost" alt="" draggable={false} />
+      {/* Viewport — clips the visible area */}
+      <div className="weapon-viewport">
+        {/* Ghost: very faint full image, no pan */}
+        <img
+          src={weaponSvgUrl}
+          className="weapon-img weapon-ghost"
+          alt="" draggable={false}
+        />
 
-      {/* Main: progressively revealed from left to right */}
-      <motion.div className="weapon-reveal" style={{ clipPath }}>
+        {/* Main image: pans vertically with scroll */}
         <motion.img
           src={weaponSvgUrl}
           className="weapon-img weapon-main"
-          style={{ opacity: mainOpacity }}
-          alt=""
-          draggable={false}
+          style={{ y: yPan, opacity: mainOpacity }}
+          alt="" draggable={false}
         />
-      </motion.div>
 
-      {/* Scan line at the reveal edge */}
-      <motion.div className="weapon-scanline" style={{ left: scanLeft, opacity: scanOpacity }} />
+        {/* Horizontal scan line */}
+        <motion.div
+          className="weapon-scanline-h"
+          style={{ top: scanY, opacity: scanOpacity }}
+        />
+      </div>
 
-      {/* Blueprint labels overlay (positioned to match 1140x912 viewBox) */}
-      <svg viewBox="0 0 1140 912" className="weapon-labels" preserveAspectRatio="xMidYMid meet">
-        {/* Phase 1: CROSSE (Stock area, left side) */}
-        <motion.g style={{ opacity: lbl1 }}>
-          <text x="180" y="590" className="bp-label" textAnchor="middle">CROSSE</text>
-          <line x1="180" y1="578" x2="180" y2="545"
-            stroke="rgba(0,255,65,0.4)" strokeWidth="1" strokeDasharray="3 3" />
-          {/* Dimension */}
-          <line x1="70" y1="360" x2="300" y2="360"
-            stroke="rgba(0,255,65,0.12)" strokeWidth="0.5" />
-          <line x1="70" y1="354" x2="70" y2="366"
-            stroke="rgba(0,255,65,0.12)" strokeWidth="0.5" />
-          <line x1="300" y1="354" x2="300" y2="366"
-            stroke="rgba(0,255,65,0.12)" strokeWidth="0.5" />
-          <text x="185" y="355" className="bp-dim" textAnchor="middle">36 cm</text>
-        </motion.g>
-
-        {/* Phase 2: BOÎTIER DE CULASSE (Receiver, center) */}
-        <motion.g style={{ opacity: lbl2 }}>
-          <text x="430" y="340" className="bp-label" textAnchor="middle">BOÎTIER DE CULASSE</text>
-          <line x1="430" y1="348" x2="430" y2="375"
-            stroke="rgba(0,255,65,0.4)" strokeWidth="1" strokeDasharray="3 3" />
-        </motion.g>
-
-        {/* Phase 3: CANON (Barrel, right side) */}
-        <motion.g style={{ opacity: lbl3 }}>
-          <text x="750" y="340" className="bp-label" textAnchor="middle">CANON</text>
-          <line x1="750" y1="348" x2="750" y2="375"
-            stroke="rgba(0,255,65,0.4)" strokeWidth="1" strokeDasharray="3 3" />
-          {/* Barrel dimension */}
-          <line x1="540" y1="362" x2="1050" y2="362"
-            stroke="rgba(0,255,65,0.12)" strokeWidth="0.5" />
-          <line x1="540" y1="356" x2="540" y2="368"
-            stroke="rgba(0,255,65,0.12)" strokeWidth="0.5" />
-          <line x1="1050" y1="356" x2="1050" y2="368"
-            stroke="rgba(0,255,65,0.12)" strokeWidth="0.5" />
-          <text x="795" y="358" className="bp-dim" textAnchor="middle">76 cm</text>
-        </motion.g>
-
-        {/* Phase 4: DÉTENTE (Trigger guard area) */}
-        <motion.g style={{ opacity: lbl4 }}>
-          <text x="360" y="590" className="bp-label" textAnchor="middle">DÉTENTE</text>
-          <line x1="360" y1="578" x2="360" y2="550"
-            stroke="rgba(0,255,65,0.4)" strokeWidth="1" strokeDasharray="3 3" />
-        </motion.g>
-
-        {/* Phase 5: GARDE-MAIN + MAGASIN */}
-        <motion.g style={{ opacity: lbl5 }}>
-          <text x="550" y="560" className="bp-label" textAnchor="middle">GARDE-MAIN</text>
-          <text x="680" y="530" className="bp-dim" textAnchor="middle">MAG. TUBULAIRE</text>
-        </motion.g>
-
-        {/* Phase 6: SYSTÈME COMPLET */}
-        <motion.g style={{ opacity: lbl6 }}>
-          <text x="570" y="660" className="bp-label-lg" textAnchor="middle">
-            SYSTÈME OPÉRATIONNEL
-          </text>
-          <line x1="300" y1="650" x2="840" y2="650"
-            stroke="rgba(0,255,65,0.12)" strokeWidth="1" />
-        </motion.g>
-
-        {/* Blueprint center lines */}
-        <line x1="0" y1="456" x2="1140" y2="456"
-          stroke="rgba(0,255,65,0.03)" strokeWidth="0.5" strokeDasharray="8 6" />
-        <line x1="570" y1="300" x2="570" y2="650"
-          stroke="rgba(0,255,65,0.03)" strokeWidth="0.5" strokeDasharray="8 6" />
-      </svg>
+      {/* Phase labels — fixed to viewport, not panning */}
+      <div className="weapon-label-layer">
+        {PHASE_LABELS.map((lbl, i) => (
+          <motion.div
+            key={lbl.key}
+            className={`weapon-label ${i === 5 ? 'weapon-label-final' : ''}`}
+            style={{ opacity: labelOpacities[i] }}
+          >
+            <span className="weapon-label-text">{lbl.text}</span>
+            {lbl.dim && <span className="weapon-label-dim">{lbl.dim}</span>}
+          </motion.div>
+        ))}
+      </div>
 
       {/* Muzzle flash */}
       <motion.div
