@@ -237,48 +237,108 @@
 }
 
 
-/* ─── Weapon SVG ─────────────────────────────────────────── */
+/* ─── Weapon Image ───────────────────────────────────────── */
 .weapon-container {
   position: relative;
   width: 55%;
   max-width: 720px;
   z-index: 5;
   pointer-events: none;
-  filter: drop-shadow(0 0 12px rgba(0, 255, 65, 0.08));
-  transition: filter 0.5s ease;
 }
 
-.weapon-svg {
+/* Night-vision green filter: dark SVG → green on transparent */
+.weapon-img {
   width: 100%;
   height: auto;
+  display: block;
+  filter: invert(1) sepia(1) hue-rotate(85deg) saturate(8) brightness(0.55) contrast(1.3);
+  mix-blend-mode: screen;
+}
+
+/* Ghost: faint full outline always visible */
+.weapon-ghost {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0.04;
+}
+
+/* Reveal container with animated clip-path */
+.weapon-reveal {
+  position: relative;
+}
+
+/* Vertical scan line at reveal edge */
+.weapon-scanline {
+  position: absolute;
+  top: 15%;
+  bottom: 15%;
+  width: 2px;
+  background: var(--nv-green);
+  box-shadow:
+    0 0 8px var(--nv-green),
+    0 0 20px rgba(0, 255, 65, 0.4),
+    0 0 40px rgba(0, 255, 65, 0.15);
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* Labels overlay (SVG positioned on top of weapon) */
+.weapon-labels {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Muzzle flash */
+.muzzle-flash {
+  position: absolute;
+  right: -4%;
+  top: 38%;
+  width: 90px;
+  height: 90px;
+  background: radial-gradient(
+    circle,
+    rgba(0, 255, 65, 0.7) 0%,
+    rgba(0, 255, 65, 0.3) 25%,
+    rgba(0, 255, 65, 0.08) 50%,
+    transparent 70%
+  );
+  border-radius: 50%;
+  z-index: 10;
+  pointer-events: none;
+  transform-origin: center;
 }
 
 /* Blueprint labels */
 .bp-label {
   font-family: 'JetBrains Mono', 'Courier New', monospace;
-  font-size: 8px;
+  font-size: 24px;
   font-weight: 600;
   fill: rgba(0, 255, 65, 0.6);
-  letter-spacing: 2px;
+  letter-spacing: 4px;
   text-transform: uppercase;
 }
 
 .bp-label-lg {
   font-family: 'JetBrains Mono', 'Courier New', monospace;
-  font-size: 10px;
+  font-size: 32px;
   font-weight: 700;
   fill: var(--nv-green);
-  letter-spacing: 3px;
+  letter-spacing: 5px;
   text-transform: uppercase;
   filter: drop-shadow(0 0 8px rgba(0, 255, 65, 0.4));
 }
 
 .bp-dim {
   font-family: 'JetBrains Mono', 'Courier New', monospace;
-  font-size: 7px;
+  font-size: 18px;
   font-weight: 500;
   fill: rgba(0, 255, 65, 0.35);
-  letter-spacing: 1px;
+  letter-spacing: 2px;
 }
 
 
