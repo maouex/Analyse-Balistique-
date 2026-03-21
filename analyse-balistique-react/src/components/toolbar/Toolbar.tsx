@@ -10,12 +10,13 @@ import { detectImpacts } from '../../lib/autoDetect';
 interface ToolbarProps {
   collapsed?: boolean;
   pinned?: boolean;
+  canCollapse?: boolean;
   onPin?: () => void;
   onExpand?: () => void;
   onCollapse?: () => void;
 }
 
-export function Toolbar({ collapsed, pinned, onPin, onExpand, onCollapse }: ToolbarProps) {
+export function Toolbar({ collapsed, pinned, canCollapse, onPin, onExpand, onCollapse }: ToolbarProps) {
   const store = useAnalysisStore();
   const fileRef = useRef<HTMLInputElement>(null);
   const [detecting, setDetecting] = useState(false);
@@ -55,8 +56,8 @@ export function Toolbar({ collapsed, pinned, onPin, onExpand, onCollapse }: Tool
         flexShrink: 0,
         position: 'relative',
       }}
-      onMouseEnter={collapsed ? onExpand : undefined}
-      onMouseLeave={collapsed ? onCollapse : undefined}
+      onMouseEnter={onExpand}
+      onMouseLeave={onCollapse}
     >
       {/* Top decoration line */}
       <div style={{
@@ -80,7 +81,7 @@ export function Toolbar({ collapsed, pinned, onPin, onExpand, onCollapse }: Tool
       )}
 
       {/* Pin button */}
-      {onPin && !collapsed && (
+      {canCollapse && onPin && !collapsed && (
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
           <button
             className={`sidebar-pin-btn ${pinned ? 'pinned' : ''}`}

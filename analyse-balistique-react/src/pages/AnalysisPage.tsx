@@ -58,6 +58,7 @@ export function AnalysisPage() {
           <Toolbar
             collapsed={leftCollapsed}
             pinned={leftPinned}
+            canCollapse={isImpactMode}
             onPin={() => setLeftPinned((p) => !p)}
             onExpand={handleLeftExpand}
             onCollapse={handleLeftCollapse}
@@ -68,6 +69,7 @@ export function AnalysisPage() {
             onSaveMunition={() => setShowMunitionForm(true)}
             collapsed={rightCollapsed}
             pinned={rightPinned}
+            canCollapse={isImpactMode}
             onPin={() => setRightPinned((p) => !p)}
             onExpand={handleRightExpand}
             onCollapse={handleRightCollapse}
