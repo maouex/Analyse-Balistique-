@@ -1,0 +1,709 @@
+/* ═══════════════════════════════════════════════════════════
+   LANDING PAGE — MILITARY/TACTICAL THEME
+   Night-vision green (#00ff41) on black
+   ═══════════════════════════════════════════════════════════ */
+
+/* ─── Variables ──────────────────────────────────────────── */
+.landing-root {
+  --nv-green: #00ff41;
+  --nv-green-dim: rgba(0, 255, 65, 0.6);
+  --nv-green-faint: rgba(0, 255, 65, 0.15);
+  --nv-green-ghost: rgba(0, 255, 65, 0.05);
+  --nv-bg: #010a01;
+  --nv-surface: rgba(0, 255, 65, 0.03);
+  --nv-border: rgba(0, 255, 65, 0.12);
+  --nv-text: #c8ffc8;
+  --nv-text-dim: rgba(0, 255, 65, 0.5);
+  --nv-font: 'Inter', 'Courier New', monospace;
+}
+
+/* ─── Root container ─────────────────────────────────────── */
+.landing-root {
+  width: 100%;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--nv-bg);
+  color: var(--nv-text);
+  font-family: var(--nv-font);
+  scroll-behavior: smooth;
+  scroll-snap-type: y proximity;
+  cursor: none;
+}
+
+/* ─── Scanlines overlay ──────────────────────────────────── */
+.scanlines {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 255, 65, 0.015) 2px,
+    rgba(0, 255, 65, 0.015) 4px
+  );
+}
+
+/* ─── Tactical grid ──────────────────────────────────────── */
+.tactical-grid {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(rgba(0, 255, 65, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 65, 0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* ─── Sections base ──────────────────────────────────────── */
+.landing-section {
+  position: relative;
+  z-index: 2;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px;
+  scroll-snap-align: start;
+}
+
+.section-anchor {
+  position: absolute;
+  top: -80px;
+}
+
+/* ─── Floating nav ───────────────────────────────────────── */
+.landing-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 32px;
+  background: rgba(1, 10, 1, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--nv-border);
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--nv-green);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.nav-cta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  background: transparent;
+  border: 1px solid var(--nv-green-dim);
+  color: var(--nv-green);
+  font-family: var(--nv-font);
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: none;
+  transition: all 0.3s;
+}
+
+.nav-cta:hover {
+  background: rgba(0, 255, 65, 0.1);
+  box-shadow: 0 0 20px rgba(0, 255, 65, 0.15);
+}
+
+/* ═══ HERO SECTION ═══════════════════════════════════════ */
+.hero-section {
+  position: relative;
+  overflow: hidden;
+}
+
+.reticle {
+  position: absolute;
+  opacity: 0.15;
+  z-index: 0;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  max-width: 800px;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border: 1px solid var(--nv-border);
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--nv-green-dim);
+  margin-bottom: 32px;
+  background: var(--nv-surface);
+}
+
+.hero-title {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-bottom: 24px;
+}
+
+.hero-title-line {
+  font-size: clamp(36px, 8vw, 80px);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -2px;
+  color: var(--nv-text);
+  text-shadow: 0 0 40px rgba(0, 255, 65, 0.15);
+}
+
+.hero-title-line.accent {
+  color: var(--nv-green);
+  text-shadow: 0 0 60px rgba(0, 255, 65, 0.3), 0 0 120px rgba(0, 255, 65, 0.1);
+}
+
+.hero-title-line.sub {
+  font-size: clamp(20px, 4vw, 40px);
+  font-weight: 400;
+  letter-spacing: 12px;
+  color: var(--nv-green-dim);
+  margin-top: 8px;
+}
+
+.hero-subtitle {
+  font-size: 16px;
+  color: var(--nv-text-dim);
+  max-width: 500px;
+  margin: 0 auto 40px;
+  line-height: 1.7;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.hero-coordinates {
+  margin-top: 48px;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--nv-green-dim);
+  opacity: 0.5;
+  font-family: 'Courier New', monospace;
+}
+
+.hero-coordinates .sep {
+  margin: 0 12px;
+  opacity: 0.3;
+}
+
+.scroll-indicator {
+  position: absolute;
+  bottom: 40px;
+  color: var(--nv-green-dim);
+  opacity: 0.4;
+}
+
+/* ─── Buttons ────────────────────────────────────────────── */
+.btn-tactical {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 28px;
+  font-family: var(--nv-font);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  border: 1px solid var(--nv-border);
+  cursor: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-tactical::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 65, 0.1), transparent);
+  transition: left 0.5s;
+}
+
+.btn-tactical:hover::before {
+  left: 100%;
+}
+
+.btn-tactical.primary {
+  background: rgba(0, 255, 65, 0.1);
+  color: var(--nv-green);
+  border-color: var(--nv-green-dim);
+}
+
+.btn-tactical.primary:hover {
+  background: rgba(0, 255, 65, 0.2);
+  box-shadow: 0 0 30px rgba(0, 255, 65, 0.2), inset 0 0 30px rgba(0, 255, 65, 0.05);
+}
+
+.btn-tactical.secondary {
+  background: transparent;
+  color: var(--nv-text-dim);
+  border-color: var(--nv-border);
+}
+
+.btn-tactical.secondary:hover {
+  border-color: var(--nv-green-dim);
+  color: var(--nv-green);
+}
+
+.btn-tactical.large {
+  padding: 18px 40px;
+  font-size: 15px;
+}
+
+/* ─── Section headers ────────────────────────────────────── */
+.section-header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.section-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 14px;
+  border: 1px solid var(--nv-border);
+  font-size: 10px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--nv-green);
+  margin-bottom: 16px;
+  background: var(--nv-surface);
+}
+
+.section-title {
+  font-size: clamp(28px, 5vw, 48px);
+  font-weight: 800;
+  letter-spacing: -1px;
+  color: var(--nv-text);
+  text-shadow: 0 0 40px rgba(0, 255, 65, 0.1);
+}
+
+.section-line {
+  width: 60px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--nv-green), transparent);
+  margin: 16px auto 0;
+}
+
+/* ═══ MISSION SECTION ════════════════════════════════════ */
+.mission-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  max-width: 1000px;
+  width: 100%;
+}
+
+.mission-card {
+  padding: 32px;
+  border: 1px solid var(--nv-border);
+  background: var(--nv-surface);
+  backdrop-filter: blur(8px);
+  transition: all 0.3s;
+  position: relative;
+}
+
+.mission-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--nv-green-faint), transparent);
+}
+
+.mission-icon {
+  color: var(--nv-green);
+  margin-bottom: 20px;
+  filter: drop-shadow(0 0 8px rgba(0, 255, 65, 0.3));
+}
+
+.mission-card h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--nv-text);
+  margin-bottom: 12px;
+  letter-spacing: 0.5px;
+}
+
+.mission-card p {
+  font-size: 14px;
+  color: var(--nv-text-dim);
+  line-height: 1.7;
+}
+
+/* ═══ PHYSICS SECTION ════════════════════════════════════ */
+.physics-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  max-width: 1100px;
+  width: 100%;
+  align-items: center;
+}
+
+.physics-equations {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.equation-block {
+  padding: 20px 24px;
+  border: 1px solid var(--nv-border);
+  background: var(--nv-surface);
+  border-left: 3px solid var(--nv-green-dim);
+}
+
+.eq-label {
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--nv-green);
+  margin-bottom: 8px;
+}
+
+.eq-formula {
+  font-family: 'Courier New', monospace;
+  font-size: 18px;
+  color: var(--nv-green);
+  text-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
+  margin-bottom: 6px;
+}
+
+.eq-desc {
+  font-size: 12px;
+  color: var(--nv-text-dim);
+  line-height: 1.5;
+}
+
+.physics-visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.trajectory-canvas {
+  width: 100%;
+  max-width: 400px;
+  border: 1px solid var(--nv-border);
+  background: var(--nv-surface);
+  padding: 16px;
+}
+
+.trajectory-svg {
+  width: 100%;
+  height: auto;
+}
+
+/* ═══ MODES SECTION ══════════════════════════════════════ */
+.modes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  max-width: 1100px;
+  width: 100%;
+}
+
+.mode-card {
+  padding: 24px;
+  border: 1px solid var(--nv-border);
+  background: var(--nv-surface);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s;
+}
+
+.mode-icon {
+  color: var(--nv-green);
+  margin-bottom: 14px;
+  filter: drop-shadow(0 0 6px rgba(0, 255, 65, 0.3));
+}
+
+.mode-card h4 {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--nv-text);
+  margin-bottom: 8px;
+}
+
+.mode-card p {
+  font-size: 12px;
+  color: var(--nv-text-dim);
+  line-height: 1.6;
+}
+
+.mode-index {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  font-size: 11px;
+  font-family: 'Courier New', monospace;
+  color: var(--nv-green-faint);
+  font-weight: 700;
+}
+
+/* ═══ STATS SECTION ══════════════════════════════════════ */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 24px;
+  max-width: 1000px;
+  width: 100%;
+}
+
+.stat-block {
+  padding: 32px 24px;
+  border: 1px solid var(--nv-border);
+  background: var(--nv-surface);
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 36px;
+  font-weight: 900;
+  color: var(--nv-green);
+  text-shadow: 0 0 30px rgba(0, 255, 65, 0.3);
+  margin-bottom: 8px;
+  font-family: 'Courier New', monospace;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--nv-text-dim);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.stat-bar {
+  height: 3px;
+  background: var(--nv-green-ghost);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.stat-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--nv-green), var(--nv-green-dim));
+  box-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+}
+
+/* ═══ ARSENAL SECTION ════════════════════════════════════ */
+.arsenal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+  max-width: 900px;
+  width: 100%;
+}
+
+.arsenal-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 20px 24px;
+  border: 1px solid var(--nv-border);
+  background: var(--nv-surface);
+  transition: all 0.3s;
+}
+
+.arsenal-icon {
+  color: var(--nv-green);
+  flex-shrink: 0;
+  margin-top: 2px;
+  filter: drop-shadow(0 0 6px rgba(0, 255, 65, 0.3));
+}
+
+.arsenal-text h4 {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--nv-text);
+  margin-bottom: 6px;
+}
+
+.arsenal-text p {
+  font-size: 13px;
+  color: var(--nv-text-dim);
+  line-height: 1.6;
+}
+
+/* ═══ CTA SECTION ════════════════════════════════════════ */
+.cta-section {
+  position: relative;
+}
+
+.cta-content {
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+
+.cta-reticle {
+  color: var(--nv-green-faint);
+  margin-bottom: 24px;
+  opacity: 0.3;
+}
+
+.cta-title {
+  font-size: clamp(28px, 5vw, 48px);
+  font-weight: 800;
+  color: var(--nv-text);
+  margin-bottom: 16px;
+  text-shadow: 0 0 40px rgba(0, 255, 65, 0.15);
+}
+
+.cta-subtitle {
+  font-size: 16px;
+  color: var(--nv-text-dim);
+  max-width: 500px;
+  margin: 0 auto 40px;
+  line-height: 1.7;
+}
+
+.cta-tech-stack {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 40px;
+}
+
+.cta-tech-stack span {
+  padding: 4px 12px;
+  border: 1px solid var(--nv-border);
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--nv-green-dim);
+}
+
+/* ═══ FOOTER ═════════════════════════════════════════════ */
+.landing-footer {
+  position: relative;
+  z-index: 2;
+  padding: 24px 32px;
+}
+
+.footer-line {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--nv-border), transparent);
+  margin-bottom: 24px;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--nv-green);
+  font-size: 12px;
+  letter-spacing: 3px;
+  font-weight: 700;
+}
+
+.footer-copy {
+  font-size: 11px;
+  color: var(--nv-text-dim);
+  letter-spacing: 1px;
+}
+
+/* ═══ RESPONSIVE ═════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .landing-section {
+    padding: 60px 16px;
+  }
+
+  .physics-content {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .modes-grid {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  }
+
+  .arsenal-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .landing-nav {
+    padding: 12px 16px;
+  }
+
+  .landing-root {
+    cursor: auto;
+  }
+
+  .footer-content {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .modes-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .mode-card {
+    padding: 16px;
+  }
+}
