@@ -49,10 +49,10 @@ export function getScoreLabel(score: number): string {
 }
 
 export function getScoreColor(score: number): string {
-  if (score >= 80) return '#2ecc71';
-  if (score >= 60) return '#f0a030';
-  if (score >= 40) return '#d4a020';
-  return '#e05252';
+  if (score >= 80) return '#00ff41';
+  if (score >= 60) return '#ffaa00';
+  if (score >= 40) return '#ff8800';
+  return '#ff4444';
 }
 
 // ─── Distance Statistics ────────────────────────────────────

@@ -119,9 +119,9 @@ function drawCircle(
 function drawCenter(ctx: CanvasRenderingContext2D, p: Point): void {
   ctx.save();
   // Outer glow
-  ctx.shadowColor = '#4dabf7';
+  ctx.shadowColor = '#44aaff';
   ctx.shadowBlur = 12;
-  ctx.strokeStyle = '#4dabf7';
+  ctx.strokeStyle = '#44aaff';
   ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.moveTo(p.x - 12, p.y);
@@ -131,7 +131,7 @@ function drawCenter(ctx: CanvasRenderingContext2D, p: Point): void {
   ctx.stroke();
 
   ctx.shadowBlur = 0;
-  ctx.fillStyle = '#4dabf7';
+  ctx.fillStyle = '#44aaff';
   ctx.beginPath();
   ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
   ctx.fill();
@@ -203,7 +203,7 @@ function drawEllipse(
 
 function drawScaleLine(ctx: CanvasRenderingContext2D, p1: Point, p2: Point): void {
   ctx.save();
-  ctx.strokeStyle = '#f0a030';
+  ctx.strokeStyle = '#00ff41';
   ctx.lineWidth = 2;
   ctx.setLineDash([6, 4]);
   ctx.beginPath();
@@ -213,7 +213,7 @@ function drawScaleLine(ctx: CanvasRenderingContext2D, p1: Point, p2: Point): voi
 
   // Endpoints
   ctx.setLineDash([]);
-  ctx.fillStyle = '#f0a030';
+  ctx.fillStyle = '#00ff41';
   for (const p of [p1, p2]) {
     ctx.beginPath();
     ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
@@ -232,7 +232,7 @@ function drawEraserCursor(
   ctx.save();
 
   // Eraser circle
-  ctx.strokeStyle = '#e05252';
+  ctx.strokeStyle = '#ff4444';
   ctx.lineWidth = 2;
   ctx.setLineDash([4, 3]);
   ctx.globalAlpha = 0.8;

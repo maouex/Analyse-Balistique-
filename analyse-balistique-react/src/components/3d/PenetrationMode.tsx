@@ -228,11 +228,11 @@ export function PenetrationMode({
       {/* Reference circles on surface */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.002, 0]}>
         <ringGeometry args={[circle1RadiusCm * SCALE - 0.002, circle1RadiusCm * SCALE, 64]} />
-        <meshBasicMaterial color="#2ecc71" transparent opacity={0.5} side={THREE.DoubleSide} />
+        <meshBasicMaterial color="#00ff41" transparent opacity={0.5} side={THREE.DoubleSide} />
       </mesh>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.002, 0]}>
         <ringGeometry args={[circle2RadiusCm * SCALE - 0.002, circle2RadiusCm * SCALE, 64]} />
-        <meshBasicMaterial color="#f59f00" transparent opacity={0.5} side={THREE.DoubleSide} />
+        <meshBasicMaterial color="#ffaa00" transparent opacity={0.5} side={THREE.DoubleSide} />
       </mesh>
 
       {/* Wound channels */}

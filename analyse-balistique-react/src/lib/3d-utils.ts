@@ -106,9 +106,9 @@ export function impactsTo3D(
 
 export function getZoneColor(zone: 1 | 2 | 3): string {
   switch (zone) {
-    case 1: return '#2ecc71';
-    case 2: return '#f59f00';
-    case 3: return '#e05252';
+    case 1: return '#00ff41';
+    case 2: return '#ffaa00';
+    case 3: return '#ff4444';
   }
 }
 

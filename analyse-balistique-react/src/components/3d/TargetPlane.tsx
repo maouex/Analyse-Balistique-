@@ -12,8 +12,8 @@ interface TargetPlaneProps {
 export function TargetPlane({
   circle1RadiusCm,
   circle2RadiusCm,
-  circle1Color = '#2ecc71',
-  circle2Color = '#f59f00',
+  circle1Color = '#00ff41',
+  circle2Color = '#ffaa00',
   scale = 0.01,
 }: TargetPlaneProps) {
   const r1 = circle1RadiusCm * scale;
@@ -54,11 +54,11 @@ export function TargetPlane({
       {/* Center cross */}
       <mesh position={[0, 0.003, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[0.005, r1 * 0.4]} />
-        <meshBasicMaterial color="#4dabf7" transparent opacity={0.6} />
+        <meshBasicMaterial color="#44aaff" transparent opacity={0.6} />
       </mesh>
       <mesh position={[0, 0.003, 0]} rotation={[-Math.PI / 2, 0, Math.PI / 2]}>
         <planeGeometry args={[0.005, r1 * 0.4]} />
-        <meshBasicMaterial color="#4dabf7" transparent opacity={0.6} />
+        <meshBasicMaterial color="#44aaff" transparent opacity={0.6} />
       </mesh>
 
       {/* Labels */}

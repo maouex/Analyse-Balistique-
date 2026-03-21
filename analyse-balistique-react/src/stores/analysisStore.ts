@@ -67,22 +67,22 @@ const defaultCircle1: CircleConfig = {
   visible: true,
   radiusPx: 150,
   diameterCm: 50,
-  color: '#2ecc71',
+  color: '#00ff41',
 };
 
 const defaultCircle2: CircleConfig = {
   visible: true,
   radiusPx: 300,
   diameterCm: 100,
-  color: '#f59f00',
+  color: '#ffaa00',
 };
 
 const defaultImpactStyle: ImpactStyle = {
   radius: 6,
-  color: '#e05252',
+  color: '#ff4444',
   showNumbers: true,
   showEllipse: true,
-  ellipseColor: '#4dabf7',
+  ellipseColor: '#44aaff',
 };
 
 const defaultScale: ScaleCalibration = {

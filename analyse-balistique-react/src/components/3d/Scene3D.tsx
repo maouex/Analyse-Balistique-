@@ -277,8 +277,8 @@ export function Scene3D({
             <>
               <ambientLight intensity={0.4} />
               <directionalLight position={[5, 10, 5]} intensity={0.8} />
-              <directionalLight position={[-3, 8, -3]} intensity={0.3} color="#4dabf7" />
-              <pointLight position={[0, 2, 0]} intensity={0.5} color="#f0a030" />
+              <directionalLight position={[-3, 8, -3]} intensity={0.3} color="#44aaff" />
+              <pointLight position={[0, 2, 0]} intensity={0.5} color="#00ff41" />
             </>
           )}
 

@@ -10,10 +10,10 @@ const AXES = [
 ];
 
 const COLORS = [
-  { stroke: '#4dabf7', fill: 'rgba(77,171,247,0.12)' },
-  { stroke: '#2ecc71', fill: 'rgba(46,204,113,0.12)' },
-  { stroke: '#f0a030', fill: 'rgba(240,160,48,0.12)' },
-  { stroke: '#e05252', fill: 'rgba(224,82,82,0.12)' },
+  { stroke: '#44aaff', fill: 'rgba(68,170,255,0.12)' },
+  { stroke: '#00ff41', fill: 'rgba(0,255,65,0.12)' },
+  { stroke: '#ffaa00', fill: 'rgba(255,170,0,0.12)' },
+  { stroke: '#ff4444', fill: 'rgba(255,68,68,0.12)' },
 ];
 
 interface RadarChartProps {

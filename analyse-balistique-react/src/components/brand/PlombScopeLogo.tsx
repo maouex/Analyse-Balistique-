@@ -96,8 +96,8 @@ export function PlombScopeIcon({ size = 30 }: { size?: number }) {
     >
       <defs>
         <linearGradient id="icon-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#f0a030" />
-          <stop offset="100%" stopColor="#d4940a" />
+          <stop offset="0%" stopColor="#00ff41" />
+          <stop offset="100%" stopColor="#00cc33" />
         </linearGradient>
       </defs>
       <circle cx="50" cy="50" r="30" stroke="url(#icon-grad)" strokeWidth="3" />
