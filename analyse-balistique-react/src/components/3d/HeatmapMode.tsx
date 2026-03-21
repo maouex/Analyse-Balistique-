@@ -104,17 +104,17 @@ export function HeatmapMode({ impacts, circle1RadiusCm, circle2RadiusCm }: Heatm
         <>
           <mesh position={[0, heatmapData.hoopY1, 0]} rotation={[-Math.PI / 2, 0, 0]}>
             <torusGeometry args={[circle1RadiusCm * WORLD_SCALE, 0.004, 12, 64]} />
-            <meshStandardMaterial color="#2ecc71" emissive="#2ecc71" emissiveIntensity={0.4} transparent opacity={0.9} side={THREE.DoubleSide} />
+            <meshStandardMaterial color="#00ff41" emissive="#00ff41" emissiveIntensity={0.4} transparent opacity={0.9} side={THREE.DoubleSide} />
           </mesh>
-          <Text position={[circle1RadiusCm * WORLD_SCALE + 0.02, heatmapData.hoopY1 + 0.015, 0]} fontSize={0.03} color="#2ecc71" anchorX="left">
+          <Text position={[circle1RadiusCm * WORLD_SCALE + 0.02, heatmapData.hoopY1 + 0.015, 0]} fontSize={0.03} color="#00ff41" anchorX="left">
             {`∅${circle1RadiusCm * 2}cm`}
           </Text>
 
           <mesh position={[0, heatmapData.hoopY2, 0]} rotation={[-Math.PI / 2, 0, 0]}>
             <torusGeometry args={[circle2RadiusCm * WORLD_SCALE, 0.004, 12, 64]} />
-            <meshStandardMaterial color="#f59f00" emissive="#f59f00" emissiveIntensity={0.4} transparent opacity={0.9} side={THREE.DoubleSide} />
+            <meshStandardMaterial color="#ffaa00" emissive="#ffaa00" emissiveIntensity={0.4} transparent opacity={0.9} side={THREE.DoubleSide} />
           </mesh>
-          <Text position={[circle2RadiusCm * WORLD_SCALE + 0.02, heatmapData.hoopY2 + 0.015, 0]} fontSize={0.03} color="#f59f00" anchorX="left">
+          <Text position={[circle2RadiusCm * WORLD_SCALE + 0.02, heatmapData.hoopY2 + 0.015, 0]} fontSize={0.03} color="#ffaa00" anchorX="left">
             {`∅${circle2RadiusCm * 2}cm`}
           </Text>
         </>

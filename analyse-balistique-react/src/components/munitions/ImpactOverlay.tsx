@@ -2,10 +2,10 @@ import { useRef, useEffect, useState, useCallback } from 'react';
 import type { Munition, Impact } from '../../types';
 
 const COLORS = [
-  { main: '#4dabf7', light: 'rgba(77,171,247,0.5)', glow: 'rgba(77,171,247,0.15)' },
-  { main: '#2ecc71', light: 'rgba(46,204,113,0.5)', glow: 'rgba(46,204,113,0.15)' },
-  { main: '#f0a030', light: 'rgba(240,160,48,0.5)', glow: 'rgba(240,160,48,0.15)' },
-  { main: '#e05252', light: 'rgba(224,82,82,0.5)', glow: 'rgba(224,82,82,0.15)' },
+  { main: '#44aaff', light: 'rgba(68,170,255,0.5)', glow: 'rgba(68,170,255,0.15)' },
+  { main: '#00ff41', light: 'rgba(0,255,65,0.5)', glow: 'rgba(0,255,65,0.15)' },
+  { main: '#ffaa00', light: 'rgba(255,170,0,0.5)', glow: 'rgba(255,170,0,0.15)' },
+  { main: '#ff4444', light: 'rgba(255,68,68,0.5)', glow: 'rgba(255,68,68,0.15)' },
 ];
 
 const SHAPES: Array<(ctx: CanvasRenderingContext2D, x: number, y: number, r: number) => void> = [

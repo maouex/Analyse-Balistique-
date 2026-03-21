@@ -81,7 +81,7 @@ export function ConeDispersionMode({
       >
         <coneGeometry args={[coneRadius, coneHeight, 32, 1, true]} />
         <meshStandardMaterial
-          color={enhanced ? '#c084fc' : '#f0a030'}
+          color={enhanced ? '#aa66ff' : '#00ff41'}
           transparent
           opacity={0.12}
           side={THREE.DoubleSide}
@@ -93,7 +93,7 @@ export function ConeDispersionMode({
       <mesh position={[0, coneHeight / 2, 0]}>
         <coneGeometry args={[coneRadius, coneHeight, 32, 1, true]} />
         <meshStandardMaterial
-          color={enhanced ? '#c084fc' : '#f0a030'}
+          color={enhanced ? '#aa66ff' : '#00ff41'}
           transparent
           opacity={0.05}
           side={THREE.DoubleSide}
@@ -140,7 +140,7 @@ export function ConeDispersionMode({
       {ellipseShape && (
         <line>
           <bufferGeometry attach="geometry" {...ellipseShape} />
-          <lineBasicMaterial color="#4dabf7" transparent opacity={0.8} />
+          <lineBasicMaterial color="#44aaff" transparent opacity={0.8} />
         </line>
       )}
 

@@ -213,7 +213,7 @@ export function DispersionCloudMode({
       <group ref={ringRef}>
         <mesh rotation={[-Math.PI / 2, 0, 0]}>
           <ringGeometry args={[0.48, 0.5, 64]} />
-          <meshBasicMaterial color="#4dabf7" transparent opacity={0.35} side={THREE.DoubleSide} />
+          <meshBasicMaterial color="#44aaff" transparent opacity={0.35} side={THREE.DoubleSide} />
         </mesh>
       </group>
 

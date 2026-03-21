@@ -70,11 +70,11 @@ function TargetAtDistance({
       {/* Circles */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.002, 0]}>
         <ringGeometry args={[r1 - 0.002, r1, 48]} />
-        <meshBasicMaterial color="#2ecc71" transparent opacity={0.6} side={THREE.DoubleSide} />
+        <meshBasicMaterial color="#00ff41" transparent opacity={0.6} side={THREE.DoubleSide} />
       </mesh>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.002, 0]}>
         <ringGeometry args={[r2 - 0.002, r2, 48]} />
-        <meshBasicMaterial color="#f59f00" transparent opacity={0.6} side={THREE.DoubleSide} />
+        <meshBasicMaterial color="#ffaa00" transparent opacity={0.6} side={THREE.DoubleSide} />
       </mesh>
 
       {/* Impact pellets */}
@@ -101,7 +101,7 @@ function TargetAtDistance({
       <Text
         position={[0, 0.08, planeSize / 2 + 0.04]}
         fontSize={0.06}
-        color={isActual ? '#4dabf7' : '#a0a4b8'}
+        color={isActual ? '#44aaff' : 'rgba(0, 255, 65, 0.5)'}
         fontWeight={isActual ? 'bold' : 'normal'}
       >
         {`${distanceM}m`}
@@ -112,7 +112,7 @@ function TargetAtDistance({
         <Text
           position={[0, 0.04, planeSize / 2 + 0.04]}
           fontSize={0.025}
-          color="#4dabf7"
+          color="#44aaff"
         >
           (distance réelle)
         </Text>
@@ -132,7 +132,7 @@ function TargetAtDistance({
           <Text
             position={[0, 0, 0.04]}
             fontSize={0.022}
-            color="#a0a4b8"
+            color="rgba(0, 255, 65, 0.5)"
             rotation={[-Math.PI / 2, 0, 0]}
           >
             {`Pén: ${simResult.avgPenetration.toFixed(1)}cm | Rét: ${simResult.velocityRetention.toFixed(0)}%`}
