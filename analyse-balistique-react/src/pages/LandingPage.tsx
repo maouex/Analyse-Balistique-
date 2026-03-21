@@ -117,7 +117,7 @@ export function LandingPage() {
       <motion.nav className="landing-nav" style={{ opacity: headerOpacity }}>
         <div className="nav-brand">
           <Crosshair size={20} />
-          <span>PLOMBSCOPE</span>
+          <span>S.A.G.</span>
         </div>
         <button className="nav-cta" onClick={goToApp}>
           Accéder au simulateur <ArrowRight size={16} />
@@ -421,7 +421,7 @@ export function LandingPage() {
             whileTap={{ scale: 0.98 }}
           >
             <Target size={22} />
-            Lancer PlombScope
+            Lancer S.A.G.
             <ArrowRight size={18} />
           </motion.button>
           <div className="cta-tech-stack">
@@ -439,10 +439,10 @@ export function LandingPage() {
         <div className="footer-line" />
         <div className="footer-content">
           <span className="footer-brand">
-            <Crosshair size={14} /> PLOMBSCOPE
+            <Crosshair size={14} /> S.A.G.
           </span>
           <span className="footer-copy">
-            Système d&apos;analyse balistique — {new Date().getFullYear()}
+            S.A.G. — Système d&apos;Analyse de Gerbe — {new Date().getFullYear()}
           </span>
         </div>
       </footer>

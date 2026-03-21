@@ -8,7 +8,7 @@ import { LandingPage } from './pages/LandingPage';
 import { LoginScreen } from './components/auth/LoginScreen';
 
 function App() {
-  const [authed, setAuthed] = useState(() => sessionStorage.getItem('plombscope-auth') === '1');
+  const [authed, setAuthed] = useState(() => sessionStorage.getItem('sag-auth') === '1');
 
   return (
     <HashRouter>
