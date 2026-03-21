@@ -210,6 +210,7 @@ export function AnalysisCanvas() {
         position: 'relative',
         overflow: 'hidden',
         background: 'var(--canvas-bg)',
+        viewTransitionName: 'canvas-area',
       }}
     >
       <canvas
@@ -238,7 +239,7 @@ export function AnalysisCanvas() {
         bottom: 12,
         left: '50%',
         transform: 'translateX(-50%)',
-        background: 'rgba(25, 28, 37, 0.9)',
+        background: 'var(--surface-glass)',
         border: '1px solid var(--border)',
         borderRadius: 'var(--radius)',
         padding: '6px 16px',
