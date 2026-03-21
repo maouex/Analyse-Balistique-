@@ -39,14 +39,6 @@ export function LoginScreen({ onAuth }: LoginScreenProps) {
     }
   }, [password]);
 
-  if (showBadge) {
-    return (
-      <Suspense fallback={<div style={{ background: '#010a01', width: '100vw', height: '100vh' }} />}>
-        <AccessBadge onComplete={onAuth} />
-      </Suspense>
-    );
-  }
-
   return (
     <div style={{
       height: '100vh',
@@ -274,6 +266,12 @@ export function LoginScreen({ onAuth }: LoginScreenProps) {
           S.A.G. — Système d&apos;Analyse de Gerbe v2.0
         </span>
       </motion.div>
+
+      {showBadge && (
+        <Suspense fallback={null}>
+          <AccessBadge onComplete={onAuth} />
+        </Suspense>
+      )}
     </div>
   );
 }
