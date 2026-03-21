@@ -166,13 +166,16 @@ function ShotgunBlast({ active }: { active: boolean }) {
       const h = canvas.offsetHeight;
       ctx.clearRect(0, 0, w, h);
 
-      // Canvas matches weapon-container exactly
-      // SVG viewBox 820x300, aspect ratio preserved, width=100% of container
-      // SVG height = w * (300/820), vertically aligned to top
+      // Canvas covers weapon-sticky (full viewport)
+      // weapon-container is 55% wide (max 720px), centered via flexbox
+      // SVG viewBox 820x300, width=100% of container, height=auto
       // Muzzle at viewBox coords (797, 95)
-      const originX = (797 / 820) * w;
-      const svgRenderedH = w * (300 / 820);
-      const originY = (95 / 300) * svgRenderedH;
+      const containerW = Math.min(w * 0.55, 720);
+      const containerLeft = (w - containerW) / 2;
+      const svgH = containerW * (300 / 820);
+      const svgTop = (h - svgH) / 2;
+      const originX = containerLeft + (797 / 820) * containerW;
+      const originY = svgTop + (95 / 300) * svgH;
 
       // Spawn bursts when active
       if (active) {
@@ -265,7 +268,7 @@ function ShotgunBlast({ active }: { active: boolean }) {
 /* ═══════════════════════════════════════════════════════════
    WEAPON BLUEPRINT — SVG shotgun that assembles on scroll
    ═══════════════════════════════════════════════════════════ */
-function WeaponBlueprint({ progress, blastActive }: { progress: MotionValue<number>; blastActive: boolean }) {
+function WeaponBlueprint({ progress }: { progress: MotionValue<number> }) {
   // Part opacities — each part fades in during its phase
   const stockOp = useTransform(progress, [0, 0.05, 0.14], [0.04, 0.6, 1]);
   const receiverOp = useTransform(progress, [0.12, 0.20, 0.30], [0.04, 0.6, 1]);
@@ -407,7 +410,6 @@ function WeaponBlueprint({ progress, blastActive }: { progress: MotionValue<numb
 
         {/* Gerbe handled by ShotgunBlast canvas particle system */}
       </svg>
-      <ShotgunBlast active={blastActive} />
     </div>
   );
 }
@@ -558,8 +560,11 @@ export function LandingPage() {
       {/* ═══ WEAPON ASSEMBLY TRACK ═══ */}
       <div className="weapon-track" ref={trackRef}>
         <div className="weapon-sticky">
+          {/* Shotgun blast — in weapon-sticky so particles aren't clipped */}
+          <ShotgunBlast active={blastActive} />
+
           {/* Central weapon SVG */}
-          <WeaponBlueprint progress={wp} blastActive={blastActive} />
+          <WeaponBlueprint progress={wp} />
 
           {/* Phase indicator dots */}
           <div className="phase-dots">
