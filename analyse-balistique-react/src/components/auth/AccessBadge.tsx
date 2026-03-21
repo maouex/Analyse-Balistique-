@@ -387,6 +387,7 @@ export default function AccessBadge({ onComplete }: AccessBadgeProps) {
   const [isMobile, setIsMobile] = useState(
     () => typeof window !== 'undefined' && window.innerWidth < 768
   );
+  const [showButton, setShowButton] = useState(false);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -394,13 +395,11 @@ export default function AccessBadge({ onComplete }: AccessBadgeProps) {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // After animation plays, trigger navigation
+  // Show the continue button after the badge has dropped
   useEffect(() => {
-    const timer = setTimeout(() => {
-      onComplete();
-    }, 2800);
+    const timer = setTimeout(() => setShowButton(true), 1800);
     return () => clearTimeout(timer);
-  }, [onComplete]);
+  }, []);
 
   return (
     <div className="access-badge-overlay">
@@ -443,9 +442,11 @@ export default function AccessBadge({ onComplete }: AccessBadgeProps) {
       </Canvas>
       <div className="access-badge-status">
         <div className="access-badge-status-text">Accès autorisé</div>
-        <div className="access-badge-progress">
-          <div className="access-badge-progress-bar" />
-        </div>
+        {showButton && (
+          <button className="access-badge-button" onClick={onComplete}>
+            CONTINUER VERS L'ANALYSE
+          </button>
+        )}
       </div>
     </div>
   );
