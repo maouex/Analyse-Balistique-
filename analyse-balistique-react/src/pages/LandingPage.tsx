@@ -84,10 +84,10 @@ function ScrollPanel({ progress, range, side, keepVisible, children }: {
 
   const opacity = useTransform(progress,
     keepVisible
-      ? [S, S + span * 0.12, S + span * 0.22, range[1]]
+      ? [S + span * 0.5, S + span * 0.7, S + span * 0.85, range[1]]
       : [S, S + span * 0.12, S + span * 0.22, S + span * 0.68, S + span * 0.85, range[1]],
     keepVisible
-      ? [0, 0.6, 1, 1]
+      ? [0, 0, 1, 1]
       : [0, 0.6, 1, 1, 0.4, 0],
   );
 
