@@ -368,10 +368,9 @@
 
 .panel-center {
   left: 50%;
-  transform: translate(-50%, -50%);
   max-width: 520px;
-  top: auto;
-  bottom: 6%;
+  top: 50%;
+  margin-top: 100px;
   transform: translateX(-50%);
 }
 
