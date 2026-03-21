@@ -136,7 +136,7 @@ function WeaponBlueprint({ progress }: { progress: MotionValue<number> }) {
 
   return (
     <div className="weapon-container">
-      <svg viewBox="0 0 820 300" className="weapon-svg" xmlns="http://www.w3.org/2000/svg">
+      <svg viewBox="0 0 820 300" className="weapon-svg" xmlns="http://www.w3.org/2000/svg" overflow="visible">
         <defs>
           <filter id="wp-glow">
             <feGaussianBlur stdDeviation="2.5" result="blur" />
@@ -259,60 +259,71 @@ function WeaponBlueprint({ progress }: { progress: MotionValue<number> }) {
         {/* ══════ GERBE DE PLOMBS (shotgun spread) ══════ */}
         <motion.g style={{ opacity: flashOp, scale: flashScale, transformOrigin: '797px 95px' }}>
           {/* Cone de dispersion — lignes guides */}
-          <line x1="797" y1="95" x2="900" y2="55" stroke="rgba(0,255,65,0.08)" strokeWidth="0.5" strokeDasharray="4 3" />
-          <line x1="797" y1="95" x2="900" y2="135" stroke="rgba(0,255,65,0.08)" strokeWidth="0.5" strokeDasharray="4 3" />
+          <line x1="797" y1="95" x2="1200" y2="-30" stroke="rgba(0,255,65,0.06)" strokeWidth="0.5" strokeDasharray="6 4" />
+          <line x1="797" y1="95" x2="1200" y2="220" stroke="rgba(0,255,65,0.06)" strokeWidth="0.5" strokeDasharray="6 4" />
 
-          {/* Plombs — points verts dispersés en cône */}
+          {/* Flash à la bouche */}
+          <circle cx="800" cy="95" r="6" fill="rgba(0,255,65,0.4)" />
+          <circle cx="800" cy="95" r="12" fill="none" stroke="rgba(0,255,65,0.2)" strokeWidth="1.5" />
+
           {/* Rang 1 — proche du canon */}
-          <circle cx="810" cy="93" r="2" fill="#00ff41" opacity="0.9" />
-          <circle cx="812" cy="97" r="1.8" fill="#00ff41" opacity="0.85" />
-          <circle cx="808" cy="90" r="1.5" fill="#00ff41" opacity="0.8" />
+          <circle cx="830" cy="92" r="3" fill="#00ff41" opacity="0.9" />
+          <circle cx="835" cy="98" r="2.5" fill="#00ff41" opacity="0.85" />
+          <circle cx="825" cy="87" r="2.5" fill="#00ff41" opacity="0.8" />
+          <circle cx="832" cy="100" r="2" fill="#00ff41" opacity="0.85" />
 
-          {/* Rang 2 — dispersion commence */}
-          <circle cx="825" cy="88" r="2" fill="#00ff41" opacity="0.8" />
-          <circle cx="822" cy="98" r="1.8" fill="#00ff41" opacity="0.75" />
-          <circle cx="828" cy="103" r="1.5" fill="#00ff41" opacity="0.7" />
-          <circle cx="820" cy="82" r="1.3" fill="#00ff41" opacity="0.65" />
-          <circle cx="826" cy="94" r="2" fill="#00ff41" opacity="0.8" />
+          {/* Rang 2 */}
+          <circle cx="870" cy="82" r="3" fill="#00ff41" opacity="0.8" />
+          <circle cx="865" cy="100" r="2.5" fill="#00ff41" opacity="0.75" />
+          <circle cx="875" cy="110" r="2.5" fill="#00ff41" opacity="0.7" />
+          <circle cx="860" cy="72" r="2" fill="#00ff41" opacity="0.65" />
+          <circle cx="872" cy="93" r="3" fill="#00ff41" opacity="0.8" />
 
-          {/* Rang 3 — dispersion s'élargit */}
-          <circle cx="842" cy="78" r="1.8" fill="#00ff41" opacity="0.7" />
-          <circle cx="838" cy="95" r="2" fill="#00ff41" opacity="0.75" />
-          <circle cx="845" cy="107" r="1.5" fill="#00ff41" opacity="0.65" />
-          <circle cx="840" cy="112" r="1.8" fill="#00ff41" opacity="0.6" />
-          <circle cx="835" cy="86" r="1.3" fill="#00ff41" opacity="0.7" />
-          <circle cx="843" cy="100" r="1.5" fill="#00ff41" opacity="0.6" />
-          <circle cx="837" cy="72" r="1.2" fill="#00ff41" opacity="0.55" />
+          {/* Rang 3 */}
+          <circle cx="920" cy="65" r="2.8" fill="#00ff41" opacity="0.7" />
+          <circle cx="910" cy="95" r="3" fill="#00ff41" opacity="0.7" />
+          <circle cx="925" cy="115" r="2.5" fill="#00ff41" opacity="0.6" />
+          <circle cx="915" cy="125" r="2.5" fill="#00ff41" opacity="0.55" />
+          <circle cx="905" cy="80" r="2" fill="#00ff41" opacity="0.65" />
+          <circle cx="928" cy="100" r="2" fill="#00ff41" opacity="0.6" />
+          <circle cx="912" cy="55" r="2" fill="#00ff41" opacity="0.5" />
 
-          {/* Rang 4 — large */}
-          <circle cx="858" cy="70" r="1.5" fill="#00ff41" opacity="0.55" />
-          <circle cx="855" cy="92" r="1.8" fill="#00ff41" opacity="0.6" />
-          <circle cx="862" cy="105" r="1.3" fill="#00ff41" opacity="0.5" />
-          <circle cx="852" cy="118" r="1.5" fill="#00ff41" opacity="0.45" />
-          <circle cx="860" cy="82" r="1.2" fill="#00ff41" opacity="0.5" />
-          <circle cx="856" cy="125" r="1" fill="#00ff41" opacity="0.4" />
-          <circle cx="865" cy="95" r="1.5" fill="#00ff41" opacity="0.5" />
-          <circle cx="850" cy="62" r="1" fill="#00ff41" opacity="0.4" />
+          {/* Rang 4 */}
+          <circle cx="970" cy="50" r="2.5" fill="#00ff41" opacity="0.55" />
+          <circle cx="960" cy="90" r="2.8" fill="#00ff41" opacity="0.55" />
+          <circle cx="975" cy="110" r="2" fill="#00ff41" opacity="0.5" />
+          <circle cx="955" cy="135" r="2.5" fill="#00ff41" opacity="0.45" />
+          <circle cx="968" cy="72" r="2" fill="#00ff41" opacity="0.5" />
+          <circle cx="962" cy="145" r="1.8" fill="#00ff41" opacity="0.4" />
+          <circle cx="980" cy="95" r="2.5" fill="#00ff41" opacity="0.5" />
+          <circle cx="950" cy="40" r="1.8" fill="#00ff41" opacity="0.4" />
 
-          {/* Rang 5 — très étalé, faible opacité */}
-          <circle cx="878" cy="60" r="1.2" fill="#00ff41" opacity="0.35" />
-          <circle cx="875" cy="88" r="1.5" fill="#00ff41" opacity="0.4" />
-          <circle cx="880" cy="100" r="1" fill="#00ff41" opacity="0.35" />
-          <circle cx="872" cy="115" r="1.3" fill="#00ff41" opacity="0.3" />
-          <circle cx="882" cy="130" r="1" fill="#00ff41" opacity="0.25" />
-          <circle cx="876" cy="75" r="1.2" fill="#00ff41" opacity="0.35" />
-          <circle cx="885" cy="92" r="1" fill="#00ff41" opacity="0.3" />
+          {/* Rang 5 */}
+          <circle cx="1030" cy="35" r="2.2" fill="#00ff41" opacity="0.4" />
+          <circle cx="1020" cy="80" r="2.5" fill="#00ff41" opacity="0.4" />
+          <circle cx="1035" cy="105" r="2" fill="#00ff41" opacity="0.35" />
+          <circle cx="1015" cy="130" r="2.2" fill="#00ff41" opacity="0.35" />
+          <circle cx="1040" cy="155" r="1.8" fill="#00ff41" opacity="0.3" />
+          <circle cx="1025" cy="60" r="2" fill="#00ff41" opacity="0.35" />
+          <circle cx="1045" cy="90" r="1.8" fill="#00ff41" opacity="0.3" />
+          <circle cx="1010" cy="160" r="1.5" fill="#00ff41" opacity="0.25" />
 
-          {/* Rang 6 — le plus loin */}
-          <circle cx="895" cy="55" r="1" fill="#00ff41" opacity="0.25" />
-          <circle cx="892" cy="80" r="1.2" fill="#00ff41" opacity="0.3" />
-          <circle cx="898" cy="95" r="1" fill="#00ff41" opacity="0.25" />
-          <circle cx="890" cy="110" r="1" fill="#00ff41" opacity="0.2" />
-          <circle cx="896" cy="135" r="0.8" fill="#00ff41" opacity="0.15" />
+          {/* Rang 6 */}
+          <circle cx="1090" cy="20" r="2" fill="#00ff41" opacity="0.3" />
+          <circle cx="1080" cy="70" r="2.2" fill="#00ff41" opacity="0.3" />
+          <circle cx="1095" cy="95" r="1.8" fill="#00ff41" opacity="0.25" />
+          <circle cx="1075" cy="120" r="2" fill="#00ff41" opacity="0.25" />
+          <circle cx="1100" cy="150" r="1.5" fill="#00ff41" opacity="0.2" />
+          <circle cx="1085" cy="45" r="1.8" fill="#00ff41" opacity="0.25" />
+          <circle cx="1070" cy="170" r="1.5" fill="#00ff41" opacity="0.18" />
 
-          {/* Flash à la bouche — petit éclat */}
-          <circle cx="800" cy="95" r="4" fill="rgba(0,255,65,0.3)" />
-          <circle cx="800" cy="95" r="8" fill="none" stroke="rgba(0,255,65,0.15)" strokeWidth="1" />
+          {/* Rang 7 — le plus loin */}
+          <circle cx="1150" cy="10" r="1.8" fill="#00ff41" opacity="0.2" />
+          <circle cx="1140" cy="60" r="2" fill="#00ff41" opacity="0.2" />
+          <circle cx="1155" cy="95" r="1.5" fill="#00ff41" opacity="0.18" />
+          <circle cx="1135" cy="130" r="1.8" fill="#00ff41" opacity="0.15" />
+          <circle cx="1160" cy="175" r="1.5" fill="#00ff41" opacity="0.12" />
+          <circle cx="1145" cy="185" r="1.2" fill="#00ff41" opacity="0.1" />
         </motion.g>
       </svg>
     </div>
