@@ -96,18 +96,6 @@
   mix-blend-mode: normal;
 }
 
-/* Canvas area: instant switch, excluded from circle clip */
-::view-transition-old(canvas-area),
-::view-transition-new(canvas-area) {
-  animation: none;
-}
-::view-transition-new(canvas-area) {
-  opacity: 1;
-}
-::view-transition-old(canvas-area) {
-  opacity: 0;
-}
-
 html, body, #root {
   height: 100%;
   width: 100%;
