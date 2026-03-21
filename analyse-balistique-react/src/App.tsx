@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { HashRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AppLayout } from './components/layout/AppLayout';
-import { HomePage } from './pages/HomePage';
 import { AnalysisPage } from './pages/AnalysisPage';
 import { LibraryPage } from './pages/LibraryPage';
 import { View3DPage } from './pages/View3DPage';
@@ -17,8 +16,8 @@ function App() {
   return (
     <HashRouter>
       <Routes>
-        <Route path="/" element={<HomePage />} />
         <Route element={<AppLayout />}>
+          <Route path="/" element={<Navigate to="/analyse" replace />} />
           <Route path="/analyse" element={<AnalysisPage />} />
           <Route path="/bibliotheque" element={<LibraryPage />} />
           <Route path="/3d" element={<View3DPage />} />
