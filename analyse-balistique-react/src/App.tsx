@@ -6,6 +6,7 @@ import { LibraryPage } from './pages/LibraryPage';
 import { View3DPage } from './pages/View3DPage';
 import { LandingPage } from './pages/LandingPage';
 import { LoginScreen } from './components/auth/LoginScreen';
+import { TransitionProvider } from './components/transitions/TransitionContext';
 
 function App() {
   const [authed, setAuthed] = useState(() => sessionStorage.getItem('sag-auth') === '1');
@@ -17,19 +18,21 @@ function App() {
 
   return (
     <HashRouter>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        {authed ? (
-          <Route element={<AppLayout onLogout={handleLogout} />}>
-            <Route path="/analyse" element={<AnalysisPage />} />
-            <Route path="/bibliotheque" element={<LibraryPage />} />
-            <Route path="/3d" element={<View3DPage />} />
-          </Route>
-        ) : (
-          <Route path="/analyse" element={<LoginScreen onAuth={() => setAuthed(true)} />} />
-        )}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      <TransitionProvider>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          {authed ? (
+            <Route element={<AppLayout onLogout={handleLogout} />}>
+              <Route path="/analyse" element={<AnalysisPage />} />
+              <Route path="/bibliotheque" element={<LibraryPage />} />
+              <Route path="/3d" element={<View3DPage />} />
+            </Route>
+          ) : (
+            <Route path="/analyse" element={<LoginScreen onAuth={() => setAuthed(true)} />} />
+          )}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </TransitionProvider>
     </HashRouter>
   );
 }

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Download, Save, Box, Target, Ruler, Activity, Layers, Pin, BarChart3 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useTransitionNavigate } from '../transitions/TransitionContext';
 import { useAnalysisStore } from '../../stores/analysisStore';
 import { computeFullAnalysis, distancePx, pxToCm, classifyZone } from '../../lib/ballistics';
 import { ScoreGauge } from './ScoreGauge';
@@ -17,7 +17,7 @@ interface StatsPanelProps {
 }
 
 export function StatsPanel({ onExport, onSaveMunition, collapsed, pinned, onPin, onExpand, onCollapse }: StatsPanelProps) {
-  const navigate = useNavigate();
+  const navigate = useTransitionNavigate();
   const { impacts, center, circle1, circle2, scale } = useAnalysisStore();
 
   const stats: AnalysisStats | null = useMemo(() =>

@@ -1,7 +1,8 @@
 import { Sun, Moon, Scan, BookOpen, Crosshair, LogOut } from 'lucide-react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useThemeStore } from '../../stores/themeStore';
 import { useAnalysisStore } from '../../stores/analysisStore';
+import { useTransitionNavigate } from '../transitions/TransitionContext';
 
 const NAV_ITEMS = [
   { path: '/analyse', label: 'ANALYSE', icon: Scan },
@@ -13,7 +14,7 @@ interface HeaderProps {
 }
 
 export function Header({ onLogout }: HeaderProps) {
-  const navigate = useNavigate();
+  const navigate = useTransitionNavigate();
   const location = useLocation();
   const { mode, toggle } = useThemeStore();
   const hasAnalysis = useAnalysisStore((s) => s.impacts.length > 0);

@@ -19,7 +19,7 @@ import type { SimulationTimeState } from './RealisticSimulationMode';
 import { TimelineControls } from './TimelineControls';
 import { EnhancedBallisticsPanel } from './EnhancedBallisticsPanel';
 import { Camera, RotateCcw, ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useTransitionNavigate } from '../transitions/TransitionContext';
 import { SimColorMenu } from './SimColorMenu';
 import { useSimColorStore } from '../../stores/simColorStore';
 
@@ -34,7 +34,7 @@ export function Scene3D({
   velocityMs = 400,
   penetrationCm = 25,
 }: Scene3DProps) {
-  const navigate = useNavigate();
+  const navigate = useTransitionNavigate();
   const [activeMode, setActiveMode] = useState<View3DMode>('cone');
   const [autoRotate, setAutoRotate] = useState(true);
   const [ballisticParams, setBallisticParams] = useState<BallisticParams | null>(null);

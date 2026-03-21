@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect, useCallback } from 'react';
 import { motion, useScroll, useTransform, type MotionValue } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useTransitionNavigate } from '../components/transitions/TransitionContext';
 import {
   Crosshair, Target, Radar, Shield,
   ChevronDown, ArrowRight, Cpu, BarChart3, Layers, Eye
@@ -457,7 +457,7 @@ function Reticle() {
    MAIN LANDING PAGE
    ═══════════════════════════════════════════════════════════ */
 export function LandingPage() {
-  const navigate = useNavigate();
+  const navigate = useTransitionNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
 
