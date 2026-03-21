@@ -6,6 +6,7 @@ import {
   ChevronDown, ArrowRight, Cpu, BarChart3, Layers, Eye
 } from 'lucide-react';
 import SoftAurora from '../components/landing/SoftAurora';
+import GlitchText from '../components/landing/GlitchText';
 import { CursorEffect } from '../components/landing/CursorEffect';
 import './LandingPage.css';
 
@@ -540,9 +541,15 @@ export function LandingPage() {
             <span>SYSTÈME D&apos;ANALYSE DE GERBE v2.0</span>
           </div>
           <h1 className="hero-title">
-            <span className="hero-title-line">ANALYSE</span>
-            <span className="hero-title-line accent">BALISTIQUE</span>
-            <span className="hero-title-line sub">AVANCÉE</span>
+            <GlitchText speed={1.1} enableShadows enableOnHover={false} className="hero-title-line">
+              ANALYSE
+            </GlitchText>
+            <GlitchText speed={0.8} enableShadows enableOnHover={false} className="hero-title-line accent">
+              BALISTIQUE
+            </GlitchText>
+            <GlitchText speed={1.4} enableShadows enableOnHover={false} className="hero-title-line sub">
+              AVANCÉE
+            </GlitchText>
           </h1>
           <p className="hero-subtitle">
             Plateforme de simulation et d&apos;analyse de dispersion balistique
