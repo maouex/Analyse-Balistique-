@@ -25,7 +25,7 @@ export function LoginScreen({ onAuth }: LoginScreenProps) {
   const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     if (simpleHash(password.toLowerCase().trim()) === EXPECTED) {
-      sessionStorage.setItem('sag-auth', '1');
+      sessionStorage.setItem('plombscope-auth', '1');
       onAuth();
     } else {
       setError(true);
@@ -114,7 +114,7 @@ export function LoginScreen({ onAuth }: LoginScreenProps) {
               color: '#00ff41',
               textShadow: '0 0 20px rgba(0,255,65,0.3)',
             }}>
-              S.A.G.
+              PLOMBSCOPE
             </div>
             <div style={{
               fontSize: 9,
@@ -125,7 +125,7 @@ export function LoginScreen({ onAuth }: LoginScreenProps) {
               marginTop: 4,
               fontFamily: "'JetBrains Mono', 'Courier New', monospace",
             }}>
-              Système d'Analyse de Gerbe
+              Analyse balistique
             </div>
           </div>
         </motion.div>
@@ -250,7 +250,7 @@ export function LoginScreen({ onAuth }: LoginScreenProps) {
           fontFamily: "'JetBrains Mono', monospace",
           textTransform: 'uppercase',
         }}>
-          S.A.G. — Système d&apos;Analyse de Gerbe v2.0
+          Système d&apos;analyse v2.0
         </span>
       </motion.div>
     </div>

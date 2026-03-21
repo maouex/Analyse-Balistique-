@@ -62,7 +62,7 @@ export function Header() {
           textShadow: '0 0 10px rgba(0,255,65,0.3)',
           fontFamily: "'Inter', monospace",
         }}>
-          S.A.G.
+          PLOMBSCOPE
         </span>
       </div>
 
