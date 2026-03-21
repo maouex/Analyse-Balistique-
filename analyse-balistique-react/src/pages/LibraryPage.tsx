@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useTransitionNavigate } from '../components/transitions/TransitionContext';
 import { Search, Trash2, Edit3, GitCompare, CheckSquare, Square, Play, Database, Plus, X, Crosshair, Box } from 'lucide-react';
 import { useMunitionsStore } from '../stores/munitionsStore';
 import { useAnalysisStore } from '../stores/analysisStore';
@@ -10,7 +10,7 @@ import type { Munition } from '../types';
 export function LibraryPage() {
   const store = useMunitionsStore();
   const loadProject = useAnalysisStore((s) => s.loadProject);
-  const navigate = useNavigate();
+  const navigate = useTransitionNavigate();
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
 

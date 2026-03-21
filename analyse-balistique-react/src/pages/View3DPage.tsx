@@ -1,12 +1,12 @@
 import { lazy, Suspense } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useTransitionNavigate } from '../components/transitions/TransitionContext';
 import { useAnalysisStore } from '../stores/analysisStore';
 import { Crosshair, Box, ArrowRight, Loader2 } from 'lucide-react';
 
 const Scene3D = lazy(() => import('../components/3d/Scene3D').then(m => ({ default: m.Scene3D })));
 
 export function View3DPage() {
-  const navigate = useNavigate();
+  const navigate = useTransitionNavigate();
   const hasImpacts = useAnalysisStore((s) => s.impacts.length > 0);
   const hasScale = useAnalysisStore((s) => !!s.scale.pixelsPerCm);
   const hasCenter = useAnalysisStore((s) => !!s.center);
