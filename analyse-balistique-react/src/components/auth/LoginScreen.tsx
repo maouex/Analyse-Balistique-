@@ -1,7 +1,9 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, lazy, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import { Lock, ArrowRight, AlertCircle, Crosshair } from 'lucide-react';
 import DecryptedText from '../landing/DecryptedText';
+
+const AccessBadge = lazy(() => import('./AccessBadge'));
 
 function simpleHash(str: string): string {
   let h = 0x811c9dc5;
@@ -22,19 +24,28 @@ export function LoginScreen({ onAuth }: LoginScreenProps) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState(false);
   const [shaking, setShaking] = useState(false);
+  const [showBadge, setShowBadge] = useState(false);
 
   const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     if (simpleHash(password.toLowerCase().trim()) === EXPECTED) {
       sessionStorage.setItem('sag-auth', '1');
-      onAuth();
+      setShowBadge(true);
     } else {
       setError(true);
       setShaking(true);
       setTimeout(() => setShaking(false), 500);
       setTimeout(() => setError(false), 3000);
     }
-  }, [password, onAuth]);
+  }, [password]);
+
+  if (showBadge) {
+    return (
+      <Suspense fallback={<div style={{ background: '#010a01', width: '100vw', height: '100vh' }} />}>
+        <AccessBadge onComplete={onAuth} />
+      </Suspense>
+    );
+  }
 
   return (
     <div style={{
