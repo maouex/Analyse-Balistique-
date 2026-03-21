@@ -21,9 +21,10 @@ export function AppLayout({ onLogout }: AppLayoutProps) {
           0deg,
           transparent,
           transparent 2px,
-          rgba(0, 255, 65, 0.015) 2px,
-          rgba(0, 255, 65, 0.015) 4px
+          var(--accent-glow) 2px,
+          var(--accent-glow) 4px
         )`,
+        opacity: 0.15,
       }} />
 
       {/* Tactical grid */}
@@ -33,9 +34,10 @@ export function AppLayout({ onLogout }: AppLayoutProps) {
         pointerEvents: 'none',
         zIndex: 0,
         backgroundImage: `
-          linear-gradient(rgba(0, 255, 65, 0.025) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(0, 255, 65, 0.025) 1px, transparent 1px)
+          linear-gradient(var(--border-glow) 1px, transparent 1px),
+          linear-gradient(90deg, var(--border-glow) 1px, transparent 1px)
         `,
+        opacity: 0.3,
         backgroundSize: '60px 60px',
       }} />
 

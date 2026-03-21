@@ -24,7 +24,7 @@
   right: 0;
   height: 4px;
   background: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 0 20px 8px rgba(0, 255, 65, 0.1);
+  box-shadow: 0 0 20px 8px var(--accent-glow, rgba(0, 255, 65, 0.1));
   animation: tvScanline 600ms linear forwards;
 }
 
@@ -32,7 +32,7 @@
 .tv-static-squeeze {
   position: absolute;
   inset: 0;
-  background: #010a01;
+  background: var(--bg, #010a01);
   animation: tvSqueeze 600ms ease-in-out forwards;
 }
 

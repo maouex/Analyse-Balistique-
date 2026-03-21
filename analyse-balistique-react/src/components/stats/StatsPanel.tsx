@@ -51,14 +51,14 @@ export function StatsPanel({ onExport, onSaveMunition, collapsed, pinned, canCol
         left: 0,
         right: 0,
         height: 1,
-        background: 'linear-gradient(90deg, transparent, rgba(0,255,65,0.2))',
+        background: 'linear-gradient(90deg, transparent, var(--border-glow))',
         pointerEvents: 'none',
       }} />
 
       {/* Collapsed indicator */}
       {collapsed && (
         <div className="sidebar-collapsed-icon">
-          <BarChart3 size={16} color="rgba(0,255,65,0.5)" />
+          <BarChart3 size={16} color="var(--text-secondary)" />
           <span>Stats</span>
         </div>
       )}
@@ -89,17 +89,17 @@ export function StatsPanel({ onExport, onSaveMunition, collapsed, pinned, canCol
           fontWeight: 800,
           letterSpacing: '2px',
           textTransform: 'uppercase',
-          color: '#00ff41',
+          color: 'var(--accent2)',
           fontFamily: 'var(--font-mono)',
-          textShadow: '0 0 8px rgba(0,255,65,0.2)',
+          textShadow: '0 0 8px var(--accent-glow)',
         }}>
           Analyse
         </span>
         <span style={{
           fontSize: 10,
           fontWeight: 700,
-          background: impacts.length > 0 ? 'rgba(0,255,65,0.08)' : 'var(--surface2)',
-          color: impacts.length > 0 ? '#00ff41' : 'var(--muted)',
+          background: impacts.length > 0 ? 'var(--accent-glow)' : 'var(--surface2)',
+          color: impacts.length > 0 ? 'var(--accent2)' : 'var(--muted)',
           padding: '3px 8px',
           border: '1px solid var(--border)',
           fontFamily: 'var(--font-mono)',
@@ -130,9 +130,9 @@ export function StatsPanel({ onExport, onSaveMunition, collapsed, pinned, canCol
 
           {/* Zones */}
           <StatSection title="Distribution par zone" icon={<Target size={9} />}>
-            <ZoneRow zone={1} label="50 cm" color="#00ff41" glow="rgba(0,255,65,0.08)" stats={stats.zones[0]} />
-            <ZoneRow zone={2} label="50-100 cm" color="#ffaa00" glow="rgba(255,170,0,0.08)" stats={stats.zones[1]} />
-            <ZoneRow zone={3} label="> 100 cm" color="#ff4444" glow="rgba(255,68,68,0.08)" stats={stats.zones[2]} />
+            <ZoneRow zone={1} label="50 cm" color="var(--accent2)" glow="var(--accent-glow)" stats={stats.zones[0]} />
+            <ZoneRow zone={2} label="50-100 cm" color="var(--amber)" glow="var(--amber-glow)" stats={stats.zones[1]} />
+            <ZoneRow zone={3} label="> 100 cm" color="var(--red)" glow="var(--red-glow)" stats={stats.zones[2]} />
           </StatSection>
 
           {/* Distances */}
@@ -184,7 +184,7 @@ export function StatsPanel({ onExport, onSaveMunition, collapsed, pinned, canCol
                   ? pxToCm(distancePx(imp, center), scale.pixelsPerCm)
                   : 0;
                 const zone = classifyZone(distCm, circle1.diameterCm, circle2.diameterCm);
-                const zoneColor = zone === 1 ? '#00ff41' : zone === 2 ? '#ffaa00' : '#ff4444';
+                const zoneColor = zone === 1 ? 'var(--green)' : zone === 2 ? 'var(--amber)' : 'var(--red)';
                 return (
                   <div key={imp.id} style={{
                     display: 'flex',
@@ -227,11 +227,11 @@ export function StatsPanel({ onExport, onSaveMunition, collapsed, pinned, canCol
             onClick={() => navigate('/3d')}
             style={{
               width: '100%',
-              background: 'rgba(170,102,255,0.08)',
-              borderColor: 'rgba(170,102,255,0.25)',
+              background: 'var(--purple-glow)',
+              borderColor: 'var(--purple)',
               justifyContent: 'center',
               gap: 8,
-              color: '#aa66ff',
+              color: 'var(--purple)',
             }}
           >
             <Box size={12} /> Modélisation 3D
@@ -269,9 +269,9 @@ function MiniCard({ label, value, unit, accent }: { label: string; value: string
       <div style={{
         fontSize: 13,
         fontWeight: 800,
-        color: accent ? '#00ff41' : 'var(--text)',
+        color: accent ? 'var(--accent2)' : 'var(--text)',
         fontFamily: 'var(--font-mono)',
-        textShadow: accent ? '0 0 8px rgba(0,255,65,0.3)' : undefined,
+        textShadow: accent ? '0 0 8px var(--accent-glow-strong)' : undefined,
       }}>
         {value}
         <span style={{ fontSize: 9, fontWeight: 600, color: 'var(--muted)', marginLeft: 1 }}>{unit}</span>
@@ -343,7 +343,7 @@ function ZoneRow({ zone, label, color, glow, stats }: {
       </div>
       <div style={{
         height: 2,
-        background: 'rgba(0,255,65,0.05)',
+        background: 'var(--accent-glow)',
         overflow: 'hidden',
       }}>
         <div style={{

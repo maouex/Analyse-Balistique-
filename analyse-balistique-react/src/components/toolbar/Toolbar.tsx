@@ -66,7 +66,7 @@ export function Toolbar({ collapsed, pinned, canCollapse, onPin, onExpand, onCol
         left: 0,
         right: 0,
         height: 1,
-        background: 'linear-gradient(90deg, rgba(0,255,65,0.2), transparent)',
+        background: 'linear-gradient(90deg, var(--border-glow), transparent)',
         pointerEvents: 'none',
       }} />
 
@@ -75,7 +75,7 @@ export function Toolbar({ collapsed, pinned, canCollapse, onPin, onExpand, onCol
       {/* Collapsed indicator */}
       {collapsed && (
         <div className="sidebar-collapsed-icon">
-          <Wrench size={16} color="rgba(0,255,65,0.5)" />
+          <Wrench size={16} color="var(--text-secondary)" />
           <span>Outils</span>
         </div>
       )}
@@ -156,15 +156,15 @@ export function Toolbar({ collapsed, pinned, canCollapse, onPin, onExpand, onCol
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 padding: '5px 8px',
-                background: 'rgba(0, 255, 65, 0.06)',
-                border: '1px solid rgba(0,255,65,0.2)',
+                background: 'var(--accent-glow)',
+                border: '1px solid var(--border-glow)',
               }}>
                 <span style={{
                   fontSize: 10,
-                  color: '#00ff41',
+                  color: 'var(--accent2)',
                   fontWeight: 600,
                   fontFamily: "var(--font-mono)",
-                  textShadow: '0 0 6px rgba(0,255,65,0.3)',
+                  textShadow: '0 0 6px var(--accent-glow-strong)',
                 }}>
                   {'\u2713'} {store.scale.referenceCm}cm — {store.scale.pixelsPerCm!.toFixed(1)} px/cm
                 </span>
@@ -205,11 +205,11 @@ export function Toolbar({ collapsed, pinned, canCollapse, onPin, onExpand, onCol
               <span style={{
                 fontSize: 10,
                 fontWeight: 700,
-                color: '#00ff41',
+                color: 'var(--accent2)',
                 minWidth: 30,
                 textAlign: 'right',
                 fontFamily: "var(--font-mono)",
-                textShadow: '0 0 6px rgba(0,255,65,0.3)',
+                textShadow: '0 0 6px var(--accent-glow-strong)',
               }}>
                 {sensitivity}%
               </span>
@@ -251,9 +251,9 @@ export function Toolbar({ collapsed, pinned, canCollapse, onPin, onExpand, onCol
                 fontWeight: 600,
                 padding: '4px 8px',
                 fontFamily: "var(--font-mono)",
-                background: lastDetectCount > 0 ? 'rgba(0,255,65,0.06)' : 'rgba(255,170,0,0.06)',
-                border: lastDetectCount > 0 ? '1px solid rgba(0,255,65,0.2)' : '1px solid rgba(255,170,0,0.2)',
-                color: lastDetectCount > 0 ? '#00ff41' : '#ffaa00',
+                background: lastDetectCount > 0 ? 'var(--accent-glow)' : 'var(--amber-glow)',
+                border: lastDetectCount > 0 ? '1px solid var(--border-glow)' : '1px solid var(--amber-glow)',
+                color: lastDetectCount > 0 ? 'var(--accent2)' : 'var(--amber)',
               }}>
                 {lastDetectCount > 0
                   ? `${lastDetectCount} impact${lastDetectCount > 1 ? 's' : ''} détecté${lastDetectCount > 1 ? 's' : ''}`
@@ -411,7 +411,7 @@ function CollapsibleSection({ title, icon, open, onToggle, children }: {
           padding: '4px 0',
           fontSize: 9,
           fontWeight: 700,
-          color: '#00ff41',
+          color: 'var(--accent2)',
           textTransform: 'uppercase',
           letterSpacing: '2px',
           transition: 'color var(--transition-fast)',
