@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import { motion, useScroll, useTransform, type MotionValue } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -111,6 +111,153 @@ function ScrollPanel({ progress, range, side, keepVisible, children }: {
 }
 
 /* ═══════════════════════════════════════════════════════════
+   SHOTGUN BLAST — particle system for pellet spread
+   ═══════════════════════════════════════════════════════════ */
+interface Pellet {
+  x: number; y: number;
+  vx: number; vy: number;
+  r: number; opacity: number;
+  life: number; maxLife: number;
+}
+
+function ShotgunBlast({ active }: { active: boolean }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const pelletsRef = useRef<Pellet[]>([]);
+  const rafRef = useRef<number>(0);
+  const lastSpawnRef = useRef(0);
+
+  const spawnBurst = useCallback(() => {
+    const pellets: Pellet[] = [];
+    // Spawn 30-40 pellets in a cone
+    const count = 30 + Math.floor(Math.random() * 12);
+    for (let i = 0; i < count; i++) {
+      const angle = (Math.random() - 0.5) * 0.7; // ±20° cone spread
+      const speed = 3 + Math.random() * 6;
+      pellets.push({
+        x: 0, y: 0,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        r: 1.5 + Math.random() * 2.5,
+        opacity: 0.7 + Math.random() * 0.3,
+        life: 0,
+        maxLife: 40 + Math.random() * 40,
+      });
+    }
+    pelletsRef.current.push(...pellets);
+  }, []);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const resize = () => {
+      canvas.width = canvas.offsetWidth * 2;
+      canvas.height = canvas.offsetHeight * 2;
+      ctx.scale(2, 2);
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    const animate = () => {
+      if (!ctx || !canvas) return;
+      const w = canvas.offsetWidth;
+      const h = canvas.offsetHeight;
+      ctx.clearRect(0, 0, w, h);
+
+      // Origin: muzzle position (right side of weapon, vertically centered slightly above middle)
+      const originX = w * 0.97;
+      const originY = h * 0.35;
+
+      // Spawn bursts when active
+      if (active) {
+        const now = Date.now();
+        if (now - lastSpawnRef.current > 600) {
+          spawnBurst();
+          lastSpawnRef.current = now;
+        }
+      }
+
+      // Update & draw pellets
+      const alive: Pellet[] = [];
+      for (const p of pelletsRef.current) {
+        p.life++;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.02; // slight gravity
+        p.vx *= 0.99; // drag
+
+        const progress = p.life / p.maxLife;
+        if (progress >= 1) continue;
+
+        const alpha = p.opacity * (1 - progress * progress);
+        const size = p.r * (1 - progress * 0.3);
+
+        // Draw pellet
+        ctx.beginPath();
+        ctx.arc(originX + p.x, originY + p.y, size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(0, 255, 65, ${alpha})`;
+        ctx.fill();
+
+        // Glow
+        ctx.beginPath();
+        ctx.arc(originX + p.x, originY + p.y, size * 2.5, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(0, 255, 65, ${alpha * 0.15})`;
+        ctx.fill();
+
+        // Trail
+        if (progress < 0.5) {
+          ctx.beginPath();
+          ctx.moveTo(originX + p.x, originY + p.y);
+          ctx.lineTo(originX + p.x - p.vx * 3, originY + p.y - p.vy * 3);
+          ctx.strokeStyle = `rgba(0, 255, 65, ${alpha * 0.3})`;
+          ctx.lineWidth = size * 0.5;
+          ctx.stroke();
+        }
+
+        alive.push(p);
+      }
+      pelletsRef.current = alive;
+
+      // Muzzle flash when spawning
+      if (active && Date.now() - lastSpawnRef.current < 150) {
+        const flashAlpha = 1 - (Date.now() - lastSpawnRef.current) / 150;
+        ctx.beginPath();
+        ctx.arc(originX, originY, 8, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(0, 255, 65, ${flashAlpha * 0.6})`;
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(originX, originY, 20, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(0, 255, 65, ${flashAlpha * 0.15})`;
+        ctx.fill();
+      }
+
+      rafRef.current = requestAnimationFrame(animate);
+    };
+
+    rafRef.current = requestAnimationFrame(animate);
+    return () => {
+      cancelAnimationFrame(rafRef.current);
+      window.removeEventListener('resize', resize);
+    };
+  }, [active, spawnBurst]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{
+        position: 'absolute',
+        top: 0, left: 0,
+        width: '100%', height: '100%',
+        pointerEvents: 'none',
+        zIndex: 10,
+      }}
+    />
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════
    WEAPON BLUEPRINT — SVG shotgun that assembles on scroll
    ═══════════════════════════════════════════════════════════ */
 function WeaponBlueprint({ progress }: { progress: MotionValue<number> }) {
@@ -130,9 +277,6 @@ function WeaponBlueprint({ progress }: { progress: MotionValue<number> }) {
   const lbl5 = useTransform(progress, [0.667, 0.70, 0.79, 0.833], [0, 1, 1, 0.15]);
   const lbl6 = useTransform(progress, [0.833, 0.86, 0.95, 1], [0, 1, 1, 1]);
 
-  // Muzzle flash
-  const flashOp = useTransform(progress, [0.91, 0.96, 1.0], [0, 1, 0.5]);
-  const flashScale = useTransform(progress, [0.91, 0.96, 1.0], [0.3, 1.3, 0.9]);
 
   return (
     <div className="weapon-container">
@@ -256,75 +400,7 @@ function WeaponBlueprint({ progress }: { progress: MotionValue<number> }) {
             stroke="rgba(0,255,65,0.12)" strokeWidth="0.5" />
         </motion.g>
 
-        {/* ══════ GERBE DE PLOMBS (shotgun spread) ══════ */}
-        <motion.g style={{ opacity: flashOp, scale: flashScale, transformOrigin: '797px 95px' }}>
-          {/* Cone de dispersion — lignes guides */}
-          <line x1="797" y1="95" x2="1200" y2="-30" stroke="rgba(0,255,65,0.06)" strokeWidth="0.5" strokeDasharray="6 4" />
-          <line x1="797" y1="95" x2="1200" y2="220" stroke="rgba(0,255,65,0.06)" strokeWidth="0.5" strokeDasharray="6 4" />
-
-          {/* Flash à la bouche */}
-          <circle cx="800" cy="95" r="6" fill="rgba(0,255,65,0.4)" />
-          <circle cx="800" cy="95" r="12" fill="none" stroke="rgba(0,255,65,0.2)" strokeWidth="1.5" />
-
-          {/* Rang 1 — proche du canon */}
-          <circle cx="830" cy="92" r="3" fill="#00ff41" opacity="0.9" />
-          <circle cx="835" cy="98" r="2.5" fill="#00ff41" opacity="0.85" />
-          <circle cx="825" cy="87" r="2.5" fill="#00ff41" opacity="0.8" />
-          <circle cx="832" cy="100" r="2" fill="#00ff41" opacity="0.85" />
-
-          {/* Rang 2 */}
-          <circle cx="870" cy="82" r="3" fill="#00ff41" opacity="0.8" />
-          <circle cx="865" cy="100" r="2.5" fill="#00ff41" opacity="0.75" />
-          <circle cx="875" cy="110" r="2.5" fill="#00ff41" opacity="0.7" />
-          <circle cx="860" cy="72" r="2" fill="#00ff41" opacity="0.65" />
-          <circle cx="872" cy="93" r="3" fill="#00ff41" opacity="0.8" />
-
-          {/* Rang 3 */}
-          <circle cx="920" cy="65" r="2.8" fill="#00ff41" opacity="0.7" />
-          <circle cx="910" cy="95" r="3" fill="#00ff41" opacity="0.7" />
-          <circle cx="925" cy="115" r="2.5" fill="#00ff41" opacity="0.6" />
-          <circle cx="915" cy="125" r="2.5" fill="#00ff41" opacity="0.55" />
-          <circle cx="905" cy="80" r="2" fill="#00ff41" opacity="0.65" />
-          <circle cx="928" cy="100" r="2" fill="#00ff41" opacity="0.6" />
-          <circle cx="912" cy="55" r="2" fill="#00ff41" opacity="0.5" />
-
-          {/* Rang 4 */}
-          <circle cx="970" cy="50" r="2.5" fill="#00ff41" opacity="0.55" />
-          <circle cx="960" cy="90" r="2.8" fill="#00ff41" opacity="0.55" />
-          <circle cx="975" cy="110" r="2" fill="#00ff41" opacity="0.5" />
-          <circle cx="955" cy="135" r="2.5" fill="#00ff41" opacity="0.45" />
-          <circle cx="968" cy="72" r="2" fill="#00ff41" opacity="0.5" />
-          <circle cx="962" cy="145" r="1.8" fill="#00ff41" opacity="0.4" />
-          <circle cx="980" cy="95" r="2.5" fill="#00ff41" opacity="0.5" />
-          <circle cx="950" cy="40" r="1.8" fill="#00ff41" opacity="0.4" />
-
-          {/* Rang 5 */}
-          <circle cx="1030" cy="35" r="2.2" fill="#00ff41" opacity="0.4" />
-          <circle cx="1020" cy="80" r="2.5" fill="#00ff41" opacity="0.4" />
-          <circle cx="1035" cy="105" r="2" fill="#00ff41" opacity="0.35" />
-          <circle cx="1015" cy="130" r="2.2" fill="#00ff41" opacity="0.35" />
-          <circle cx="1040" cy="155" r="1.8" fill="#00ff41" opacity="0.3" />
-          <circle cx="1025" cy="60" r="2" fill="#00ff41" opacity="0.35" />
-          <circle cx="1045" cy="90" r="1.8" fill="#00ff41" opacity="0.3" />
-          <circle cx="1010" cy="160" r="1.5" fill="#00ff41" opacity="0.25" />
-
-          {/* Rang 6 */}
-          <circle cx="1090" cy="20" r="2" fill="#00ff41" opacity="0.3" />
-          <circle cx="1080" cy="70" r="2.2" fill="#00ff41" opacity="0.3" />
-          <circle cx="1095" cy="95" r="1.8" fill="#00ff41" opacity="0.25" />
-          <circle cx="1075" cy="120" r="2" fill="#00ff41" opacity="0.25" />
-          <circle cx="1100" cy="150" r="1.5" fill="#00ff41" opacity="0.2" />
-          <circle cx="1085" cy="45" r="1.8" fill="#00ff41" opacity="0.25" />
-          <circle cx="1070" cy="170" r="1.5" fill="#00ff41" opacity="0.18" />
-
-          {/* Rang 7 — le plus loin */}
-          <circle cx="1150" cy="10" r="1.8" fill="#00ff41" opacity="0.2" />
-          <circle cx="1140" cy="60" r="2" fill="#00ff41" opacity="0.2" />
-          <circle cx="1155" cy="95" r="1.5" fill="#00ff41" opacity="0.18" />
-          <circle cx="1135" cy="130" r="1.8" fill="#00ff41" opacity="0.15" />
-          <circle cx="1160" cy="175" r="1.5" fill="#00ff41" opacity="0.12" />
-          <circle cx="1145" cy="185" r="1.2" fill="#00ff41" opacity="0.1" />
-        </motion.g>
+        {/* Gerbe handled by ShotgunBlast canvas particle system */}
       </svg>
     </div>
   );
@@ -383,12 +459,14 @@ export function LandingPage() {
     offset: ['start start', 'end end'],
   });
 
-  // Active section index for phase dots
+  // Active section index for phase dots + blast trigger
   const [activeSection, setActiveSection] = useState(-1);
+  const [blastActive, setBlastActive] = useState(false);
   useEffect(() => {
     const unsub = wp.on('change', (v: number) => {
       if (v <= 0) setActiveSection(-1);
       else setActiveSection(Math.min(5, Math.floor(v * 6)));
+      setBlastActive(v > 0.92);
     });
     return unsub;
   }, [wp]);
@@ -474,6 +552,9 @@ export function LandingPage() {
       {/* ═══ WEAPON ASSEMBLY TRACK ═══ */}
       <div className="weapon-track" ref={trackRef}>
         <div className="weapon-sticky">
+          {/* Shotgun blast particle system */}
+          <ShotgunBlast active={blastActive} />
+
           {/* Central weapon SVG */}
           <WeaponBlueprint progress={wp} />
 
