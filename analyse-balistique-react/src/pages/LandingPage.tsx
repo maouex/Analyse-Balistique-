@@ -72,18 +72,23 @@ const SECTIONS = [
 /* ═══════════════════════════════════════════════════════════
    SCROLL PANEL — text content driven by scroll progress
    ═══════════════════════════════════════════════════════════ */
-function ScrollPanel({ progress, range, side, children }: {
+function ScrollPanel({ progress, range, side, keepVisible, children }: {
   progress: MotionValue<number>;
   range: [number, number];
   side: 'left' | 'right' | 'center';
+  keepVisible?: boolean;
   children: React.ReactNode;
 }) {
   const span = range[1] - range[0];
   const S = range[0];
 
   const opacity = useTransform(progress,
-    [S, S + span * 0.12, S + span * 0.22, S + span * 0.68, S + span * 0.85, range[1]],
-    [0, 0.6, 1, 1, 0.4, 0],
+    keepVisible
+      ? [S, S + span * 0.12, S + span * 0.22, range[1]]
+      : [S, S + span * 0.12, S + span * 0.22, S + span * 0.68, S + span * 0.85, range[1]],
+    keepVisible
+      ? [0, 0.6, 1, 1]
+      : [0, 0.6, 1, 1, 0.4, 0],
   );
 
   const xOff = side === 'left' ? -80 : side === 'right' ? 80 : 0;
@@ -504,6 +509,7 @@ export function LandingPage() {
                 progress={wp}
                 range={ranges[i]}
                 side={sec.side}
+                keepVisible={isLast}
               >
                 <div className={`panel-card ${isLast ? 'panel-cta' : ''}`}>
                   <div className="panel-tag">
