@@ -237,7 +237,7 @@
 }
 
 
-/* ─── Weapon — Viewport + vertical pan ──────────────────── */
+/* ─── Weapon — Piece-by-piece assembly ──────────────────── */
 .weapon-container {
   position: relative;
   width: 55%;
@@ -246,16 +246,22 @@
   pointer-events: none;
 }
 
-/* Viewport clips the visible portion of the panning image */
+/*
+ * Viewport shows only the COMPLETE weapon (Y≥400 of 558 in SVG).
+ * Aspect ratio = full SVG width / weapon section height = 1024 / 158.
+ */
 .weapon-viewport {
   position: relative;
   width: 100%;
-  aspect-ratio: 1024 / 170;
+  aspect-ratio: 1024 / 158;
   overflow: hidden;
-  border-radius: 4px;
 }
 
-/* Night-vision green filter applied to the SVG strokes */
+/*
+ * Night-vision green filter on SVG strokes.
+ * translateY(-71.7%) shifts image so Y=400 aligns to viewport top.
+ * (400/558 ≈ 71.7% of image height)
+ */
 .weapon-img {
   position: absolute;
   top: 0;
@@ -263,37 +269,40 @@
   width: 100%;
   height: auto;
   display: block;
+  transform: translateY(-71.7%);
   filter: invert(1) sepia(1) hue-rotate(85deg) saturate(8) brightness(0.55) contrast(1.3);
   mix-blend-mode: screen;
 }
 
-/* Ghost: faint full image, no pan, always visible */
+/* Ghost: faint full weapon silhouette, always visible */
 .weapon-ghost {
-  opacity: 0.03;
+  opacity: 0.04;
   z-index: 1;
 }
 
-/* Main image: pans vertically via motion style */
-.weapon-main {
+/* Each slice fills the viewport, clipped to its horizontal zone */
+.weapon-slice {
+  position: absolute;
+  inset: 0;
   z-index: 2;
 }
 
-/* Horizontal scan line that sweeps through viewport */
-.weapon-scanline-h {
+/* Vertical scan line at latest reveal edge */
+.weapon-scanline {
   position: absolute;
-  left: 10%;
-  right: 10%;
-  height: 1px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
   background: var(--nv-green);
   box-shadow:
-    0 0 6px var(--nv-green),
-    0 0 18px rgba(0, 255, 65, 0.4),
-    0 0 36px rgba(0, 255, 65, 0.12);
-  z-index: 5;
+    0 0 8px var(--nv-green),
+    0 0 20px rgba(0, 255, 65, 0.4),
+    0 0 40px rgba(0, 255, 65, 0.15);
+  z-index: 10;
   pointer-events: none;
 }
 
-/* ─── Phase label layer (fixed to viewport, not panning) ── */
+/* ─── Phase label layer ─────────────────────────────────── */
 .weapon-label-layer {
   position: absolute;
   bottom: -48px;
@@ -343,7 +352,7 @@
 .muzzle-flash {
   position: absolute;
   right: -4%;
-  top: 30%;
+  top: 20%;
   width: 80px;
   height: 80px;
   background: radial-gradient(
