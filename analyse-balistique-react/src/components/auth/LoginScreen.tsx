@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Lock, ArrowRight, AlertCircle, Crosshair } from 'lucide-react';
+import DecryptedText from '../landing/DecryptedText';
 
 function simpleHash(str: string): string {
   let h = 0x811c9dc5;
@@ -171,7 +172,15 @@ export function LoginScreen({ onAuth }: LoginScreenProps) {
               color: 'rgba(0,255,65,0.6)',
               fontFamily: "'JetBrains Mono', monospace",
             }}>
-              Accès sécurisé
+              <DecryptedText
+                text="Accès sécurisé"
+                speed={60}
+                maxIterations={15}
+                characters="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*"
+                animateOn="view"
+                revealDirection="start"
+                sequential
+              />
             </span>
           </div>
 
