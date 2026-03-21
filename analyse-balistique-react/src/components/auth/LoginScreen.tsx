@@ -174,12 +174,13 @@ export function LoginScreen({ onAuth }: LoginScreenProps) {
             }}>
               <DecryptedText
                 text="Accès sécurisé"
-                speed={60}
+                speed={180}
                 maxIterations={15}
                 characters="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*"
                 animateOn="view"
                 revealDirection="start"
                 sequential
+                delay={800}
               />
             </span>
           </div>

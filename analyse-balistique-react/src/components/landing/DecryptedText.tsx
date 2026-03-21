@@ -31,6 +31,7 @@ interface DecryptedTextProps {
   encryptedClassName?: string;
   animateOn?: 'hover' | 'click' | 'view' | 'inViewHover';
   clickMode?: 'once' | 'toggle';
+  delay?: number;
 }
 
 export default function DecryptedText({
@@ -46,6 +47,7 @@ export default function DecryptedText({
   encryptedClassName = '',
   animateOn = 'hover',
   clickMode = 'once',
+  delay = 0,
   ...props
 }: DecryptedTextProps) {
   const [displayText, setDisplayText] = useState(text);
@@ -300,8 +302,15 @@ export default function DecryptedText({
     const observerCallback = (entries: IntersectionObserverEntry[]) => {
       entries.forEach(entry => {
         if (entry.isIntersecting && !hasAnimated) {
-          triggerDecrypt();
-          setHasAnimated(true);
+          if (delay > 0) {
+            setTimeout(() => {
+              triggerDecrypt();
+              setHasAnimated(true);
+            }, delay);
+          } else {
+            triggerDecrypt();
+            setHasAnimated(true);
+          }
         }
       });
     };
