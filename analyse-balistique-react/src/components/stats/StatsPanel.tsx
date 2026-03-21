@@ -26,43 +26,66 @@ export function StatsPanel({ onExport, onSaveMunition }: StatsPanelProps) {
       background: 'var(--surface)',
       borderLeft: '1px solid var(--border)',
       overflowY: 'auto',
-      padding: '14px 14px',
+      padding: '12px 12px',
       display: 'flex',
       flexDirection: 'column',
       gap: 12,
       flexShrink: 0,
+      position: 'relative',
     }}>
+      {/* Top decoration */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: 1,
+        background: 'linear-gradient(90deg, transparent, rgba(0,255,65,0.2))',
+        pointerEvents: 'none',
+      }} />
+
       {/* Header */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
       }}>
-        <span style={{ fontSize: 14, fontWeight: 800, letterSpacing: '-0.2px' }}>Analyse</span>
         <span style={{
           fontSize: 11,
+          fontWeight: 800,
+          letterSpacing: '2px',
+          textTransform: 'uppercase',
+          color: '#00ff41',
+          fontFamily: 'var(--font-mono)',
+          textShadow: '0 0 8px rgba(0,255,65,0.2)',
+        }}>
+          Analyse
+        </span>
+        <span style={{
+          fontSize: 10,
           fontWeight: 700,
-          background: impacts.length > 0 ? 'var(--accent-glow)' : 'var(--surface2)',
-          color: impacts.length > 0 ? 'var(--accent2)' : 'var(--muted)',
-          padding: '3px 10px',
-          borderRadius: 20,
+          background: impacts.length > 0 ? 'rgba(0,255,65,0.08)' : 'var(--surface2)',
+          color: impacts.length > 0 ? '#00ff41' : 'var(--muted)',
+          padding: '3px 8px',
           border: '1px solid var(--border)',
+          fontFamily: 'var(--font-mono)',
           transition: 'all var(--transition-smooth)',
         }}>
-          {impacts.length} impact{impacts.length !== 1 ? 's' : ''}
+          {impacts.length} IMPACT{impacts.length !== 1 ? 'S' : ''}
         </span>
       </div>
 
       {!stats ? (
         <div style={{
-          fontSize: 12,
+          fontSize: 11,
           color: 'var(--muted)',
           textAlign: 'center',
-          padding: 28,
+          padding: 24,
           background: 'var(--surface2)',
-          borderRadius: 'var(--radius)',
           border: '1px dashed var(--border)',
           lineHeight: 1.6,
+          fontFamily: 'var(--font-mono)',
+          letterSpacing: '0.3px',
         }}>
           Placez le centre et ajoutez des impacts pour voir les statistiques.
         </div>
@@ -72,74 +95,75 @@ export function StatsPanel({ onExport, onSaveMunition }: StatsPanelProps) {
           <ScoreGauge score={stats.score} label={stats.scoreLabel} />
 
           {/* Zones */}
-          <StatSection title="Distribution par zone" icon={<Target size={10} />}>
-            <ZoneRow zone={1} label="50 cm" color="var(--green)" glow="var(--green-glow)" stats={stats.zones[0]} />
-            <ZoneRow zone={2} label="50-100 cm" color="var(--amber)" glow="var(--amber-glow)" stats={stats.zones[1]} />
-            <ZoneRow zone={3} label="> 100 cm" color="var(--red)" glow="var(--red-glow)" stats={stats.zones[2]} />
+          <StatSection title="Distribution par zone" icon={<Target size={9} />}>
+            <ZoneRow zone={1} label="50 cm" color="#00ff41" glow="rgba(0,255,65,0.08)" stats={stats.zones[0]} />
+            <ZoneRow zone={2} label="50-100 cm" color="#ffaa00" glow="rgba(255,170,0,0.08)" stats={stats.zones[1]} />
+            <ZoneRow zone={3} label="> 100 cm" color="#ff4444" glow="rgba(255,68,68,0.08)" stats={stats.zones[2]} />
           </StatSection>
 
           {/* Distances */}
-          <StatSection title="Distances" icon={<Ruler size={10} />}>
+          <StatSection title="Distances" icon={<Ruler size={9} />}>
             <div style={{
               display: 'grid',
               gridTemplateColumns: '1fr 1fr',
-              gap: 6,
+              gap: 4,
             }}>
-              <MiniCard label="Moyenne" value={`${stats.distances.mean.toFixed(1)}`} unit="cm" />
-              <MiniCard label="Écart-type" value={`${stats.distances.stdDev.toFixed(1)}`} unit="cm" />
-              <MiniCard label="Min" value={`${stats.distances.min.toFixed(1)}`} unit="cm" />
-              <MiniCard label="Max" value={`${stats.distances.max.toFixed(1)}`} unit="cm" />
+              <MiniCard label="MOY" value={`${stats.distances.mean.toFixed(1)}`} unit="cm" />
+              <MiniCard label="σ" value={`${stats.distances.stdDev.toFixed(1)}`} unit="cm" />
+              <MiniCard label="MIN" value={`${stats.distances.min.toFixed(1)}`} unit="cm" />
+              <MiniCard label="MAX" value={`${stats.distances.max.toFixed(1)}`} unit="cm" />
             </div>
             <StatRow label="CV" value={`${stats.distances.cv.toFixed(1)}%`} />
           </StatSection>
 
           {/* Dispersion */}
-          <StatSection title="Dispersion" icon={<Activity size={10} />}>
+          <StatSection title="Dispersion" icon={<Activity size={9} />}>
             <div style={{
               display: 'grid',
               gridTemplateColumns: '1fr 1fr 1fr',
-              gap: 6,
+              gap: 4,
             }}>
-              <MiniCard label="Δ Horiz." value={`${stats.dispersion.cx.toFixed(1)}`} unit="cm" />
-              <MiniCard label="Δ Vert." value={`${stats.dispersion.cy.toFixed(1)}`} unit="cm" />
+              <MiniCard label="ΔH" value={`${stats.dispersion.cx.toFixed(1)}`} unit="cm" />
+              <MiniCard label="ΔV" value={`${stats.dispersion.cy.toFixed(1)}`} unit="cm" />
               <MiniCard label="R90" value={`${stats.dispersion.r90.toFixed(1)}`} unit="cm" accent />
             </div>
           </StatSection>
 
           {/* Density */}
-          <StatSection title="Densité" icon={<Layers size={10} />}>
+          <StatSection title="Densité" icon={<Layers size={9} />}>
             <div style={{
               display: 'grid',
               gridTemplateColumns: '1fr 1fr 1fr',
-              gap: 6,
+              gap: 4,
             }}>
-              <MiniCard label="∅50cm" value={`${stats.density.pct50cm.toFixed(0)}`} unit="%" />
-              <MiniCard label="∅100cm" value={`${stats.density.pct100cm.toFixed(0)}`} unit="%" />
-              <MiniCard label="Grp CV" value={`${stats.density.groupingCV.toFixed(1)}`} unit="%" />
+              <MiniCard label="∅50" value={`${stats.density.pct50cm.toFixed(0)}`} unit="%" />
+              <MiniCard label="∅100" value={`${stats.density.pct100cm.toFixed(0)}`} unit="%" />
+              <MiniCard label="GRP" value={`${stats.density.groupingCV.toFixed(1)}`} unit="%" />
             </div>
           </StatSection>
 
           {/* Impact list */}
-          <StatSection title={`Liste (${impacts.length})`} icon={<span style={{ fontSize: 10 }}>#</span>}>
+          <StatSection title={`Liste (${impacts.length})`} icon={<span style={{ fontSize: 9, fontFamily: 'var(--font-mono)' }}>#</span>}>
             <div style={{ maxHeight: 180, overflowY: 'auto' }}>
               {impacts.map((imp) => {
                 const distCm = center && scale.pixelsPerCm
                   ? pxToCm(distancePx(imp, center), scale.pixelsPerCm)
                   : 0;
                 const zone = classifyZone(distCm, circle1.diameterCm, circle2.diameterCm);
-                const zoneColor = zone === 1 ? 'var(--green)' : zone === 2 ? 'var(--amber)' : 'var(--red)';
+                const zoneColor = zone === 1 ? '#00ff41' : zone === 2 ? '#ffaa00' : '#ff4444';
                 return (
                   <div key={imp.id} style={{
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    padding: '4px 0',
+                    padding: '3px 0',
                     borderBottom: '1px solid var(--border)',
-                    fontSize: 11,
+                    fontSize: 10,
+                    fontFamily: 'var(--font-mono)',
                   }}>
                     <span style={{
                       color: 'var(--muted)',
-                      fontSize: 10,
+                      fontSize: 9,
                       fontWeight: 600,
                       minWidth: 24,
                     }}>
@@ -147,9 +171,8 @@ export function StatsPanel({ onExport, onSaveMunition }: StatsPanelProps) {
                     </span>
                     <span style={{ fontWeight: 600 }}>{distCm.toFixed(1)} cm</span>
                     <span style={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: '50%',
+                      width: 6,
+                      height: 6,
                       background: zoneColor,
                       boxShadow: `0 0 6px ${zoneColor}`,
                       display: 'inline-block',
@@ -163,28 +186,29 @@ export function StatsPanel({ onExport, onSaveMunition }: StatsPanelProps) {
       )}
 
       {/* Actions */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 'auto', paddingTop: 8 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 'auto', paddingTop: 8 }}>
         {stats && (
           <button
             className="btn btn-sm"
             onClick={() => navigate('/3d')}
             style={{
               width: '100%',
-              background: 'linear-gradient(135deg, var(--purple-glow), var(--accent-glow))',
-              borderColor: 'var(--border-light)',
+              background: 'rgba(170,102,255,0.08)',
+              borderColor: 'rgba(170,102,255,0.25)',
               justifyContent: 'center',
               gap: 8,
+              color: '#aa66ff',
             }}
           >
-            <Box size={13} /> Modélisation 3D
+            <Box size={12} /> Modélisation 3D
           </button>
         )}
-        <div style={{ display: 'flex', gap: 6 }}>
+        <div style={{ display: 'flex', gap: 4 }}>
           <button className="btn btn-sm" onClick={onSaveMunition} style={{ flex: 1, justifyContent: 'center' }}>
-            <Save size={12} /> Sauvegarder
+            <Save size={11} /> Sauvegarder
           </button>
           <button className="btn btn-sm btn-primary" onClick={onExport} style={{ flex: 1, justifyContent: 'center' }}>
-            <Download size={12} /> PNG
+            <Download size={11} /> PNG
           </button>
         </div>
       </div>
@@ -206,17 +230,28 @@ function StatSection({ title, icon, children }: { title: string; icon?: React.Re
 
 function MiniCard({ label, value, unit, accent }: { label: string; value: string; unit: string; accent?: boolean }) {
   return (
-    <div className="stat-card" style={{ textAlign: 'center', padding: '8px 4px' }}>
+    <div className="stat-card" style={{ textAlign: 'center', padding: '6px 4px' }}>
       <div style={{
-        fontSize: 14,
+        fontSize: 13,
         fontWeight: 800,
-        color: accent ? 'var(--accent2)' : 'var(--text)',
-        letterSpacing: '-0.3px',
+        color: accent ? '#00ff41' : 'var(--text)',
+        fontFamily: 'var(--font-mono)',
+        textShadow: accent ? '0 0 8px rgba(0,255,65,0.3)' : undefined,
       }}>
         {value}
-        <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--muted)', marginLeft: 1 }}>{unit}</span>
+        <span style={{ fontSize: 9, fontWeight: 600, color: 'var(--muted)', marginLeft: 1 }}>{unit}</span>
       </div>
-      <div style={{ fontSize: 9, color: 'var(--muted)', fontWeight: 600, marginTop: 2 }}>{label}</div>
+      <div style={{
+        fontSize: 8,
+        color: 'var(--muted)',
+        fontWeight: 700,
+        marginTop: 2,
+        letterSpacing: '1px',
+        textTransform: 'uppercase',
+        fontFamily: 'var(--font-mono)',
+      }}>
+        {label}
+      </div>
     </div>
   );
 }
@@ -226,11 +261,12 @@ function StatRow({ label, value }: { label: string; value: string }) {
     <div style={{
       display: 'flex',
       justifyContent: 'space-between',
-      padding: '4px 0',
-      fontSize: 12,
+      padding: '3px 0',
+      fontSize: 11,
+      fontFamily: 'var(--font-mono)',
     }}>
-      <span style={{ color: 'var(--muted)' }}>{label}</span>
-      <span style={{ fontWeight: 700 }}>{value}</span>
+      <span style={{ color: 'var(--muted)', letterSpacing: '1px' }}>{label}</span>
+      <span style={{ fontWeight: 700, color: 'var(--text)' }}>{value}</span>
     </div>
   );
 }
@@ -244,43 +280,41 @@ function ZoneRow({ zone, label, color, glow, stats }: {
 }) {
   return (
     <div style={{ marginBottom: 8 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 3 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <span style={{
-            width: 8,
-            height: 8,
-            borderRadius: '50%',
+            width: 6,
+            height: 6,
             background: color,
             boxShadow: `0 0 6px ${color}`,
             display: 'inline-block',
           }} />
-          <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Zone {zone} ({label})</span>
+          <span style={{ fontSize: 10, color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>Z{zone} ({label})</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ fontSize: 12, fontWeight: 800 }}>{stats.count}</span>
+          <span style={{ fontSize: 11, fontWeight: 800, fontFamily: 'var(--font-mono)' }}>{stats.count}</span>
           <span style={{
-            fontSize: 10,
+            fontSize: 9,
             fontWeight: 700,
             color,
             background: glow,
             padding: '1px 6px',
-            borderRadius: 8,
+            border: `1px solid ${color}33`,
+            fontFamily: 'var(--font-mono)',
           }}>
             {stats.percentage.toFixed(0)}%
           </span>
         </div>
       </div>
       <div style={{
-        height: 4,
-        borderRadius: 4,
-        background: 'var(--surface3)',
+        height: 2,
+        background: 'rgba(0,255,65,0.05)',
         overflow: 'hidden',
       }}>
         <div style={{
           height: '100%',
           width: `${stats.percentage}%`,
-          background: `linear-gradient(90deg, ${color}, ${color}aa)`,
-          borderRadius: 4,
+          background: color,
           transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
           boxShadow: `0 0 8px ${glow}`,
         }} />

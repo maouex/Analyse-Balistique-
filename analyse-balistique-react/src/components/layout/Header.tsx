@@ -1,12 +1,11 @@
-import { Sun, Moon, Scan, BookOpen } from 'lucide-react';
+import { Sun, Moon, Scan, BookOpen, Crosshair } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useThemeStore } from '../../stores/themeStore';
 import { useAnalysisStore } from '../../stores/analysisStore';
-import { PlombScopeIcon } from '../brand/PlombScopeLogo';
 
 const NAV_ITEMS = [
-  { path: '/analyse', label: 'Analyse', icon: Scan },
-  { path: '/bibliotheque', label: 'Bibliothèque', icon: BookOpen },
+  { path: '/analyse', label: 'ANALYSE', icon: Scan },
+  { path: '/bibliotheque', label: 'BIBLIOTHÈQUE', icon: BookOpen },
 ];
 
 export function Header() {
@@ -18,11 +17,11 @@ export function Header() {
 
   return (
     <header style={{
-      height: 52,
-      background: 'var(--surface-glass)',
-      backdropFilter: 'blur(20px)',
-      WebkitBackdropFilter: 'blur(20px)',
-      borderBottom: '1px solid var(--border)',
+      height: 48,
+      background: 'rgba(1, 10, 1, 0.9)',
+      backdropFilter: 'blur(12px)',
+      WebkitBackdropFilter: 'blur(12px)',
+      borderBottom: '1px solid rgba(0, 255, 65, 0.15)',
       display: 'flex',
       alignItems: 'center',
       padding: '0 16px',
@@ -31,14 +30,14 @@ export function Header() {
       zIndex: 100,
       position: 'relative',
     }}>
-      {/* Subtle bottom glow */}
+      {/* Bottom glow line */}
       <div style={{
         position: 'absolute',
         bottom: -1,
-        left: '10%',
-        right: '10%',
+        left: 0,
+        right: 0,
         height: 1,
-        background: 'linear-gradient(90deg, transparent, var(--accent-glow), transparent)',
+        background: 'linear-gradient(90deg, transparent, rgba(0, 255, 65, 0.2), transparent)',
         pointerEvents: 'none',
       }} />
 
@@ -50,22 +49,30 @@ export function Header() {
           alignItems: 'center',
           gap: 8,
           cursor: 'pointer',
-          marginRight: 8,
+          marginRight: 12,
           flexShrink: 0,
         }}
       >
-        <PlombScopeIcon size={28} />
+        <Crosshair size={18} color="#00ff41" strokeWidth={1.5} />
         <span style={{
-          fontSize: 14,
-          fontWeight: 900,
-          letterSpacing: '-0.4px',
-          background: 'linear-gradient(135deg, var(--text), var(--accent2))',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
+          fontSize: 12,
+          fontWeight: 800,
+          letterSpacing: '2px',
+          color: '#00ff41',
+          textShadow: '0 0 10px rgba(0,255,65,0.3)',
+          fontFamily: "'Inter', monospace",
         }}>
-          PlombScope
+          PLOMBSCOPE
         </span>
       </div>
+
+      {/* Separator */}
+      <div style={{
+        width: 1,
+        height: 20,
+        background: 'rgba(0,255,65,0.15)',
+        marginRight: 8,
+      }} />
 
       {/* Navigation tabs */}
       <nav style={{
@@ -73,7 +80,6 @@ export function Header() {
         alignItems: 'center',
         gap: 2,
         flex: 1,
-        justifyContent: 'center',
       }}>
         {NAV_ITEMS.map((item) => {
           const isActive = location.pathname === item.path;
@@ -87,34 +93,22 @@ export function Header() {
                 display: 'flex',
                 alignItems: 'center',
                 gap: 6,
-                padding: '7px 16px',
-                borderRadius: 8,
-                border: 'none',
+                padding: '6px 14px',
+                border: isActive ? '1px solid rgba(0,255,65,0.3)' : '1px solid transparent',
+                background: isActive ? 'rgba(0,255,65,0.08)' : 'transparent',
                 cursor: 'pointer',
-                fontSize: 13,
-                fontWeight: isActive ? 700 : 500,
-                color: isActive ? 'var(--accent2)' : 'var(--text-secondary)',
-                background: isActive ? 'var(--accent-glow)' : 'transparent',
-                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                fontSize: 11,
+                fontWeight: 700,
+                letterSpacing: '1.5px',
+                color: isActive ? '#00ff41' : 'rgba(0,255,65,0.4)',
+                transition: 'all 0.2s',
                 position: 'relative',
                 whiteSpace: 'nowrap',
+                fontFamily: "'Inter', monospace",
               }}
             >
-              <Icon size={15} strokeWidth={isActive ? 2.2 : 1.8} />
+              <Icon size={13} strokeWidth={isActive ? 2.2 : 1.5} />
               {item.label}
-
-              {isActive && (
-                <div style={{
-                  position: 'absolute',
-                  bottom: -2,
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  width: 16,
-                  height: 2,
-                  borderRadius: 1,
-                  background: 'var(--accent2)',
-                }} />
-              )}
             </button>
           );
         })}
@@ -128,47 +122,58 @@ export function Header() {
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: 5,
-              padding: '5px 10px',
-              borderRadius: 6,
-              border: '1px solid var(--border-glow)',
-              background: 'var(--accent-glow)',
+              gap: 6,
+              padding: '4px 10px',
+              border: '1px solid rgba(0,255,65,0.3)',
+              background: 'rgba(0,255,65,0.08)',
               cursor: 'pointer',
-              color: 'var(--accent2)',
-              fontSize: 11,
+              color: '#00ff41',
+              fontSize: 10,
               fontWeight: 700,
-              transition: 'all var(--transition-fast)',
+              letterSpacing: '1px',
+              fontFamily: "'Courier New', monospace",
+              transition: 'all 0.2s',
             }}
           >
             <span style={{
               width: 6,
               height: 6,
               borderRadius: '50%',
-              background: 'var(--accent2)',
+              background: '#00ff41',
+              boxShadow: '0 0 8px rgba(0,255,65,0.6)',
               animation: 'pulse 2s ease-in-out infinite',
             }} />
-            {impactCount} impacts
+            {impactCount} IMPACTS
           </button>
         )}
+
+        {/* Coordinates display */}
+        <span style={{
+          fontSize: 9,
+          fontFamily: "'Courier New', monospace",
+          color: 'rgba(0,255,65,0.25)',
+          letterSpacing: '1px',
+        }}>
+          SYS:OK
+        </span>
 
         <button
           onClick={toggle}
           title={mode === 'dark' ? 'Thème clair' : 'Thème sombre'}
           style={{
-            width: 32,
-            height: 32,
-            borderRadius: 'var(--radius-sm)',
-            border: '1px solid var(--border)',
-            background: 'var(--surface2)',
+            width: 28,
+            height: 28,
+            border: '1px solid rgba(0,255,65,0.15)',
+            background: 'rgba(0,255,65,0.05)',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: 'var(--text-secondary)',
-            transition: 'all var(--transition-fast)',
+            color: 'rgba(0,255,65,0.5)',
+            transition: 'all 0.2s',
           }}
         >
-          {mode === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
+          {mode === 'dark' ? <Sun size={12} /> : <Moon size={12} />}
         </button>
       </div>
     </header>

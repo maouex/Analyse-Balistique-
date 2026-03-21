@@ -38,12 +38,24 @@ export function Toolbar() {
       background: 'var(--surface)',
       borderRight: '1px solid var(--border)',
       overflowY: 'auto',
-      padding: '12px 12px',
+      padding: '10px 10px',
       display: 'flex',
       flexDirection: 'column',
       gap: 14,
       flexShrink: 0,
+      position: 'relative',
     }}>
+      {/* Top decoration line */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: 1,
+        background: 'linear-gradient(90deg, rgba(0,255,65,0.2), transparent)',
+        pointerEvents: 'none',
+      }} />
+
       <input ref={fileRef} type="file" accept="image/*" hidden onChange={handleFileChange} />
 
       {/* ─── IMAGE ─── */}
@@ -53,22 +65,21 @@ export function Toolbar() {
           onClick={() => fileRef.current?.click()}
           style={{
             width: '100%',
-            padding: '16px 12px',
-            fontSize: 13,
+            padding: '14px 12px',
+            fontSize: 11,
             gap: 8,
-            borderRadius: 'var(--radius)',
             justifyContent: 'center',
           }}
         >
-          <Upload size={16} /> Charger une image
+          <Upload size={14} /> Charger une image
         </button>
       ) : (
         <div style={{ display: 'flex', gap: 4 }}>
           <button className="btn btn-sm" onClick={() => fileRef.current?.click()} style={{ flex: 1, justifyContent: 'center' }}>
-            <Upload size={12} /> Charger
+            <Upload size={11} /> Charger
           </button>
           <button className="btn btn-sm btn-danger" onClick={store.resetAnalysis}>
-            <RotateCcw size={12} />
+            <RotateCcw size={11} />
           </button>
         </div>
       )}
@@ -77,13 +88,13 @@ export function Toolbar() {
       {hasImage && (
         <>
           <Section title="Outils">
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 4 }}>
-              <ToolBtn icon={<Ruler size={13} />} label="Échelle" active={store.activeMode === 'scale'} onClick={() => store.setMode('scale')} />
-              <ToolBtn icon={<Crosshair size={13} />} label="Centre" active={store.activeMode === 'center'} onClick={() => store.setMode('center')} />
-              <ToolBtn icon={<Circle size={13} />} label="Impacts" active={store.activeMode === 'impact'} onClick={() => store.setMode('impact')} />
-              <ToolBtn icon={<Eraser size={13} />} label="Gomme" active={store.activeMode === 'eraser'} onClick={() => store.setMode('eraser')} />
-              <ToolBtn icon={<Move size={13} />} label="Déplacer" active={store.activeMode === 'move'} onClick={() => store.setMode('move')} />
-              <ToolBtn icon={<Undo2 size={13} />} label="Annuler" active={false} onClick={store.undoImpact} />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 3 }}>
+              <ToolBtn icon={<Ruler size={12} />} label="Échelle" active={store.activeMode === 'scale'} onClick={() => store.setMode('scale')} />
+              <ToolBtn icon={<Crosshair size={12} />} label="Centre" active={store.activeMode === 'center'} onClick={() => store.setMode('center')} />
+              <ToolBtn icon={<Circle size={12} />} label="Impacts" active={store.activeMode === 'impact'} onClick={() => store.setMode('impact')} />
+              <ToolBtn icon={<Eraser size={12} />} label="Gomme" active={store.activeMode === 'eraser'} onClick={() => store.setMode('eraser')} />
+              <ToolBtn icon={<Move size={12} />} label="Déplacer" active={store.activeMode === 'move'} onClick={() => store.setMode('move')} />
+              <ToolBtn icon={<Undo2 size={12} />} label="Annuler" active={false} onClick={store.undoImpact} />
             </div>
             {hasImpacts && (
               <button
@@ -93,9 +104,9 @@ export function Toolbar() {
                     store.clearImpacts();
                   }
                 }}
-                style={{ width: '100%', marginTop: 6, fontSize: 11, justifyContent: 'center' }}
+                style={{ width: '100%', marginTop: 6, fontSize: 9, justifyContent: 'center' }}
               >
-                <Trash2 size={11} /> Effacer les {store.impacts.length} impacts
+                <Trash2 size={10} /> Effacer les {store.impacts.length} impacts
               </button>
             )}
           </Section>
@@ -107,30 +118,36 @@ export function Toolbar() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                padding: '6px 10px',
-                background: 'var(--green-glow)',
-                borderRadius: 'var(--radius-sm)',
-                border: '1px solid rgba(52,211,153,0.15)',
+                padding: '5px 8px',
+                background: 'rgba(0, 255, 65, 0.06)',
+                border: '1px solid rgba(0,255,65,0.2)',
               }}>
-                <span style={{ fontSize: 11, color: 'var(--green)', fontWeight: 600 }}>
+                <span style={{
+                  fontSize: 10,
+                  color: '#00ff41',
+                  fontWeight: 600,
+                  fontFamily: "var(--font-mono)",
+                  textShadow: '0 0 6px rgba(0,255,65,0.3)',
+                }}>
                   {'\u2713'} {store.scale.referenceCm}cm — {store.scale.pixelsPerCm!.toFixed(1)} px/cm
                 </span>
                 <button
                   className="btn btn-sm"
                   onClick={store.clearScale}
-                  style={{ padding: '2px 6px', fontSize: 10 }}
+                  style={{ padding: '2px 5px', fontSize: 9 }}
                 >
-                  <X size={10} />
+                  <X size={9} />
                 </button>
               </div>
             ) : (
               <div style={{
-                fontSize: 10,
+                fontSize: 9,
                 color: 'var(--muted)',
-                padding: '6px 10px',
+                padding: '6px 8px',
                 background: 'var(--surface2)',
-                borderRadius: 'var(--radius-sm)',
                 border: '1px dashed var(--border)',
+                fontFamily: "var(--font-mono)",
+                letterSpacing: '0.5px',
               }}>
                 {"S\u00E9lectionnez \"\u00C9chelle\" puis tracez 2 points"}
               </div>
@@ -149,11 +166,13 @@ export function Toolbar() {
                 style={{ flex: 1 }}
               />
               <span style={{
-                fontSize: 11,
+                fontSize: 10,
                 fontWeight: 700,
-                color: 'var(--accent2)',
+                color: '#00ff41',
                 minWidth: 30,
                 textAlign: 'right',
+                fontFamily: "var(--font-mono)",
+                textShadow: '0 0 6px rgba(0,255,65,0.3)',
               }}>
                 {sensitivity}%
               </span>
@@ -183,20 +202,21 @@ export function Toolbar() {
               style={{ width: '100%', marginTop: 6, justifyContent: 'center' }}
             >
               {detecting ? (
-                <><Loader2 size={12} className="spin" /> Analyse...</>
+                <><Loader2 size={11} className="spin" /> Analyse...</>
               ) : (
-                <><Wand2 size={12} /> Détecter les impacts</>
+                <><Wand2 size={11} /> Détecter les impacts</>
               )}
             </button>
             {lastDetectCount !== null && (
               <div style={{
-                fontSize: 10,
+                fontSize: 9,
                 marginTop: 4,
                 fontWeight: 600,
                 padding: '4px 8px',
-                borderRadius: 'var(--radius-sm)',
-                background: lastDetectCount > 0 ? 'var(--green-glow)' : 'var(--amber-glow)',
-                color: lastDetectCount > 0 ? 'var(--green)' : 'var(--amber)',
+                fontFamily: "var(--font-mono)",
+                background: lastDetectCount > 0 ? 'rgba(0,255,65,0.06)' : 'rgba(255,170,0,0.06)',
+                border: lastDetectCount > 0 ? '1px solid rgba(0,255,65,0.2)' : '1px solid rgba(255,170,0,0.2)',
+                color: lastDetectCount > 0 ? '#00ff41' : '#ffaa00',
               }}>
                 {lastDetectCount > 0
                   ? `${lastDetectCount} impact${lastDetectCount > 1 ? 's' : ''} détecté${lastDetectCount > 1 ? 's' : ''}`
@@ -208,7 +228,7 @@ export function Toolbar() {
           {/* ─── NAVIGATION ─── */}
           <Section title="Navigation">
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <ZoomIn size={12} color="var(--muted)" />
+              <ZoomIn size={11} color="var(--muted)" />
               <input
                 type="range"
                 min={5}
@@ -218,11 +238,12 @@ export function Toolbar() {
                 style={{ flex: 1 }}
               />
               <span style={{
-                fontSize: 11,
+                fontSize: 10,
                 fontWeight: 700,
                 color: 'var(--text-secondary)',
                 minWidth: 32,
                 textAlign: 'right',
+                fontFamily: "var(--font-mono)",
               }}>
                 {Math.round(store.view.zoom * 100)}%
               </span>
@@ -233,16 +254,16 @@ export function Toolbar() {
                 const canvas = document.querySelector('canvas');
                 if (canvas) store.fitToScreen(canvas.width, canvas.height);
               }}
-              style={{ width: '100%', marginTop: 4, fontSize: 11, justifyContent: 'center' }}
+              style={{ width: '100%', marginTop: 4, fontSize: 10, justifyContent: 'center' }}
             >
-              <Maximize2 size={11} /> Ajuster à l{'\u2019'}écran
+              <Maximize2 size={10} /> Ajuster à l{'\u2019'}écran
             </button>
           </Section>
 
           {/* ─── APPARENCE (collapsible) ─── */}
           <CollapsibleSection
             title="Apparence"
-            icon={<Palette size={11} />}
+            icon={<Palette size={10} />}
             open={showAppearance}
             onToggle={() => setShowAppearance(!showAppearance)}
           >
@@ -276,7 +297,7 @@ export function Toolbar() {
                 type="color"
                 value={store.impactStyle.color}
                 onChange={(e) => store.updateImpactStyle({ color: e.target.value })}
-                style={{ width: 22, height: 22, border: 'none', background: 'none', cursor: 'pointer', flexShrink: 0 }}
+                style={{ width: 20, height: 20, border: 'none', background: 'none', cursor: 'pointer', flexShrink: 0 }}
               />
               <input
                 type="range"
@@ -286,20 +307,20 @@ export function Toolbar() {
                 onChange={(e) => store.updateImpactStyle({ radius: Number(e.target.value) })}
                 style={{ flex: 1 }}
               />
-              <span style={{ fontSize: 10, color: 'var(--muted)', minWidth: 22, fontWeight: 600 }}>{store.impactStyle.radius}px</span>
+              <span style={{ fontSize: 9, color: 'var(--muted)', minWidth: 22, fontWeight: 600, fontFamily: 'var(--font-mono)' }}>{store.impactStyle.radius}px</span>
             </div>
-            <div style={{ display: 'flex', gap: 4, marginTop: 6 }}>
+            <div style={{ display: 'flex', gap: 3, marginTop: 6 }}>
               <button
                 className={`btn btn-sm ${store.impactStyle.showNumbers ? 'active' : ''}`}
                 onClick={() => store.updateImpactStyle({ showNumbers: !store.impactStyle.showNumbers })}
-                style={{ flex: 1, fontSize: 10, padding: '4px 4px', justifyContent: 'center' }}
+                style={{ flex: 1, fontSize: 9, padding: '4px 4px', justifyContent: 'center' }}
               >
-                <Hash size={10} /> N{'\u00B0'}
+                <Hash size={9} /> N{'\u00B0'}
               </button>
               <button
                 className={`btn btn-sm ${store.impactStyle.showEllipse ? 'active' : ''}`}
                 onClick={() => store.updateImpactStyle({ showEllipse: !store.impactStyle.showEllipse })}
-                style={{ flex: 1, fontSize: 10, padding: '4px 4px', justifyContent: 'center' }}
+                style={{ flex: 1, fontSize: 9, padding: '4px 4px', justifyContent: 'center' }}
               >
                 Ellipse
               </button>
@@ -308,7 +329,7 @@ export function Toolbar() {
                   type="color"
                   value={store.impactStyle.ellipseColor}
                   onChange={(e) => store.updateImpactStyle({ ellipseColor: e.target.value })}
-                  style={{ width: 22, height: 22, border: 'none', background: 'none', cursor: 'pointer' }}
+                  style={{ width: 20, height: 20, border: 'none', background: 'none', cursor: 'pointer' }}
                 />
               )}
             </div>
@@ -350,15 +371,16 @@ function CollapsibleSection({ title, icon, open, onToggle, children }: {
           border: 'none',
           cursor: 'pointer',
           padding: '4px 0',
-          fontSize: 10,
+          fontSize: 9,
           fontWeight: 700,
-          color: 'var(--muted)',
+          color: '#00ff41',
           textTransform: 'uppercase',
-          letterSpacing: '0.6px',
+          letterSpacing: '2px',
           transition: 'color var(--transition-fast)',
+          fontFamily: 'var(--font-mono)',
         }}
       >
-        {open ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
+        {open ? <ChevronDown size={10} /> : <ChevronRight size={10} />}
         {icon}
         {title}
       </button>
@@ -378,10 +400,12 @@ function CollapsibleSection({ title, icon, open, onToggle, children }: {
 function SubLabel({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
   return (
     <div style={{
-      fontSize: 10,
+      fontSize: 9,
       color: 'var(--text-secondary)',
       marginBottom: 5,
       fontWeight: 600,
+      letterSpacing: '0.5px',
+      textTransform: 'uppercase',
       ...style,
     }}>
       {children}
@@ -407,13 +431,13 @@ function CircleRow({ label, visible, color, diameter, min, max, onToggle, onColo
         onClick={onToggle}
         style={{ padding: '3px 5px', flexShrink: 0 }}
       >
-        {visible ? <Eye size={10} /> : <EyeOff size={10} />}
+        {visible ? <Eye size={9} /> : <EyeOff size={9} />}
       </button>
       <input
         type="color"
         value={color}
         onChange={(e) => onColor(e.target.value)}
-        style={{ width: 20, height: 20, border: 'none', background: 'none', cursor: 'pointer', flexShrink: 0 }}
+        style={{ width: 18, height: 18, border: 'none', background: 'none', cursor: 'pointer', flexShrink: 0 }}
       />
       <input
         type="range"
@@ -423,7 +447,7 @@ function CircleRow({ label, visible, color, diameter, min, max, onToggle, onColo
         onChange={(e) => onDiameter(Number(e.target.value))}
         style={{ flex: 1 }}
       />
-      <span style={{ fontSize: 10, color: 'var(--muted)', minWidth: 36, textAlign: 'right', fontWeight: 600 }}>{label}</span>
+      <span style={{ fontSize: 9, color: 'var(--muted)', minWidth: 36, textAlign: 'right', fontWeight: 600, fontFamily: 'var(--font-mono)' }}>{label}</span>
     </div>
   );
 }
@@ -441,12 +465,11 @@ function ToolBtn({ icon, label, active, onClick }: {
       style={{
         justifyContent: 'center',
         flexDirection: 'column',
-        gap: 3,
-        padding: '8px 2px',
-        fontSize: 9,
+        gap: 2,
+        padding: '7px 2px',
+        fontSize: 8,
         lineHeight: 1,
         fontWeight: active ? 700 : 600,
-        borderRadius: 'var(--radius-sm)',
       }}
     >
       {icon}

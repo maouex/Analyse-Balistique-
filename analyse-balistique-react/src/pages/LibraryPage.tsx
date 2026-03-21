@@ -82,20 +82,19 @@ export function LibraryPage() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{
-            width: 36,
-            height: 36,
-            borderRadius: 10,
-            background: 'var(--blue-glow)',
-            border: '1px solid rgba(96,165,250,0.2)',
+            width: 32,
+            height: 32,
+            background: 'rgba(68,170,255,0.08)',
+            border: '1px solid rgba(68,170,255,0.2)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
           }}>
-            <Database size={18} color="var(--blue)" />
+            <Database size={16} color="#44aaff" />
           </div>
           <div>
-            <h2 style={{ fontSize: 20, fontWeight: 800, letterSpacing: '-0.3px' }}>Bibliothèque</h2>
-            <span style={{ fontSize: 11, color: 'var(--muted)' }}>
+            <h2 style={{ fontSize: 14, fontWeight: 800, letterSpacing: '2px', textTransform: 'uppercase', color: '#00ff41', fontFamily: 'var(--font-mono)', textShadow: '0 0 10px rgba(0,255,65,0.2)' }}>Bibliothèque</h2>
+            <span style={{ fontSize: 9, color: 'rgba(0,255,65,0.3)', fontFamily: 'var(--font-mono)', letterSpacing: '1px' }}>
               {store.munitions.length} munition{store.munitions.length !== 1 ? 's' : ''} enregistr{'\u00E9'}e{store.munitions.length !== 1 ? 's' : ''}
             </span>
           </div>
@@ -126,13 +125,14 @@ export function LibraryPage() {
           display: 'flex',
           alignItems: 'center',
           gap: 8,
-          padding: '8px 14px',
-          background: 'var(--blue-glow)',
-          border: '1px solid rgba(96,165,250,0.15)',
-          borderRadius: 'var(--radius-sm)',
-          fontSize: 11,
-          color: 'var(--blue)',
+          padding: '6px 12px',
+          background: 'rgba(68,170,255,0.06)',
+          border: '1px solid rgba(68,170,255,0.15)',
+          fontSize: 10,
+          color: '#44aaff',
           fontWeight: 600,
+          fontFamily: 'var(--font-mono)',
+          letterSpacing: '0.5px',
         }}>
           <GitCompare size={12} />
           S{'\u00E9'}lectionnez 2 à 4 munitions pour les comparer
@@ -156,16 +156,16 @@ export function LibraryPage() {
       {filtered.length === 0 ? (
         <div style={{
           textAlign: 'center',
-          padding: 48,
+          padding: 40,
           color: 'var(--muted)',
-          fontSize: 14,
+          fontSize: 12,
           background: 'var(--surface2)',
-          borderRadius: 'var(--radius-lg)',
           border: '1px dashed var(--border)',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           gap: 14,
+          fontFamily: 'var(--font-mono)',
         }}>
           {store.munitions.length === 0 ? (
             <>
@@ -230,10 +230,10 @@ function MunitionCard({ munition: m, selected, onToggle, onEdit, onDelete, onRes
       }}
     >
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 10 }}>
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 15, fontWeight: 800, letterSpacing: '-0.2px' }}>{m.nom || 'Sans nom'}</div>
-          <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 2 }}>
+          <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: '0.5px', textTransform: 'uppercase' }}>{m.nom || 'Sans nom'}</div>
+          <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 2, fontFamily: 'var(--font-mono)', letterSpacing: '0.3px' }}>
             {m.fabricant} — {m.calibre}
           </div>
         </div>
@@ -360,12 +360,14 @@ function MiniStat({ label, value, unit, color, glow }: {
 function Tag({ children }: { children: React.ReactNode }) {
   return (
     <span style={{
-      padding: '3px 9px',
+      padding: '2px 8px',
       background: 'var(--surface2)',
       border: '1px solid var(--border)',
-      borderRadius: 6,
-      fontSize: 11,
-      fontWeight: 500,
+      fontSize: 9,
+      fontWeight: 600,
+      fontFamily: 'var(--font-mono)',
+      letterSpacing: '0.5px',
+      textTransform: 'uppercase',
     }}>
       {children}
     </span>
