@@ -1,21 +1,16 @@
 import { useEffect } from 'react';
 import { useMunitionsStore } from '../../stores/munitionsStore';
-import { RadarChart } from './SvgCharts';
+import { RadarChart, RadialGauge } from './SvgCharts';
+import type { WidgetSize } from '../../stores/dashboardStore';
 
-export function PerformanceRadarWidget() {
+export function PerformanceRadarWidget({ size = 'M' }: { size?: WidgetSize }) {
   const store = useMunitionsStore();
   const load = store.load;
-
   useEffect(() => { load(); }, [load]);
 
   const withSnap = store.munitions.filter((m) => m.snap);
-
   if (withSnap.length === 0) {
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--muted)', fontSize: 10, fontFamily: 'var(--font-mono)' }}>
-        Analysez des munitions pour voir le radar
-      </div>
-    );
+    return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--muted)', fontSize: 9, fontFamily: 'var(--font-mono)' }}>Pas de données</div>;
   }
 
   const avgScore = withSnap.reduce((a, m) => a + (m.snap?.score ?? 0), 0) / withSnap.length;
@@ -32,12 +27,18 @@ export function PerformanceRadarWidget() {
     { label: 'Vol.', value: Math.min(100, (avgImp / 200) * 100) },
   ];
 
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-      <RadarChart axes={axes} size={120} color="var(--accent2)" />
-      <div style={{ fontSize: 7, color: 'var(--muted)', fontFamily: 'var(--font-mono)', marginTop: 2 }}>
-        {withSnap.length} analyse{withSnap.length > 1 ? 's' : ''}
+  if (size === 'S') {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+        <RadialGauge value={avgScore} size={60} strokeWidth={5} label="Perf." color="auto" />
       </div>
+    );
+  }
+
+  const radarSize = size === 'L' ? 130 : 105;
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+      <RadarChart axes={axes} size={radarSize} color="var(--accent2)" />
     </div>
   );
 }

@@ -1,42 +1,48 @@
 import { Crosshair, BookOpen, Box, Upload } from 'lucide-react';
 import { useTransitionNavigate } from '../transitions/TransitionContext';
 import { useAnalysisStore } from '../../stores/analysisStore';
+import type { WidgetSize } from '../../stores/dashboardStore';
 
-export function QuickActionsWidget() {
+export function QuickActionsWidget({ size = 'M' }: { size?: WidgetSize }) {
   const navigate = useTransitionNavigate();
   const hasAnalysis = useAnalysisStore((s) => s.impacts.length > 0);
 
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, height: '100%', justifyContent: 'center' }}>
-      <ActionBtn icon={<Crosshair size={14} />} label="Nouvelle analyse" color="var(--accent2)" borderColor="var(--border-light)"
-        onClick={() => { useAnalysisStore.getState().resetAnalysis(); navigate('/analyse'); }} />
-      <ActionBtn icon={<BookOpen size={14} />} label="Bibliothèque" color="var(--blue)" borderColor="rgba(68,170,255,0.25)"
-        onClick={() => navigate('/bibliotheque')} />
-      {hasAnalysis && (
-        <>
-          <ActionBtn icon={<Upload size={14} />} label={`Reprendre (${useAnalysisStore.getState().impacts.length} impacts)`} color="var(--amber)" borderColor="rgba(255,170,0,0.25)"
-            onClick={() => navigate('/analyse')} />
-          <ActionBtn icon={<Box size={14} />} label="Vue 3D" color="var(--purple)" borderColor="rgba(170,102,255,0.25)"
-            onClick={() => navigate('/3d')} />
-        </>
-      )}
-    </div>
-  );
-}
+  const goNew = () => { useAnalysisStore.getState().resetAnalysis(); navigate('/analyse'); };
 
-function ActionBtn({ icon, label, color, borderColor, onClick }: {
-  icon: React.ReactNode; label: string; color: string; borderColor: string; onClick: () => void;
-}) {
+  if (size === 'S') {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 4 }}>
+        <button onClick={goNew} style={{ border: '1px solid var(--border-light)', background: 'var(--accent-glow)', cursor: 'pointer', padding: '6px 8px', display: 'flex', alignItems: 'center', gap: 4 }}>
+          <Crosshair size={12} color="var(--accent2)" />
+          <span style={{ fontSize: 8, fontWeight: 700, color: 'var(--accent2)', fontFamily: 'var(--font-mono)', letterSpacing: '0.5px' }}>ANALYSE</span>
+        </button>
+      </div>
+    );
+  }
+
+  const actions = [
+    { icon: <Crosshair size={13} />, label: 'Nouvelle analyse', color: 'var(--accent2)', onClick: goNew },
+    { icon: <BookOpen size={13} />, label: 'Bibliothèque', color: 'var(--blue)', onClick: () => navigate('/bibliotheque') },
+    ...(hasAnalysis ? [
+      { icon: <Upload size={13} />, label: `Reprendre (${useAnalysisStore.getState().impacts.length})`, color: 'var(--amber)', onClick: () => navigate('/analyse') },
+      { icon: <Box size={13} />, label: 'Vue 3D', color: 'var(--purple)', onClick: () => navigate('/3d') },
+    ] : []),
+  ];
+
+  const shown = size === 'L' ? actions : actions.slice(0, 3);
+  const dir = size === 'L' ? 'row' : 'column';
+
   return (
-    <button onClick={onClick} style={{
-      display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px',
-      background: `${color}10`, border: `1px solid ${borderColor}`, cursor: 'pointer', transition: 'all 0.15s',
-    }}
-      onMouseOver={(e) => { e.currentTarget.style.background = `${color}20`; }}
-      onMouseOut={(e) => { e.currentTarget.style.background = `${color}10`; }}
-    >
-      <div style={{ color, display: 'flex' }}>{icon}</div>
-      <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', color, fontFamily: 'var(--font-mono)' }}>{label}</span>
-    </button>
+    <div style={{ display: 'flex', flexDirection: dir as 'row' | 'column', gap: 5, height: '100%', justifyContent: 'center', flexWrap: size === 'L' ? 'wrap' : undefined }}>
+      {shown.map((a) => (
+        <button key={a.label} onClick={a.onClick} style={{
+          display: 'flex', alignItems: 'center', gap: 6, padding: '5px 8px', flex: size === 'L' ? '1 1 40%' : undefined,
+          background: `${a.color}10`, border: `1px solid ${a.color}25`, cursor: 'pointer', transition: 'all 0.15s',
+        }}>
+          <div style={{ color: a.color, display: 'flex' }}>{a.icon}</div>
+          <span style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.8px', textTransform: 'uppercase', color: a.color, fontFamily: 'var(--font-mono)' }}>{a.label}</span>
+        </button>
+      ))}
+    </div>
   );
 }
