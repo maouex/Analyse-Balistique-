@@ -154,3 +154,20 @@ export interface TutorialStep {
   description: string;
   icon: string;
 }
+
+// ─── Users & Auth ───────────────────────────────────────────
+
+export type UserRole = 'admin' | 'operator' | 'viewer';
+
+export interface User {
+  id: string;
+  username: string;
+  displayName: string;
+  role: UserRole;
+  passwordHash: string;
+  avatar: string; // initials color hex
+  active: boolean;
+  lastLogin: string | null;
+  createdAt: string;
+  updatedAt: string;
+}

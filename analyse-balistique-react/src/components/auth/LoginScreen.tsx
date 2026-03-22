@@ -1,21 +1,11 @@
 import { useState, useCallback, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Lock, ArrowRight, AlertCircle, Crosshair } from 'lucide-react';
+import { Lock, ArrowRight, AlertCircle, Crosshair, User } from 'lucide-react';
 import DecryptedText from '../landing/DecryptedText';
+import { useUserStore } from '../../stores/userStore';
 
 const AccessBadge = lazy(() => import('./AccessBadge'));
-
-function simpleHash(str: string): string {
-  let h = 0x811c9dc5;
-  for (let i = 0; i < str.length; i++) {
-    h ^= str.charCodeAt(i);
-    h = Math.imul(h, 0x01000193);
-  }
-  return (h >>> 0).toString(16).slice(0, 10);
-}
-
-const EXPECTED = simpleHash('taradeau');
 
 interface LoginScreenProps {
   onAuth: () => void;
@@ -24,8 +14,10 @@ interface LoginScreenProps {
 
 export function LoginScreen({ onAuth, redirectTo = '/dashboard' }: LoginScreenProps) {
   const navigate = useNavigate();
+  const login = useUserStore((s) => s.login);
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState(false);
+  const [error, setError] = useState('');
   const [shaking, setShaking] = useState(false);
   const [showBadge, setShowBadge] = useState(false);
 
@@ -36,16 +28,16 @@ export function LoginScreen({ onAuth, redirectTo = '/dashboard' }: LoginScreenPr
 
   const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
-    if (simpleHash(password.toLowerCase().trim()) === EXPECTED) {
-      sessionStorage.setItem('sag-auth', '1');
+    const result = login(username, password);
+    if (result.success) {
       setShowBadge(true);
     } else {
-      setError(true);
+      setError(result.error || 'Erreur de connexion');
       setShaking(true);
       setTimeout(() => setShaking(false), 500);
-      setTimeout(() => setError(false), 3000);
+      setTimeout(() => setError(''), 4000);
     }
-  }, [password]);
+  }, [username, password, login]);
 
   return (
     <div style={{
@@ -196,7 +188,31 @@ export function LoginScreen({ onAuth, redirectTo = '/dashboard' }: LoginScreenPr
             </span>
           </div>
 
+          {/* Username */}
           <div style={{ position: 'relative' }}>
+            <User size={13} color="rgba(0,255,65,0.3)" style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)' }} />
+            <input
+              className="input"
+              type="text"
+              placeholder="Identifiant"
+              value={username}
+              onChange={(e) => {
+                setUsername(e.target.value);
+                setError('');
+              }}
+              autoFocus
+              autoComplete="username"
+              style={{
+                paddingLeft: 32,
+                borderColor: error ? '#ff4444' : undefined,
+                boxShadow: error ? '0 0 12px rgba(255,68,68,0.15)' : undefined,
+              }}
+            />
+          </div>
+
+          {/* Password */}
+          <div style={{ position: 'relative' }}>
+            <Lock size={13} color="rgba(0,255,65,0.3)" style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)' }} />
             <input
               className="input"
               type="password"
@@ -204,10 +220,11 @@ export function LoginScreen({ onAuth, redirectTo = '/dashboard' }: LoginScreenPr
               value={password}
               onChange={(e) => {
                 setPassword(e.target.value);
-                setError(false);
+                setError('');
               }}
-              autoFocus
+              autoComplete="current-password"
               style={{
+                paddingLeft: 32,
                 paddingRight: 40,
                 borderColor: error ? '#ff4444' : undefined,
                 boxShadow: error ? '0 0 12px rgba(255,68,68,0.15)' : undefined,
@@ -222,20 +239,20 @@ export function LoginScreen({ onAuth, redirectTo = '/dashboard' }: LoginScreenPr
                 transform: 'translateY(-50%)',
                 width: 28,
                 height: 28,
-                border: password.length > 0
+                border: (username.length > 0 && password.length > 0)
                   ? '1px solid rgba(0,255,65,0.4)'
                   : '1px solid rgba(0,255,65,0.1)',
-                background: password.length > 0
+                background: (username.length > 0 && password.length > 0)
                   ? 'rgba(0,255,65,0.15)'
                   : 'transparent',
-                cursor: password.length > 0 ? 'pointer' : 'default',
+                cursor: (username.length > 0 && password.length > 0) ? 'pointer' : 'default',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 transition: 'all 0.2s ease',
               }}
             >
-              <ArrowRight size={12} color={password.length > 0 ? '#00ff41' : 'rgba(0,255,65,0.2)'} />
+              <ArrowRight size={12} color={(username.length > 0 && password.length > 0) ? '#00ff41' : 'rgba(0,255,65,0.2)'} />
             </button>
           </div>
 
@@ -258,9 +275,21 @@ export function LoginScreen({ onAuth, redirectTo = '/dashboard' }: LoginScreenPr
               }}
             >
               <AlertCircle size={11} />
-              ERREUR: MOT DE PASSE INCORRECT
+              {error.toUpperCase()}
             </motion.div>
           )}
+
+          {/* Default credentials hint */}
+          <div style={{
+            fontSize: 9,
+            color: 'rgba(0,255,65,0.2)',
+            fontFamily: "'JetBrains Mono', monospace",
+            textAlign: 'center',
+            borderTop: '1px solid rgba(0,255,65,0.08)',
+            paddingTop: 10,
+          }}>
+            Par défaut: admin / taradeau
+          </div>
         </motion.form>
 
         {/* Footer */}

@@ -2,13 +2,13 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="manifest" href="manifest.json" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#f0a030" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <link rel="apple-touch-icon" href="/icon-192.png" />
+    <link rel="apple-touch-icon" href="icon-192.png" />
     <title>S.A.G. — Système d'Analyse de Gerbe</title>
   </head>
   <body>
@@ -17,7 +17,10 @@
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js');
+          var base = document.querySelector('base')?.href || new URL('./', location.href).href;
+          navigator.serviceWorker.register(new URL('sw.js', base), { scope: base })
+            .then(function(r) { console.log('[SW] registered, scope:', r.scope); })
+            .catch(function(e) { console.warn('[SW] registration failed:', e); });
         });
       }
     </script>

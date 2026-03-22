@@ -1,16 +1,11 @@
 import { useRef, useState } from 'react';
-import { Sun, Moon, Scan, BookOpen, Crosshair, LogOut, LayoutGrid, Volume2, VolumeX } from 'lucide-react';
+import { Sun, Moon, Scan, BookOpen, Crosshair, LogOut, LayoutGrid, Volume2, VolumeX, Users } from 'lucide-react';
 import { isSoundEnabled, toggleSound } from '../../lib/sounds';
 import { useLocation } from 'react-router-dom';
 import { useThemeStore } from '../../stores/themeStore';
 import { useAnalysisStore } from '../../stores/analysisStore';
+import { useUserStore, canManageUsers } from '../../stores/userStore';
 import { useTransitionNavigate } from '../transitions/TransitionContext';
-
-const NAV_ITEMS = [
-  { path: '/dashboard', label: 'DASHBOARD', icon: LayoutGrid },
-  { path: '/analyse', label: 'ANALYSE', icon: Scan },
-  { path: '/bibliotheque', label: 'BIBLIOTHÈQUE', icon: BookOpen },
-];
 
 interface HeaderProps {
   onLogout?: () => void;
@@ -22,7 +17,17 @@ export function Header({ onLogout }: HeaderProps) {
   const { mode, animatedToggle } = useThemeStore();
   const hasAnalysis = useAnalysisStore((s) => s.impacts.length > 0);
   const impactCount = useAnalysisStore((s) => s.impacts.length);
+  const currentUser = useUserStore((s) => s.currentUser);
   const themeButtonRef = useRef<HTMLButtonElement>(null);
+
+  const isAdmin = currentUser && canManageUsers(currentUser.role);
+
+  const NAV_ITEMS = [
+    { path: '/dashboard', label: 'DASHBOARD', icon: LayoutGrid },
+    { path: '/analyse', label: 'ANALYSE', icon: Scan },
+    { path: '/bibliotheque', label: 'BIBLIOTHÈQUE', icon: BookOpen },
+    ...(isAdmin ? [{ path: '/utilisateurs', label: 'UTILISATEURS', icon: Users }] : []),
+  ];
 
   return (
     <header style={{
@@ -156,7 +161,53 @@ export function Header({ onLogout }: HeaderProps) {
           </button>
         )}
 
-        {/* Coordinates display */}
+        {/* Current user badge */}
+        {currentUser && (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '3px 8px',
+              border: `1px solid ${currentUser.avatar}30`,
+              background: `${currentUser.avatar}08`,
+              cursor: isAdmin ? 'pointer' : 'default',
+            }}
+            onClick={() => isAdmin && navigate('/utilisateurs')}
+            title={`${currentUser.displayName} (${currentUser.role})`}
+          >
+            <div style={{
+              width: 20,
+              height: 20,
+              borderRadius: '50%',
+              background: `${currentUser.avatar}20`,
+              border: `1.5px solid ${currentUser.avatar}50`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 8,
+              fontWeight: 800,
+              color: currentUser.avatar,
+              fontFamily: 'var(--font-mono)',
+            }}>
+              {currentUser.displayName.slice(0, 2).toUpperCase()}
+            </div>
+            <span style={{
+              fontSize: 10,
+              fontWeight: 700,
+              color: 'var(--text-secondary)',
+              fontFamily: 'var(--font-mono)',
+              maxWidth: 80,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}>
+              {currentUser.displayName}
+            </span>
+          </div>
+        )}
+
+        {/* System status */}
         <span style={{
           fontSize: 9,
           fontFamily: "'Courier New', monospace",
