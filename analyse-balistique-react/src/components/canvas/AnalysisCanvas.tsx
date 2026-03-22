@@ -1,8 +1,10 @@
-import { useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect, useCallback, useState } from 'react';
+import { Upload } from 'lucide-react';
 import { useAnalysisStore } from '../../stores/analysisStore';
 import { useThemeStore } from '../../stores/themeStore';
 import { render } from '../../lib/canvas-renderer';
 import { computeFullAnalysis } from '../../lib/ballistics';
+import { toast } from '../toast/Toast';
 import type { Point } from '../../types';
 
 const ERASER_RADIUS_PX = 20; // eraser radius in image pixels
@@ -14,6 +16,8 @@ export function AnalysisCanvas() {
   const isErasing = useRef(false);
   const isRightDragging = useRef(false);
   const lastMouse = useRef<Point>({ x: 0, y: 0 });
+  const [dragOver, setDragOver] = useState(false);
+  const dragCounter = useRef(0);
 
   const store = useAnalysisStore();
   // Subscribe to theme so canvas re-renders synchronously during view transition
@@ -174,6 +178,8 @@ export function AnalysisCanvas() {
 
   const handleDrop = useCallback((e: React.DragEvent<HTMLCanvasElement>) => {
     e.preventDefault();
+    dragCounter.current = 0;
+    setDragOver(false);
     const file = e.dataTransfer.files[0];
     if (!file || !file.type.startsWith('image/')) return;
     loadImageFile(file);
@@ -185,6 +191,7 @@ export function AnalysisCanvas() {
       const img = new Image();
       img.onload = () => {
         store.setImage(img);
+        toast('Image chargée', 'success');
       };
       img.src = ev.target?.result as string;
     };
@@ -193,6 +200,18 @@ export function AnalysisCanvas() {
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
+  }, []);
+
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    dragCounter.current++;
+    if (e.dataTransfer.types.includes('Files')) setDragOver(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    dragCounter.current--;
+    if (dragCounter.current <= 0) { dragCounter.current = 0; setDragOver(false); }
   }, []);
 
   // Instruction message
@@ -210,6 +229,8 @@ export function AnalysisCanvas() {
   return (
     <div
       ref={containerRef}
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
       style={{
         flex: 1,
         position: 'relative',
@@ -270,6 +291,43 @@ export function AnalysisCanvas() {
       }}>
         {Math.round(store.view.zoom * 100)}%
       </div>
+
+      {/* Drag & drop overlay */}
+      {dragOver && (
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'rgba(0, 0, 0, 0.7)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 12,
+          zIndex: 50,
+          border: '2px dashed var(--accent)',
+          pointerEvents: 'none',
+          animation: 'dropzone-fade-in 0.2s ease-out',
+        }}>
+          <Upload size={40} color="var(--accent)" style={{ opacity: 0.8 }} />
+          <span style={{
+            fontSize: 14,
+            fontWeight: 700,
+            color: 'var(--accent)',
+            fontFamily: 'var(--font-mono)',
+            letterSpacing: '1px',
+          }}>
+            DÉPOSER L'IMAGE ICI
+          </span>
+          <span style={{
+            fontSize: 11,
+            color: 'var(--muted)',
+            fontFamily: 'var(--font-mono)',
+          }}>
+            JPG, PNG, WebP...
+          </span>
+        </div>
+      )}
     </div>
   );
 }

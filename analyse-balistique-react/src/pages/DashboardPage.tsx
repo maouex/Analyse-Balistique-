@@ -109,7 +109,8 @@ export function DashboardPage() {
   }, [allVisible, reorderWidgets]);
 
   return (
-    <div style={{ height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column', padding: 10, gap: 10 }}>
+    <div style={{ height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column', padding: 10, gap: 10, position: 'relative' }}>
+      <div className="scanlines" />
       <BentoSpotlight gridRef={gridRef} spotlightRadius={400} glowColor="0, 255, 65" />
 
       <div
