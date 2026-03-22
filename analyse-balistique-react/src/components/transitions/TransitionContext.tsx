@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TvStatic } from './TvStatic';
+import { playNavigate } from '../../lib/sounds';
 
 interface TransitionContextValue {
   navigateWithTransition: (to: string) => void;
@@ -20,6 +21,7 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
   const [target, setTarget] = useState<string | null>(null);
 
   const navigateWithTransition = useCallback((to: string) => {
+    playNavigate();
     setTarget(to);
     setTransitioning(true);
   }, []);

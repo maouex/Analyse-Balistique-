@@ -4,6 +4,7 @@ import { useAnalysisStore } from '../../stores/analysisStore';
 import { renderExport } from '../../lib/canvas-renderer';
 import { computeFullAnalysis } from '../../lib/ballistics';
 import { generatePdfReport } from '../../lib/pdf-export';
+import { toast } from '../toast/Toast';
 import type { ExportOptions } from '../../types';
 
 interface ExportModalProps {
@@ -49,6 +50,7 @@ export function ExportModal({ onClose }: ExportModalProps) {
     link.download = 'analyse-balistique.png';
     link.href = canvas.toDataURL('image/png');
     link.click();
+    toast('Image PNG exportée', 'export');
     onClose();
   };
 
@@ -71,6 +73,7 @@ export function ExportModal({ onClose }: ExportModalProps) {
       impactStyle: store.impactStyle,
       pixelsPerCm: store.scale.pixelsPerCm,
     });
+    toast('Rapport PDF généré', 'export');
     onClose();
   };
 

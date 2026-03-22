@@ -3,6 +3,7 @@ import { X, Plus } from 'lucide-react';
 import { useMunitionsStore } from '../../stores/munitionsStore';
 import { useAnalysisStore } from '../../stores/analysisStore';
 import { computeFullAnalysis, distancePx, pxToCm } from '../../lib/ballistics';
+import { toast } from '../toast/Toast';
 import type { Munition, AnalysisSnapshot } from '../../types';
 
 interface MunitionFormProps {
@@ -79,8 +80,10 @@ export function MunitionForm({ onClose, editId }: MunitionFormProps) {
 
     if (editId) {
       updateMunition(editId, data);
+      toast('Munition mise à jour', 'success');
     } else {
       addMunition(data);
+      toast('Munition sauvegardée', 'success');
     }
     onClose();
   };

@@ -1,8 +1,10 @@
 import { useMemo } from 'react';
-import { Download, Save, Box, Target, Ruler, Activity, Layers, Pin, BarChart3 } from 'lucide-react';
+import { Download, Save, Box, Target, Ruler, Activity, Layers, Pin, BarChart3, FileText } from 'lucide-react';
 import { useTransitionNavigate } from '../transitions/TransitionContext';
 import { useAnalysisStore } from '../../stores/analysisStore';
 import { computeFullAnalysis, distancePx, pxToCm, classifyZone } from '../../lib/ballistics';
+import { generatePdfReport } from '../../lib/pdf-export';
+import { toast } from '../toast/Toast';
 import { ScoreGauge } from './ScoreGauge';
 import type { AnalysisStats } from '../../types';
 
@@ -19,7 +21,7 @@ interface StatsPanelProps {
 
 export function StatsPanel({ onExport, onSaveMunition, collapsed, pinned, canCollapse, onPin, onExpand, onCollapse }: StatsPanelProps) {
   const navigate = useTransitionNavigate();
-  const { impacts, center, circle1, circle2, scale } = useAnalysisStore();
+  const { impacts, center, circle1, circle2, scale, impactStyle } = useAnalysisStore();
 
   const stats: AnalysisStats | null = useMemo(() =>
     computeFullAnalysis(impacts, center, circle1.diameterCm, circle2.diameterCm, scale.pixelsPerCm),
@@ -243,6 +245,25 @@ export function StatsPanel({ onExport, onSaveMunition, collapsed, pinned, canCol
           </button>
           <button className="btn btn-sm btn-primary" onClick={onExport} style={{ flex: 1, justifyContent: 'center' }}>
             <Download size={11} /> PNG
+          </button>
+          <button
+            className="btn btn-sm btn-primary"
+            onClick={() => {
+              if (!center || !scale.pixelsPerCm || !stats) return;
+              generatePdfReport({
+                stats,
+                impacts,
+                center,
+                circle1,
+                circle2,
+                impactStyle,
+                pixelsPerCm: scale.pixelsPerCm,
+              });
+              toast('Rapport PDF généré', 'export');
+            }}
+            style={{ flex: 1, justifyContent: 'center', background: 'var(--blue-glow)', borderColor: 'rgba(68,170,255,0.3)', color: 'var(--blue)' }}
+          >
+            <FileText size={11} /> PDF
           </button>
         </div>
       </div>
