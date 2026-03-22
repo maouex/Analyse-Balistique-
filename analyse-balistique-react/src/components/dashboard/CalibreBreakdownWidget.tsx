@@ -31,8 +31,8 @@ export function CalibreBreakdownWidget({ size = 'M' }: { size?: WidgetSize }) {
 
   if (size === 'S') {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        <DonutChart segments={calibres.map((c) => ({ value: c.count, color: c.color, label: c.calibre }))} size={90} strokeWidth={12} centerValue={String(store.munitions.length)} centerLabel="total" />
+      <div className="widget-chart-container">
+        <DonutChart segments={calibres.map((c) => ({ value: c.count, color: c.color, label: c.calibre }))} size={75} strokeWidth={10} centerValue={String(store.munitions.length)} centerLabel="total" />
       </div>
     );
   }
@@ -42,8 +42,8 @@ export function CalibreBreakdownWidget({ size = 'M' }: { size?: WidgetSize }) {
       label: c.calibre, value: Math.round(c.avgScore!), color: c.color, subLabel: `${c.count} mun.`,
     }));
     return (
-      <div style={{ display: 'flex', alignItems: 'center', gap: 20, justifyContent: 'center' }}>
-        <DonutChart segments={calibres.map((c) => ({ value: c.count, color: c.color, label: c.calibre }))} size={120} strokeWidth={14} centerValue={String(store.munitions.length)} centerLabel="total" />
+      <div className="widget-content-flex">
+        <DonutChart segments={calibres.map((c) => ({ value: c.count, color: c.color, label: c.calibre }))} size={90} strokeWidth={12} centerValue={String(store.munitions.length)} centerLabel="total" />
         {barItems.length > 0 && (
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-secondary)', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'var(--font-mono)', marginBottom: 6 }}>Score par calibre</div>
@@ -56,8 +56,8 @@ export function CalibreBreakdownWidget({ size = 'M' }: { size?: WidgetSize }) {
 
   // M
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'center' }}>
-      <DonutChart segments={calibres.map((c) => ({ value: c.count, color: c.color, label: c.calibre }))} size={100} strokeWidth={12} centerValue={String(store.munitions.length)} centerLabel="total" />
+    <div className="widget-content-flex">
+      <DonutChart segments={calibres.map((c) => ({ value: c.count, color: c.color, label: c.calibre }))} size={80} strokeWidth={10} centerValue={String(store.munitions.length)} centerLabel="total" />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
         {calibres.slice(0, 4).map((c) => (
           <div key={c.calibre} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { AnimNum } from '../../hooks/useAnimatedNumber';
 import { useMunitionsStore } from '../../stores/munitionsStore';
@@ -9,6 +9,20 @@ export function ScoreEvolutionWidget({ size = 'M' }: { size?: WidgetSize }) {
   const store = useMunitionsStore();
   const load = store.load;
   useEffect(() => { load(); }, [load]);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState(280);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver((entries) => {
+      const w = entries[0]?.contentRect.width;
+      if (w && w > 0) setContainerWidth(w);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   const withSnap = [...store.munitions].filter((m) => m.snap)
     .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
@@ -35,22 +49,22 @@ export function ScoreEvolutionWidget({ size = 'M' }: { size?: WidgetSize }) {
     );
   }
 
-  const sparkW = size === 'L' ? 480 : 300;
+  const sparkW = Math.max(120, containerWidth - 8);
   const r90s = size === 'L' ? withSnap.map((m) => m.snap?.r90 ?? 0) : null;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, justifyContent: 'center' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <div style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: trend > 2 ? 'var(--green-glow)' : trend < -2 ? 'var(--red-glow)' : 'var(--surface2)', border: `1px solid ${trend > 2 ? 'rgba(0,255,65,0.2)' : trend < -2 ? 'rgba(255,68,68,0.2)' : 'var(--border)'}` }}>
-          {trend > 2 ? <TrendingUp size={13} color="var(--green)" /> : trend < -2 ? <TrendingDown size={13} color="var(--red)" /> : <Minus size={13} color="var(--muted)" />}
+    <div ref={containerRef} style={{ display: 'flex', flexDirection: 'column', gap: 6, justifyContent: 'center', width: '100%', minWidth: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+        <div style={{ width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: trend > 2 ? 'var(--green-glow)' : trend < -2 ? 'var(--red-glow)' : 'var(--surface2)', border: `1px solid ${trend > 2 ? 'rgba(0,255,65,0.2)' : trend < -2 ? 'rgba(255,68,68,0.2)' : 'var(--border)'}` }}>
+          {trend > 2 ? <TrendingUp size={12} color="var(--green)" /> : trend < -2 ? <TrendingDown size={12} color="var(--red)" /> : <Minus size={12} color="var(--muted)" />}
         </div>
-        <span style={{ fontSize: 12, fontWeight: 700, fontFamily: 'var(--font-mono)' }}>{trend > 2 ? 'Progression' : trend < -2 ? 'Baisse' : 'Stable'} ({trend > 0 ? '+' : ''}{trend.toFixed(1)}pts)</span>
+        <span style={{ fontSize: 11, fontWeight: 700, fontFamily: 'var(--font-mono)', whiteSpace: 'nowrap' }}>{trend > 2 ? 'Progression' : trend < -2 ? 'Baisse' : 'Stable'} ({trend > 0 ? '+' : ''}{trend.toFixed(1)}pts)</span>
       </div>
-      <Sparkline data={scores} width={sparkW} height={60} color="var(--accent2)" labels={labels.length <= 8 ? labels : undefined} />
+      <Sparkline data={scores} width={sparkW} height={55} color="var(--accent2)" labels={labels.length <= 8 ? labels : undefined} />
       {r90s && r90s.some((r) => r > 0) && (
         <div>
           <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.5px', marginBottom: 4 }}>R90 (cm)</div>
-          <Sparkline data={r90s} width={sparkW} height={50} color="var(--blue)" showDots={false} />
+          <Sparkline data={r90s} width={sparkW} height={45} color="var(--blue)" showDots={false} />
         </div>
       )}
     </div>

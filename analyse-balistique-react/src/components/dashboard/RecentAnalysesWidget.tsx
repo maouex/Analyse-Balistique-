@@ -34,7 +34,7 @@ export function RecentAnalysesWidget({ size = 'M' }: { size?: WidgetSize }) {
     const m = recents[0];
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
-        <div style={{ fontSize: 20, fontWeight: 800, color: (m.snap?.score ?? 0) >= 60 ? 'var(--green)' : 'var(--amber)', fontFamily: 'var(--font-mono)' }}>{m.snap?.score != null ? <AnimNum value={m.snap.score} /> : '—'}</div>
+        <div style={{ fontSize: 16, fontWeight: 800, color: (m.snap?.score ?? 0) >= 60 ? 'var(--green)' : 'var(--amber)', fontFamily: 'var(--font-mono)' }}>{m.snap?.score != null ? <AnimNum value={m.snap.score} /> : '—'}</div>
         <div style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'var(--font-mono)', textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }}>{m.nom || 'Sans nom'}</div>
       </div>
     );

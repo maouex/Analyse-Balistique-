@@ -28,21 +28,21 @@ export function WelcomeWidget({ size = 'M' }: { size?: WidgetSize }) {
   if (size === 'L') {
     const now = new Date();
     return (
-      <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <Crosshair size={28} color="var(--accent2)" style={{ flexShrink: 0 }} />
-          <div>
-            <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--accent2)', textShadow: '0 0 15px var(--accent-glow)' }}>{greeting}, Opérateur</div>
-            <div style={{ fontSize: 12, color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, flex: '1 1 auto' }}>
+          <Crosshair size={24} color="var(--accent2)" style={{ flexShrink: 0 }} />
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--accent2)', textShadow: '0 0 15px var(--accent-glow)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{greeting}, Opérateur</div>
+            <div style={{ fontSize: 10, color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               S.A.G. v2.0 — {now.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
             </div>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: 8, flex: 1 }}>
-          <QS icon={<Database size={14} />} label="Munitions" value={String(total)} color="var(--blue)" />
-          <QS icon={<Crosshair size={14} />} label="Analyses" value={String(analyses)} color="var(--accent2)" />
-          <QS icon={<Activity size={14} />} label="Score" value={total > 0 ? avgScore.toFixed(0) : '—'} color="var(--amber)" />
-          <QS icon={<Shield size={14} />} label="Statut" value="OK" color="var(--accent2)" />
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', flex: '1 1 auto' }}>
+          <QS icon={<Database size={12} />} label="Mun." value={String(total)} color="var(--blue)" />
+          <QS icon={<Crosshair size={12} />} label="Anal." value={String(analyses)} color="var(--accent2)" />
+          <QS icon={<Activity size={12} />} label="Score" value={total > 0 ? avgScore.toFixed(0) : '—'} color="var(--amber)" />
+          <QS icon={<Shield size={12} />} label="Statut" value="OK" color="var(--accent2)" />
         </div>
       </div>
     );
