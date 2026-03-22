@@ -1,4 +1,3 @@
-import { useRef } from 'react';
 import { GripVertical, X } from 'lucide-react';
 import type { WidgetId } from '../../stores/dashboardStore';
 
@@ -12,13 +11,11 @@ interface WidgetShellProps {
   onRemove?: () => void;
   isDragging?: boolean;
   isDragOver?: boolean;
-  dragHandlers?: {
-    onDragStart: (e: React.DragEvent<HTMLDivElement>) => void;
-    onDragEnd: (e: React.DragEvent<HTMLDivElement>) => void;
-    onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
-    onDragLeave: (e: React.DragEvent<HTMLDivElement>) => void;
-    onDrop: (e: React.DragEvent<HTMLDivElement>) => void;
-  };
+  onHeaderDragStart?: (e: React.DragEvent<HTMLDivElement>) => void;
+  onHeaderDragEnd?: (e: React.DragEvent<HTMLDivElement>) => void;
+  onContainerDragOver?: (e: React.DragEvent<HTMLDivElement>) => void;
+  onContainerDragLeave?: (e: React.DragEvent<HTMLDivElement>) => void;
+  onContainerDrop?: (e: React.DragEvent<HTMLDivElement>) => void;
 }
 
 export function WidgetShell({
@@ -31,27 +28,18 @@ export function WidgetShell({
   onRemove,
   isDragging,
   isDragOver,
-  dragHandlers,
+  onHeaderDragStart,
+  onHeaderDragEnd,
+  onContainerDragOver,
+  onContainerDragLeave,
+  onContainerDrop,
 }: WidgetShellProps) {
-  const headerRef = useRef<HTMLDivElement>(null);
-
   return (
     <div
       data-widget-id={id}
-      draggable
-      onDragStart={(e) => {
-        // Only allow drag when starting from the header (grip area)
-        const header = headerRef.current;
-        if (header && !header.contains(e.target as Node)) {
-          e.preventDefault();
-          return;
-        }
-        dragHandlers?.onDragStart(e);
-      }}
-      onDragEnd={dragHandlers?.onDragEnd}
-      onDragOver={dragHandlers?.onDragOver}
-      onDragLeave={dragHandlers?.onDragLeave}
-      onDrop={dragHandlers?.onDrop}
+      onDragOver={onContainerDragOver}
+      onDragLeave={onContainerDragLeave}
+      onDrop={onContainerDrop}
       style={{
         background: 'var(--surface)',
         border: isDragOver
@@ -62,9 +50,9 @@ export function WidgetShell({
         flexDirection: 'column',
         overflow: 'hidden',
         minHeight: 0,
-        opacity: isDragging ? 0.35 : 1,
-        boxShadow: isDragOver ? '0 0 20px var(--accent-glow-strong), inset 0 0 20px var(--accent-glow)' : undefined,
-        transition: 'border-color 0.15s, box-shadow 0.15s, opacity 0.15s',
+        opacity: isDragging ? 0.3 : 1,
+        boxShadow: isDragOver ? '0 0 24px var(--accent-glow-strong), inset 0 0 24px var(--accent-glow)' : undefined,
+        transition: 'border-color 0.15s, box-shadow 0.15s, opacity 0.2s',
       }}
     >
       {/* Top glow line */}
@@ -78,9 +66,18 @@ export function WidgetShell({
         pointerEvents: 'none',
       }} />
 
-      {/* Header - drag handle zone */}
+      {/* Header - this is the draggable handle */}
       <div
-        ref={headerRef}
+        draggable
+        onDragStart={(e) => {
+          // Set drag image to the whole widget
+          const widget = e.currentTarget.parentElement;
+          if (widget) {
+            e.dataTransfer.setDragImage(widget, 50, 20);
+          }
+          onHeaderDragStart?.(e);
+        }}
+        onDragEnd={onHeaderDragEnd}
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -109,9 +106,10 @@ export function WidgetShell({
           {title}
         </span>
 
-        {/* Remove button */}
+        {/* Remove button - stop drag propagation */}
         {onRemove && (
           <button
+            draggable={false}
             onClick={(e) => { e.stopPropagation(); onRemove(); }}
             onMouseDown={(e) => e.stopPropagation()}
             style={removeBtnStyle}
@@ -122,7 +120,7 @@ export function WidgetShell({
         )}
       </div>
 
-      {/* Content - scrollable */}
+      {/* Content - scrollable, not draggable */}
       <div style={{ flex: 1, padding: 12, overflowY: 'auto', minHeight: 0 }}>
         {children}
       </div>
