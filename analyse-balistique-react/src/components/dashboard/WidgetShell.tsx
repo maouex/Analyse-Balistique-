@@ -1,12 +1,11 @@
 import { motion } from 'framer-motion';
-import { GripVertical, ChevronUp, ChevronDown, X } from 'lucide-react';
+import { ChevronUp, ChevronDown, X } from 'lucide-react';
 import type { WidgetId } from '../../stores/dashboardStore';
 
 interface WidgetShellProps {
   id: WidgetId;
   title: string;
   icon: React.ReactNode;
-  size?: 'small' | 'medium' | 'large' | 'full';
   accentColor?: string;
   accentGlow?: string;
   children: React.ReactNode;
@@ -17,17 +16,9 @@ interface WidgetShellProps {
   isLast?: boolean;
 }
 
-const sizeMap = {
-  small: '1',
-  medium: '1',
-  large: '1 / span 2',
-  full: '1 / -1',
-};
-
 export function WidgetShell({
   title,
   icon,
-  size = 'medium',
   accentColor = 'var(--accent2)',
   accentGlow = 'var(--accent-glow)',
   children,
@@ -45,13 +36,13 @@ export function WidgetShell({
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.3 }}
       style={{
-        gridColumn: sizeMap[size],
         background: 'var(--surface)',
         border: '1px solid var(--border)',
         position: 'relative',
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
+        minHeight: 0,
       }}
     >
       {/* Top glow line */}
@@ -70,9 +61,10 @@ export function WidgetShell({
         display: 'flex',
         alignItems: 'center',
         gap: 8,
-        padding: '10px 14px',
+        padding: '8px 12px',
         borderBottom: '1px solid var(--border)',
         background: accentGlow,
+        flexShrink: 0,
       }}>
         <div style={{ color: accentColor, display: 'flex', alignItems: 'center' }}>
           {icon}
@@ -90,7 +82,7 @@ export function WidgetShell({
         </span>
 
         {/* Controls */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           {onMoveUp && !isFirst && (
             <button onClick={onMoveUp} style={controlBtnStyle} title="Monter">
               <ChevronUp size={11} />
@@ -101,7 +93,6 @@ export function WidgetShell({
               <ChevronDown size={11} />
             </button>
           )}
-          <GripVertical size={11} color="var(--muted)" style={{ opacity: 0.4, marginLeft: 2 }} />
           {onRemove && (
             <button onClick={onRemove} style={{ ...controlBtnStyle, color: 'var(--red)' }} title="Retirer">
               <X size={11} />
@@ -110,8 +101,8 @@ export function WidgetShell({
         </div>
       </div>
 
-      {/* Content */}
-      <div style={{ flex: 1, padding: 14 }}>
+      {/* Content - scrollable */}
+      <div style={{ flex: 1, padding: 12, overflowY: 'auto', minHeight: 0 }}>
         {children}
       </div>
     </motion.div>
@@ -119,8 +110,8 @@ export function WidgetShell({
 }
 
 const controlBtnStyle: React.CSSProperties = {
-  width: 22,
-  height: 22,
+  width: 20,
+  height: 20,
   border: 'none',
   background: 'transparent',
   cursor: 'pointer',
