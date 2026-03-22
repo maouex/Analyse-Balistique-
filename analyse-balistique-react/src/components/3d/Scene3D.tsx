@@ -1,6 +1,9 @@
 import { Suspense, useState, useMemo, useRef, useCallback } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
+import { EffectComposer, Bloom, ChromaticAberration, Vignette, ToneMapping } from '@react-three/postprocessing';
+import { BlendFunction, ToneMappingMode } from 'postprocessing';
+import * as THREE from 'three';
 import { useAnalysisStore } from '../../stores/analysisStore';
 import { computeFullAnalysis } from '../../lib/ballistics';
 import { impactsTo3D, getDistanceMeters, VIEW_3D_MODES } from '../../lib/3d-utils';
@@ -385,6 +388,28 @@ export function Scene3D({
               />
             )}
           </Suspense>
+
+          {/* Post-processing effects */}
+          <EffectComposer multisampling={4}>
+            <Bloom
+              intensity={isSimMode ? 0.3 : 0.8}
+              luminanceThreshold={0.6}
+              luminanceSmoothing={0.9}
+              mipmapBlur
+            />
+            <ChromaticAberration
+              blendFunction={BlendFunction.NORMAL}
+              offset={new THREE.Vector2(0.0006, 0.0006)}
+              radialModulation={false}
+              modulationOffset={0.5}
+            />
+            <Vignette
+              darkness={0.5}
+              offset={0.3}
+              blendFunction={BlendFunction.NORMAL}
+            />
+            <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
+          </EffectComposer>
         </Canvas>
 
         {/* Color menu overlay (only in simulation mode) */}
