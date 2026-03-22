@@ -26,7 +26,7 @@ export function CalibreBreakdownWidget({ size = 'M' }: { size?: WidgetSize }) {
     })).sort((a, b) => b.count - a.count);
 
   if (calibres.length === 0) {
-    return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, color: 'var(--muted)', fontSize: 10, fontFamily: 'var(--font-mono)' }}>Aucune donnée</div>;
+    return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)', fontSize: 10, fontFamily: 'var(--font-mono)' }}>Aucune donnée</div>;
   }
 
   if (size === 'S') {
@@ -42,10 +42,10 @@ export function CalibreBreakdownWidget({ size = 'M' }: { size?: WidgetSize }) {
       label: c.calibre, value: Math.round(c.avgScore!), color: c.color, subLabel: `${c.count} mun.`,
     }));
     return (
-      <div style={{ display: 'flex', alignItems: 'center', gap: 14, flex: 1, justifyContent: 'center' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14, justifyContent: 'center' }}>
         <DonutChart segments={calibres.map((c) => ({ value: c.count, color: c.color, label: c.calibre }))} size={85} strokeWidth={12} centerValue={String(store.munitions.length)} centerLabel="total" />
         {barItems.length > 0 && (
-          <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ minWidth: 0 }}>
             <div style={{ fontSize: 7, fontWeight: 700, color: 'var(--text-secondary)', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'var(--font-mono)', marginBottom: 4 }}>Score par calibre</div>
             <HBarChart items={barItems} maxValue={100} />
           </div>
@@ -56,13 +56,13 @@ export function CalibreBreakdownWidget({ size = 'M' }: { size?: WidgetSize }) {
 
   // M
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, justifyContent: 'center' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}>
       <DonutChart segments={calibres.map((c) => ({ value: c.count, color: c.color, label: c.calibre }))} size={70} strokeWidth={10} centerValue={String(store.munitions.length)} centerLabel="total" />
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flex: 1, minWidth: 0 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
         {calibres.slice(0, 4).map((c) => (
           <div key={c.calibre} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
             <div style={{ width: 5, height: 5, background: c.color, flexShrink: 0 }} />
-            <span style={{ fontSize: 8, fontWeight: 700, fontFamily: 'var(--font-mono)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.calibre}</span>
+            <span style={{ fontSize: 8, fontWeight: 700, fontFamily: 'var(--font-mono)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.calibre}</span>
             <span style={{ fontSize: 8, fontWeight: 700, color: c.color, fontFamily: 'var(--font-mono)', flexShrink: 0 }}>{c.count}</span>
           </div>
         ))}

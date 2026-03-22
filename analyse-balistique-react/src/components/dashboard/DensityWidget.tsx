@@ -10,7 +10,7 @@ export function DensityWidget({ size = 'M' }: { size?: WidgetSize }) {
 
   const withSnap = store.munitions.filter((m) => m.snap);
   if (withSnap.length === 0) {
-    return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, color: 'var(--muted)', fontSize: 9, fontFamily: 'var(--font-mono)' }}>Pas de données</div>;
+    return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)', fontSize: 9, fontFamily: 'var(--font-mono)' }}>Pas de données</div>;
   }
 
   const totalImpacts = withSnap.reduce((a, m) => a + (m.snap?.nbImpacts ?? 0), 0);

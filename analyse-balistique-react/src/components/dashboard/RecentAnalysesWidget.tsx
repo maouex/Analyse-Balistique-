@@ -22,7 +22,7 @@ export function RecentAnalysesWidget({ size = 'M' }: { size?: WidgetSize }) {
 
   if (recents.length === 0) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, flex: 1, color: 'var(--muted)' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, color: 'var(--muted)' }}>
         <Crosshair size={18} color="var(--border-light)" />
         <span style={{ fontSize: 9, fontFamily: 'var(--font-mono)' }}>Aucune analyse</span>
       </div>
@@ -32,7 +32,7 @@ export function RecentAnalysesWidget({ size = 'M' }: { size?: WidgetSize }) {
   if (size === 'S') {
     const m = recents[0];
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, gap: 4 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
         <div style={{ fontSize: 16, fontWeight: 800, color: (m.snap?.score ?? 0) >= 60 ? 'var(--green)' : 'var(--amber)', fontFamily: 'var(--font-mono)' }}>{m.snap?.score ?? '—'}</div>
         <div style={{ fontSize: 8, color: 'var(--muted)', fontFamily: 'var(--font-mono)', textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }}>{m.nom || 'Sans nom'}</div>
       </div>
@@ -40,7 +40,7 @@ export function RecentAnalysesWidget({ size = 'M' }: { size?: WidgetSize }) {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 3, flex: 1, justifyContent: 'center' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 3, justifyContent: 'center' }}>
       {recents.map((m) => (
         <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 6px', background: 'var(--surface2)', border: '1px solid var(--border)' }}>
           <div style={{
@@ -50,7 +50,7 @@ export function RecentAnalysesWidget({ size = 'M' }: { size?: WidgetSize }) {
           }}>
             <span style={{ fontSize: 10, fontWeight: 800, color: (m.snap?.score ?? 0) >= 60 ? 'var(--green)' : 'var(--amber)', fontFamily: 'var(--font-mono)' }}>{m.snap?.score ?? '—'}</span>
           </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ minWidth: 0 }}>
             <div style={{ fontSize: 9, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.nom || 'Sans nom'}</div>
             <div style={{ fontSize: 7, color: 'var(--muted)', fontFamily: 'var(--font-mono)' }}>{m.calibre} — {m.snap?.nbImpacts ?? 0} imp.</div>
           </div>

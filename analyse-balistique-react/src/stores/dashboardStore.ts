@@ -26,8 +26,6 @@ export interface WidgetConfig {
 // Cells per size in a 6-column grid
 export const SIZE_CELLS: Record<WidgetSize, number> = { S: 1, M: 2, L: 3 };
 export const GRID_COLS = 6;
-export const GRID_ROWS = 2;
-export const MAX_CELLS = GRID_COLS * GRID_ROWS; // 12
 
 export const WIDGET_CATALOG: WidgetConfig[] = [
   { id: 'welcome', label: 'Accueil', description: 'Message de bienvenue et statut système', availableSizes: ['S', 'M', 'L'], defaultSize: 'M' },
@@ -72,13 +70,6 @@ function loadWidgetSizes(): Record<string, WidgetSize> {
   return {};
 }
 
-function calcUsedCells(visible: WidgetId[], sizes: Record<string, WidgetSize>): number {
-  return visible.reduce((acc, id) => {
-    const config = WIDGET_CATALOG.find((w) => w.id === id);
-    const size = sizes[id] ?? config?.defaultSize ?? 'M';
-    return acc + SIZE_CELLS[size];
-  }, 0);
-}
 
 interface DashboardState {
   visibleWidgets: WidgetId[];
@@ -87,10 +78,6 @@ interface DashboardState {
   showCatalog: boolean;
 
   getWidgetSize: (id: WidgetId) => WidgetSize;
-  usedCells: () => number;
-  remainingCells: () => number;
-  isGridFull: () => boolean;
-  canAddSize: (size: WidgetSize) => boolean;
 
   addWidget: (id: WidgetId, size: WidgetSize) => void;
   removeWidget: (id: WidgetId) => void;
@@ -111,21 +98,9 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
     return widgetSizes[id] ?? config?.defaultSize ?? 'M';
   },
 
-  usedCells: () => {
-    const { visibleWidgets, widgetSizes } = get();
-    return calcUsedCells(visibleWidgets, widgetSizes);
-  },
-
-  remainingCells: () => MAX_CELLS - get().usedCells(),
-
-  isGridFull: () => get().remainingCells() <= 0,
-
-  canAddSize: (size) => SIZE_CELLS[size] <= get().remainingCells(),
-
   addWidget: (id, size) => {
     const { visibleWidgets, widgetSizes } = get();
     if (visibleWidgets.includes(id)) return;
-    if (!get().canAddSize(size)) return;
     const nextVisible = [...visibleWidgets, id];
     const nextSizes = { ...widgetSizes, [id]: size };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(nextVisible));
@@ -142,12 +117,8 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
 
   setWidgetSize: (id, size) => {
     const { widgetSizes, visibleWidgets } = get();
-    const oldSize = get().getWidgetSize(id);
-    const diff = SIZE_CELLS[size] - SIZE_CELLS[oldSize];
-    if (diff > 0 && diff > get().remainingCells()) return; // Not enough room
     const next = { ...widgetSizes, [id]: size };
     localStorage.setItem(SIZES_KEY, JSON.stringify(next));
-    // Also persist visible in case defaults changed
     localStorage.setItem(STORAGE_KEY, JSON.stringify(visibleWidgets));
     set({ widgetSizes: next });
   },
