@@ -1,5 +1,7 @@
 import { GripVertical, X } from 'lucide-react';
 import type { WidgetId } from '../../stores/dashboardStore';
+import { useBentoEffects } from './useBentoEffects';
+import './MagicBento.css';
 
 interface WidgetShellProps {
   id: WidgetId;
@@ -7,6 +9,7 @@ interface WidgetShellProps {
   icon: React.ReactNode;
   accentColor?: string;
   accentGlow?: string;
+  glowColor?: string;
   children: React.ReactNode;
   onRemove?: () => void;
   isDragging?: boolean;
@@ -24,6 +27,7 @@ export function WidgetShell({
   icon,
   accentColor = 'var(--accent2)',
   accentGlow = 'var(--accent-glow)',
+  glowColor = '0, 255, 65',
   children,
   onRemove,
   isDragging,
@@ -34,13 +38,18 @@ export function WidgetShell({
   onContainerDragLeave,
   onContainerDrop,
 }: WidgetShellProps) {
+  const particleRef = useBentoEffects({ glowColor, particleCount: 12, clickEffect: true });
+
   return (
     <div
+      ref={particleRef}
       data-widget-id={id}
+      className="widget-bento--border-glow widget-bento-particles"
       onDragOver={onContainerDragOver}
       onDragLeave={onContainerDragLeave}
       onDrop={onContainerDrop}
       style={{
+        '--glow-color': glowColor,
         background: 'var(--surface)',
         border: isDragOver
           ? '2px solid var(--accent2)'
@@ -53,7 +62,7 @@ export function WidgetShell({
         opacity: isDragging ? 0.3 : 1,
         boxShadow: isDragOver ? '0 0 24px var(--accent-glow-strong), inset 0 0 24px var(--accent-glow)' : undefined,
         transition: 'border-color 0.15s, box-shadow 0.15s, opacity 0.2s',
-      }}
+      } as React.CSSProperties}
     >
       {/* Top glow line */}
       <div style={{
@@ -64,13 +73,13 @@ export function WidgetShell({
         height: 1,
         background: `linear-gradient(90deg, transparent, ${accentColor}40, transparent)`,
         pointerEvents: 'none',
+        zIndex: 11,
       }} />
 
       {/* Header - this is the draggable handle */}
       <div
         draggable
         onDragStart={(e) => {
-          // Set drag image to the whole widget
           const widget = e.currentTarget.parentElement;
           if (widget) {
             e.dataTransfer.setDragImage(widget, 50, 20);
@@ -88,6 +97,8 @@ export function WidgetShell({
           flexShrink: 0,
           cursor: 'grab',
           userSelect: 'none',
+          position: 'relative',
+          zIndex: 11,
         }}
       >
         <GripVertical size={12} color="var(--muted)" style={{ opacity: 0.5, flexShrink: 0 }} />
@@ -106,7 +117,7 @@ export function WidgetShell({
           {title}
         </span>
 
-        {/* Remove button - stop drag propagation */}
+        {/* Remove button */}
         {onRemove && (
           <button
             draggable={false}
@@ -120,8 +131,8 @@ export function WidgetShell({
         )}
       </div>
 
-      {/* Content - scrollable, not draggable */}
-      <div style={{ flex: 1, padding: 12, overflowY: 'auto', minHeight: 0 }}>
+      {/* Content */}
+      <div style={{ flex: 1, padding: 12, overflowY: 'auto', minHeight: 0, position: 'relative', zIndex: 1 }}>
         {children}
       </div>
     </div>

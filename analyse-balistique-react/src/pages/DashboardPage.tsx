@@ -1,10 +1,11 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { Plus, Crosshair, Activity, BookOpen, Trophy, BarChart3, Zap, Clock } from 'lucide-react';
 import { useDashboardStore, WIDGET_CATALOG } from '../stores/dashboardStore';
 import type { WidgetId } from '../stores/dashboardStore';
 import { WidgetShell } from '../components/dashboard/WidgetShell';
 import { WidgetCatalog } from '../components/dashboard/WidgetCatalog';
+import { BentoSpotlight } from '../components/dashboard/BentoSpotlight';
 import { WelcomeWidget } from '../components/dashboard/WelcomeWidget';
 import { QuickActionsWidget } from '../components/dashboard/QuickActionsWidget';
 import { RecentAnalysesWidget } from '../components/dashboard/RecentAnalysesWidget';
@@ -23,14 +24,14 @@ const widgetIcons: Record<WidgetId, React.ReactNode> = {
   'activity': <Clock size={13} />,
 };
 
-const widgetColors: Record<WidgetId, { color: string; glow: string }> = {
-  'welcome': { color: 'var(--accent2)', glow: 'var(--accent-glow)' },
-  'quick-actions': { color: 'var(--amber)', glow: 'var(--amber-glow)' },
-  'recent-analyses': { color: 'var(--blue)', glow: 'var(--blue-glow)' },
-  'stats-overview': { color: 'var(--accent2)', glow: 'var(--accent-glow)' },
-  'calibre-breakdown': { color: 'var(--purple)', glow: 'var(--purple-glow)' },
-  'top-scores': { color: 'var(--amber)', glow: 'var(--amber-glow)' },
-  'activity': { color: 'var(--blue)', glow: 'var(--blue-glow)' },
+const widgetColors: Record<WidgetId, { color: string; glow: string; glowRgb: string }> = {
+  'welcome': { color: 'var(--accent2)', glow: 'var(--accent-glow)', glowRgb: '0, 255, 65' },
+  'quick-actions': { color: 'var(--amber)', glow: 'var(--amber-glow)', glowRgb: '255, 170, 0' },
+  'recent-analyses': { color: 'var(--blue)', glow: 'var(--blue-glow)', glowRgb: '68, 170, 255' },
+  'stats-overview': { color: 'var(--accent2)', glow: 'var(--accent-glow)', glowRgb: '0, 255, 65' },
+  'calibre-breakdown': { color: 'var(--purple)', glow: 'var(--purple-glow)', glowRgb: '170, 102, 255' },
+  'top-scores': { color: 'var(--amber)', glow: 'var(--amber-glow)', glowRgb: '255, 170, 0' },
+  'activity': { color: 'var(--blue)', glow: 'var(--blue-glow)', glowRgb: '68, 170, 255' },
 };
 
 const widgetComponents: Record<WidgetId, React.ComponentType> = {
@@ -45,6 +46,7 @@ const widgetComponents: Record<WidgetId, React.ComponentType> = {
 
 export function DashboardPage() {
   const { visibleWidgets, widgetOrder, showCatalog, setShowCatalog, toggleWidget, reorderWidgets } = useDashboardStore();
+  const gridRef = useRef<HTMLDivElement>(null);
 
   const [draggedId, setDraggedId] = useState<WidgetId | null>(null);
   const [dragOverId, setDragOverId] = useState<WidgetId | null>(null);
@@ -122,15 +124,22 @@ export function DashboardPage() {
       padding: 12,
       gap: 12,
     }}>
+      {/* Global spotlight effect */}
+      <BentoSpotlight gridRef={gridRef} spotlightRadius={400} glowColor="0, 255, 65" />
+
       {/* Widget Grid */}
-      <div style={{
-        flex: 1,
-        display: 'grid',
-        gridTemplateColumns: 'repeat(3, 1fr)',
-        gridAutoRows: '1fr',
-        gap: 10,
-        minHeight: 0,
-      }}>
+      <div
+        ref={gridRef}
+        className="bento-grid-section"
+        style={{
+          flex: 1,
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gridAutoRows: '1fr',
+          gap: 10,
+          minHeight: 0,
+        }}
+      >
         {allVisible.map((widgetId) => {
           const config = WIDGET_CATALOG.find((w) => w.id === widgetId);
           if (!config) return null;
@@ -145,6 +154,7 @@ export function DashboardPage() {
               icon={widgetIcons[widgetId]}
               accentColor={colors.color}
               accentGlow={colors.glow}
+              glowColor={colors.glowRgb}
               onRemove={() => toggleWidget(widgetId)}
               isDragging={draggedId === widgetId}
               isDragOver={dragOverId === widgetId && draggedId !== widgetId}
