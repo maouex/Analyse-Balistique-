@@ -59,10 +59,7 @@ export function WidgetShell({
           ? '2px solid var(--accent2)'
           : '1px solid var(--border)',
         position: 'relative',
-        display: 'flex',
-        flexDirection: 'column',
         overflow: 'hidden',
-        minHeight: 0,
         opacity: isDragging ? 0.3 : 1,
         boxShadow: isDragOver ? '0 0 24px var(--accent-glow-strong), inset 0 0 24px var(--accent-glow)' : undefined,
         transition: 'border-color 0.15s, box-shadow 0.15s, opacity 0.2s',
@@ -136,10 +133,8 @@ export function WidgetShell({
       </div>
 
       {/* Content */}
-      <div style={{ flex: 1, padding: 12, overflowY: 'auto', minHeight: 0, position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column' }}>
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-          {children}
-        </div>
+      <div style={{ padding: 12, position: 'relative', zIndex: 1 }}>
+        {children}
       </div>
     </div>
   );

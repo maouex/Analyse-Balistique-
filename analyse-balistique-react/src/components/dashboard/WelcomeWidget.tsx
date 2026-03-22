@@ -16,7 +16,7 @@ export function WelcomeWidget({ size = 'M' }: { size?: WidgetSize }) {
 
   if (size === 'S') {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, gap: 4 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
         <Crosshair size={16} color="var(--accent2)" />
         <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--accent2)', fontFamily: 'var(--font-mono)' }}>S.A.G.</div>
         <div style={{ fontSize: 8, color: 'var(--muted)', fontFamily: 'var(--font-mono)' }}>SYS:OK</div>
@@ -49,7 +49,7 @@ export function WelcomeWidget({ size = 'M' }: { size?: WidgetSize }) {
 
   // M
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flex: 1, justifyContent: 'center' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, justifyContent: 'center' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <Crosshair size={16} color="var(--accent2)" style={{ flexShrink: 0 }} />
         <div>
@@ -67,7 +67,7 @@ export function WelcomeWidget({ size = 'M' }: { size?: WidgetSize }) {
 
 function QS({ icon, label, value, color }: { icon: React.ReactNode; label: string; value: string; color: string }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '3px 6px', background: `${color}10`, border: `1px solid ${color}20`, flex: 1, minWidth: 0 }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '3px 6px', background: `${color}10`, border: `1px solid ${color}20`, minWidth: 0 }}>
       <div style={{ color, display: 'flex' }}>{icon}</div>
       <div>
         <div style={{ fontSize: 11, fontWeight: 800, color, fontFamily: 'var(--font-mono)' }}>{value}</div>

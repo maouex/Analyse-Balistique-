@@ -119,9 +119,11 @@ export function DashboardPage() {
           flex: 1,
           display: 'grid',
           gridTemplateColumns: `repeat(${GRID_COLS}, 1fr)`,
-          gridAutoRows: '1fr',
+          gridAutoRows: 'auto',
           gap: 8,
           minHeight: 0,
+          overflowY: 'auto',
+          alignContent: 'start',
         }}
       >
         {allVisible.map((widgetId) => {

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { X, LayoutGrid, Plus, AlertTriangle } from 'lucide-react';
-import { useDashboardStore, WIDGET_CATALOG, SIZE_CELLS, MAX_CELLS } from '../../stores/dashboardStore';
+import { X, LayoutGrid, Plus } from 'lucide-react';
+import { useDashboardStore, WIDGET_CATALOG, SIZE_CELLS } from '../../stores/dashboardStore';
 import type { WidgetId, WidgetSize } from '../../stores/dashboardStore';
 
 // Import all widget components for preview
@@ -35,12 +35,9 @@ const SIZE_LABELS: Record<WidgetSize, string> = { S: 'Petit', M: 'Moyen', L: 'Gr
 const PREVIEW_WIDTHS: Record<WidgetSize, number> = { S: 80, M: 180, L: 300 };
 
 export function WidgetCatalog() {
-  const { visibleWidgets, addWidget, setShowCatalog, usedCells, canAddSize } = useDashboardStore();
+  const { visibleWidgets, addWidget, setShowCatalog } = useDashboardStore();
   const [selectedWidget, setSelectedWidget] = useState<WidgetId | null>(null);
   const [previewSize, setPreviewSize] = useState<WidgetSize>('M');
-  const used = usedCells();
-  const remaining = MAX_CELLS - used;
-  const isFull = remaining <= 0;
 
   const availableWidgets = WIDGET_CATALOG.filter((w) => !visibleWidgets.includes(w.id));
 
@@ -48,9 +45,6 @@ export function WidgetCatalog() {
     if (!selectedWidget) return;
     addWidget(selectedWidget, previewSize);
     setSelectedWidget(null);
-    if (remaining - SIZE_CELLS[previewSize] <= 0) {
-      setShowCatalog(false);
-    }
   };
 
   const selectedConfig = selectedWidget ? WIDGET_CATALOG.find((w) => w.id === selectedWidget) : null;
@@ -71,38 +65,14 @@ export function WidgetCatalog() {
             <LayoutGrid size={14} color="var(--accent2)" />
             <h2>Ajouter un widget</h2>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            {/* Cell usage indicator */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <div style={{ display: 'flex', gap: 2 }}>
-                {Array.from({ length: MAX_CELLS }).map((_, i) => (
-                  <div key={i} style={{
-                    width: 6, height: 6,
-                    background: i < used ? 'var(--accent2)' : 'var(--surface2)',
-                    border: `1px solid ${i < used ? 'var(--accent2)' : 'var(--border)'}`,
-                    opacity: i < used ? 0.8 : 0.4,
-                  }} />
-                ))}
-              </div>
-              <span style={{ fontSize: 9, color: remaining > 0 ? 'var(--text-secondary)' : 'var(--red)', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
-                {remaining}/{MAX_CELLS}
-              </span>
-            </div>
-            <button onClick={() => setShowCatalog(false)} style={{ width: 28, height: 28, border: '1px solid var(--border)', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)' }}>
-              <X size={14} />
-            </button>
-          </div>
+          <button onClick={() => setShowCatalog(false)} style={{ width: 28, height: 28, border: '1px solid var(--border)', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)' }}>
+            <X size={14} />
+          </button>
         </div>
 
         <div style={{ display: 'flex', flex: 1, minHeight: 0, overflow: 'hidden' }}>
           {/* Left: Widget list */}
           <div style={{ width: 220, borderRight: '1px solid var(--border)', overflowY: 'auto', padding: '8px' }}>
-            {isFull && availableWidgets.length > 0 && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 8px', background: 'var(--red-glow)', border: '1px solid rgba(255,68,68,0.2)', marginBottom: 8, fontSize: 9, color: 'var(--red)', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>
-                <AlertTriangle size={11} /> Grille pleine
-              </div>
-            )}
-
             {availableWidgets.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '20px 10px', color: 'var(--muted)', fontSize: 10, fontFamily: 'var(--font-mono)' }}>
                 Tous les widgets sont déjà affichés
@@ -143,17 +113,15 @@ export function WidgetCatalog() {
                   <div style={{ display: 'flex', gap: 6 }}>
                     {(['S', 'M', 'L'] as WidgetSize[]).map((s) => {
                       const isActive = previewSize === s;
-                      const canFit = canAddSize(s);
                       return (
                         <button
                           key={s}
-                          onClick={() => canFit && setPreviewSize(s)}
-                          disabled={!canFit}
+                          onClick={() => setPreviewSize(s)}
                           style={{
-                            flex: 1, padding: '6px 8px', cursor: canFit ? 'pointer' : 'not-allowed',
+                            flex: 1, padding: '6px 8px', cursor: 'pointer',
                             background: isActive ? 'var(--accent-glow-strong)' : 'var(--surface2)',
                             border: `1px solid ${isActive ? 'var(--accent2)' : 'var(--border)'}`,
-                            opacity: canFit ? 1 : 0.3, transition: 'all 0.15s',
+                            transition: 'all 0.15s',
                           }}
                         >
                           <div style={{ fontSize: 12, fontWeight: 800, color: isActive ? 'var(--accent2)' : 'var(--text)', fontFamily: 'var(--font-mono)' }}>{s}</div>
@@ -182,8 +150,7 @@ export function WidgetCatalog() {
                 <button
                   className="btn btn-primary"
                   onClick={handleAdd}
-                  disabled={!canAddSize(previewSize)}
-                  style={{ alignSelf: 'flex-end', gap: 6, opacity: canAddSize(previewSize) ? 1 : 0.4 }}
+                  style={{ alignSelf: 'flex-end', gap: 6 }}
                 >
                   <Plus size={13} />
                   Ajouter en {SIZE_LABELS[previewSize].toLowerCase()}

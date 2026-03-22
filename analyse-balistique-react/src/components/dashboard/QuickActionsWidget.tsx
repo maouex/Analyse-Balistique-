@@ -11,7 +11,7 @@ export function QuickActionsWidget({ size = 'M' }: { size?: WidgetSize }) {
 
   if (size === 'S') {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, gap: 4 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
         <button onClick={goNew} style={{ border: '1px solid var(--border-light)', background: 'var(--accent-glow)', cursor: 'pointer', padding: '6px 8px', display: 'flex', alignItems: 'center', gap: 4 }}>
           <Crosshair size={12} color="var(--accent2)" />
           <span style={{ fontSize: 8, fontWeight: 700, color: 'var(--accent2)', fontFamily: 'var(--font-mono)', letterSpacing: '0.5px' }}>ANALYSE</span>
@@ -33,7 +33,7 @@ export function QuickActionsWidget({ size = 'M' }: { size?: WidgetSize }) {
   const dir = size === 'L' ? 'row' : 'column';
 
   return (
-    <div style={{ display: 'flex', flexDirection: dir as 'row' | 'column', gap: 5, flex: 1, justifyContent: 'center', flexWrap: size === 'L' ? 'wrap' : undefined }}>
+    <div style={{ display: 'flex', flexDirection: dir as 'row' | 'column', gap: 5, justifyContent: 'center', flexWrap: size === 'L' ? 'wrap' : undefined }}>
       {shown.map((a) => (
         <button key={a.label} onClick={a.onClick} style={{
           display: 'flex', alignItems: 'center', gap: 6, padding: '5px 8px', flex: size === 'L' ? '1 1 40%' : undefined,
