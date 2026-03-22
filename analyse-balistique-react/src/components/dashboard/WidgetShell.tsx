@@ -95,7 +95,7 @@ export function WidgetShell({
           display: 'flex',
           alignItems: 'center',
           gap: 6,
-          padding: '5px 10px',
+          padding: '8px 12px',
           borderBottom: '1px solid var(--border)',
           background: accentGlow,
           flexShrink: 0,
@@ -136,7 +136,7 @@ export function WidgetShell({
       </div>
 
       {/* Content */}
-      <div style={{ flex: 1, padding: '6px 10px', overflow: 'hidden', minHeight: 0, position: 'relative', zIndex: 1 }}>
+      <div style={{ flex: 1, padding: 14, overflowY: 'auto', minHeight: 0, position: 'relative', zIndex: 1 }}>
         {children}
       </div>
     </div>

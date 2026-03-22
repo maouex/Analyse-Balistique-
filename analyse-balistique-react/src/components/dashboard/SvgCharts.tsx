@@ -265,18 +265,26 @@ export function HBarChart({ items, maxValue }: HBarChartProps) {
   const max = maxValue ?? Math.max(...items.map((it) => it.value), 1);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
       {items.map((item, i) => (
         <div key={i}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 1 }}>
-            <span style={{ fontSize: 8, fontWeight: 700, fontFamily: 'var(--font-mono)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 3 }}>
+            <span style={{
+              fontSize: 10, fontWeight: 700, fontFamily: 'var(--font-mono)', letterSpacing: '0.3px',
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1,
+            }}>
               {item.label}
             </span>
-            <span style={{ fontSize: 9, fontWeight: 800, color: item.color, fontFamily: 'var(--font-mono)', flexShrink: 0, marginLeft: 4 }}>
-              {item.value}
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              {item.subLabel && (
+                <span style={{ fontSize: 8, color: 'var(--muted)', fontFamily: 'var(--font-mono)' }}>{item.subLabel}</span>
+              )}
+              <span style={{ fontSize: 11, fontWeight: 800, color: item.color, fontFamily: 'var(--font-mono)', flexShrink: 0 }}>
+                {item.value}
+              </span>
+            </div>
           </div>
-          <div style={{ height: 4, background: 'var(--surface2)', border: '1px solid var(--border)', overflow: 'hidden' }}>
+          <div style={{ height: 6, background: 'var(--surface2)', border: '1px solid var(--border)', overflow: 'hidden' }}>
             <div style={{
               height: '100%',
               width: `${(item.value / max) * 100}%`,

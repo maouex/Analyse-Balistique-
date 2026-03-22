@@ -52,8 +52,8 @@ function loadVisibleWidgets(): WidgetId[] {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) return JSON.parse(raw);
   } catch { /* ignore */ }
-  // Default: first few widgets that fit in 12 cells
-  return ['welcome', 'quick-actions', 'stats-overview', 'recent-analyses', 'top-scores', 'performance-radar'];
+  // Default: 4 widgets (8 cells) leaving room for user to add more
+  return ['welcome', 'quick-actions', 'stats-overview', 'recent-analyses'];
 }
 
 function loadWidgetOrder(): WidgetId[] {
