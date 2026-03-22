@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { AnimNum } from '../../hooks/useAnimatedNumber';
 import { useMunitionsStore } from '../../stores/munitionsStore';
 import { Sparkline } from './SvgCharts';
 import type { WidgetSize } from '../../stores/dashboardStore';
@@ -27,7 +28,7 @@ export function ScoreEvolutionWidget({ size = 'M' }: { size?: WidgetSize }) {
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
         {trend > 2 ? <TrendingUp size={18} color="var(--green)" /> : trend < -2 ? <TrendingDown size={18} color="var(--red)" /> : <Minus size={18} color="var(--muted)" />}
         <div style={{ fontSize: 14, fontWeight: 800, fontFamily: 'var(--font-mono)', color: trend > 2 ? 'var(--green)' : trend < -2 ? 'var(--red)' : 'var(--muted)' }}>
-          {trend > 0 ? '+' : ''}{trend.toFixed(0)}
+          {trend > 0 ? '+' : ''}<AnimNum value={Math.round(trend)} />
         </div>
         <div style={{ fontSize: 10, color: 'var(--muted)', fontFamily: 'var(--font-mono)' }}>pts</div>
       </div>

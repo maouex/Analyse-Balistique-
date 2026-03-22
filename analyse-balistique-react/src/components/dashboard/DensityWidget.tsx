@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useMunitionsStore } from '../../stores/munitionsStore';
-import { DonutChart, RadialGauge } from './SvgCharts';
+import { DonutChart, RadialGauge, AnimatedValue } from './SvgCharts';
+import { AnimNum } from '../../hooks/useAnimatedNumber';
 import type { WidgetSize } from '../../stores/dashboardStore';
 
 export function DensityWidget({ size = 'M' }: { size?: WidgetSize }) {
@@ -45,11 +46,11 @@ export function DensityWidget({ size = 'M' }: { size?: WidgetSize }) {
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           <div className="stat-card" style={{ textAlign: 'center', padding: '5px 8px' }}>
-            <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--blue)', fontFamily: 'var(--font-mono)' }}>{avgDisp.toFixed(1)}cm</div>
+            <AnimatedValue value={avgDisp} decimals={1} suffix="cm" style={{ fontSize: 15, fontWeight: 800, color: 'var(--blue)', fontFamily: 'var(--font-mono)' }} />
             <div style={{ fontSize: 9, color: 'var(--muted)', fontWeight: 600, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Disp. moy.</div>
           </div>
           <div className="stat-card" style={{ textAlign: 'center', padding: '5px 8px' }}>
-            <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--purple)', fontFamily: 'var(--font-mono)' }}>{withSnap.length}</div>
+            <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--purple)', fontFamily: 'var(--font-mono)' }}><AnimNum value={withSnap.length} /></div>
             <div style={{ fontSize: 9, color: 'var(--muted)', fontWeight: 600, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Analyses</div>
           </div>
         </div>

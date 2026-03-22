@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { X } from 'lucide-react';
+import { X, FileImage, FileText } from 'lucide-react';
 import { useAnalysisStore } from '../../stores/analysisStore';
 import { renderExport } from '../../lib/canvas-renderer';
 import { computeFullAnalysis } from '../../lib/ballistics';
+import { generatePdfReport } from '../../lib/pdf-export';
 import type { ExportOptions } from '../../types';
 
 interface ExportModalProps {
@@ -51,6 +52,28 @@ export function ExportModal({ onClose }: ExportModalProps) {
     onClose();
   };
 
+  const handlePdfExport = () => {
+    if (!store.image || !store.center || !store.scale.pixelsPerCm) return;
+
+    const stats = computeFullAnalysis(
+      store.impacts, store.center,
+      store.circle1.diameterCm, store.circle2.diameterCm,
+      store.scale.pixelsPerCm
+    );
+    if (!stats) return;
+
+    generatePdfReport({
+      stats,
+      impacts: store.impacts,
+      center: store.center,
+      circle1: store.circle1,
+      circle2: store.circle2,
+      impactStyle: store.impactStyle,
+      pixelsPerCm: store.scale.pixelsPerCm,
+    });
+    onClose();
+  };
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
@@ -93,9 +116,14 @@ export function ExportModal({ onClose }: ExportModalProps) {
             onColorChange={(c) => setOptions({ ...options, ellipseColor: c })}
           />
         </div>
-        <div className="modal-footer">
+        <div className="modal-footer" style={{ display: 'flex', gap: 8 }}>
           <button className="btn" onClick={onClose}>Annuler</button>
-          <button className="btn btn-primary" onClick={handleExport}>Exporter</button>
+          <button className="btn btn-primary" onClick={handleExport} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <FileImage size={14} /> PNG
+          </button>
+          <button className="btn btn-primary" onClick={handlePdfExport} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'var(--blue-glow)', borderColor: 'rgba(68,170,255,0.3)', color: 'var(--blue)' }}>
+            <FileText size={14} /> Rapport PDF
+          </button>
         </div>
       </div>
     </div>
