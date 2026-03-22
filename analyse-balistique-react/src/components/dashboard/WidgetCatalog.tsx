@@ -32,7 +32,9 @@ const widgetComponents: Record<WidgetId, React.ComponentType<{ size?: WidgetSize
 };
 
 const SIZE_LABELS: Record<WidgetSize, string> = { S: 'Petit', M: 'Moyen', L: 'Grand' };
-const PREVIEW_WIDTHS: Record<WidgetSize, number> = { S: 80, M: 180, L: 300 };
+// Real rendered width for each size, then scaled down to fit the preview area
+const RENDER_WIDTHS: Record<WidgetSize, number> = { S: 140, M: 340, L: 500 };
+const PREVIEW_SCALE: Record<WidgetSize, number> = { S: 0.85, M: 0.65, L: 0.52 };
 
 export function WidgetCatalog() {
   const { visibleWidgets, addWidget, setShowCatalog } = useDashboardStore();
@@ -137,12 +139,23 @@ export function WidgetCatalog() {
                   <div style={{ fontSize: 8, fontWeight: 700, color: 'var(--text-secondary)', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'var(--font-mono)', marginBottom: 6, alignSelf: 'flex-start' }}>
                     Prévisualisation
                   </div>
+                  {/* Scale-down container: render at real size, then scale to fit */}
                   <div style={{
-                    width: PREVIEW_WIDTHS[previewSize], height: 120,
-                    background: 'var(--surface)', border: '1px solid var(--border)',
-                    padding: '6px 8px', overflow: 'hidden', transition: 'width 0.3s ease',
+                    width: RENDER_WIDTHS[previewSize] * PREVIEW_SCALE[previewSize],
+                    height: 'auto',
+                    overflow: 'hidden',
+                    transition: 'width 0.3s ease',
                   }}>
-                    <PreviewComponent size={previewSize} />
+                    <div style={{
+                      width: RENDER_WIDTHS[previewSize],
+                      transform: `scale(${PREVIEW_SCALE[previewSize]})`,
+                      transformOrigin: 'top left',
+                      background: 'var(--surface)',
+                      border: '1px solid var(--border)',
+                      padding: '12px 14px',
+                    }}>
+                      <PreviewComponent size={previewSize} />
+                    </div>
                   </div>
                 </div>
 
