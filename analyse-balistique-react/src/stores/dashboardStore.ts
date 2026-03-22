@@ -13,36 +13,47 @@ export type WidgetId =
   | 'velocity-compare'
   | 'density';
 
+export type WidgetSize = 'S' | 'M' | 'L';
+
 export interface WidgetConfig {
   id: WidgetId;
   label: string;
   description: string;
-  defaultSize: 'small' | 'medium' | 'large' | 'full';
+  availableSizes: WidgetSize[];
+  defaultSize: WidgetSize;
 }
 
+// Cells per size in a 6-column grid
+export const SIZE_CELLS: Record<WidgetSize, number> = { S: 1, M: 2, L: 3 };
+export const GRID_COLS = 6;
+export const GRID_ROWS = 2;
+export const MAX_CELLS = GRID_COLS * GRID_ROWS; // 12
+
 export const WIDGET_CATALOG: WidgetConfig[] = [
-  { id: 'welcome', label: 'Accueil', description: 'Message de bienvenue et statut système', defaultSize: 'full' },
-  { id: 'quick-actions', label: 'Actions rapides', description: 'Accès direct aux fonctionnalités', defaultSize: 'medium' },
-  { id: 'stats-overview', label: 'Statistiques globales', description: 'Scores, impacts et graphiques donut', defaultSize: 'medium' },
-  { id: 'recent-analyses', label: 'Analyses récentes', description: 'Dernières analyses effectuées', defaultSize: 'large' },
-  { id: 'calibre-breakdown', label: 'Répartition calibres', description: 'Camembert et barres par calibre', defaultSize: 'medium' },
-  { id: 'top-scores', label: 'Meilleurs scores', description: 'Top munitions par performance', defaultSize: 'medium' },
-  { id: 'performance-radar', label: 'Radar performance', description: 'Graphique radar multi-critères', defaultSize: 'medium' },
-  { id: 'score-evolution', label: 'Évolution scores', description: 'Courbe de progression et tendance', defaultSize: 'medium' },
-  { id: 'density', label: 'Densité impacts', description: 'Répartition zones et jauges de densité', defaultSize: 'medium' },
-  { id: 'velocity-compare', label: 'Vitesse & pénétration', description: 'Comparaison vitesses et pénétrations', defaultSize: 'medium' },
-  { id: 'activity', label: 'Activité récente', description: 'Historique des dernières actions', defaultSize: 'large' },
+  { id: 'welcome', label: 'Accueil', description: 'Message de bienvenue et statut système', availableSizes: ['S', 'M', 'L'], defaultSize: 'M' },
+  { id: 'quick-actions', label: 'Actions rapides', description: 'Accès direct aux fonctionnalités', availableSizes: ['S', 'M', 'L'], defaultSize: 'M' },
+  { id: 'stats-overview', label: 'Statistiques globales', description: 'Scores, impacts et graphiques donut', availableSizes: ['S', 'M', 'L'], defaultSize: 'M' },
+  { id: 'recent-analyses', label: 'Analyses récentes', description: 'Dernières analyses effectuées', availableSizes: ['S', 'M', 'L'], defaultSize: 'M' },
+  { id: 'calibre-breakdown', label: 'Répartition calibres', description: 'Camembert et barres par calibre', availableSizes: ['S', 'M', 'L'], defaultSize: 'M' },
+  { id: 'top-scores', label: 'Meilleurs scores', description: 'Top munitions par performance', availableSizes: ['S', 'M', 'L'], defaultSize: 'M' },
+  { id: 'performance-radar', label: 'Radar performance', description: 'Graphique radar multi-critères', availableSizes: ['S', 'M', 'L'], defaultSize: 'M' },
+  { id: 'score-evolution', label: 'Évolution scores', description: 'Courbe de progression et tendance', availableSizes: ['S', 'M', 'L'], defaultSize: 'M' },
+  { id: 'density', label: 'Densité impacts', description: 'Répartition zones et jauges de densité', availableSizes: ['S', 'M', 'L'], defaultSize: 'M' },
+  { id: 'velocity-compare', label: 'Vitesse & pénétration', description: 'Comparaison vitesses et pénétrations', availableSizes: ['S', 'M', 'L'], defaultSize: 'M' },
+  { id: 'activity', label: 'Activité récente', description: 'Historique des dernières actions', availableSizes: ['S', 'M', 'L'], defaultSize: 'M' },
 ];
 
 const STORAGE_KEY = 'sag_dashboard_widgets';
 const ORDER_KEY = 'sag_dashboard_order';
+const SIZES_KEY = 'sag_dashboard_sizes';
 
 function loadVisibleWidgets(): WidgetId[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) return JSON.parse(raw);
   } catch { /* ignore */ }
-  return WIDGET_CATALOG.map((w) => w.id);
+  // Default: first few widgets that fit in 12 cells
+  return ['welcome', 'quick-actions', 'stats-overview', 'recent-analyses', 'top-scores', 'performance-radar'];
 }
 
 function loadWidgetOrder(): WidgetId[] {
@@ -53,29 +64,92 @@ function loadWidgetOrder(): WidgetId[] {
   return WIDGET_CATALOG.map((w) => w.id);
 }
 
+function loadWidgetSizes(): Record<string, WidgetSize> {
+  try {
+    const raw = localStorage.getItem(SIZES_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch { /* ignore */ }
+  return {};
+}
+
+function calcUsedCells(visible: WidgetId[], sizes: Record<string, WidgetSize>): number {
+  return visible.reduce((acc, id) => {
+    const config = WIDGET_CATALOG.find((w) => w.id === id);
+    const size = sizes[id] ?? config?.defaultSize ?? 'M';
+    return acc + SIZE_CELLS[size];
+  }, 0);
+}
+
 interface DashboardState {
   visibleWidgets: WidgetId[];
   widgetOrder: WidgetId[];
+  widgetSizes: Record<string, WidgetSize>;
   showCatalog: boolean;
 
-  toggleWidget: (id: WidgetId) => void;
+  getWidgetSize: (id: WidgetId) => WidgetSize;
+  usedCells: () => number;
+  remainingCells: () => number;
+  isGridFull: () => boolean;
+  canAddSize: (size: WidgetSize) => boolean;
+
+  addWidget: (id: WidgetId, size: WidgetSize) => void;
+  removeWidget: (id: WidgetId) => void;
+  setWidgetSize: (id: WidgetId, size: WidgetSize) => void;
   reorderWidgets: (order: WidgetId[]) => void;
   setShowCatalog: (show: boolean) => void;
-  moveWidget: (id: WidgetId, direction: 'up' | 'down') => void;
 }
 
 export const useDashboardStore = create<DashboardState>((set, get) => ({
   visibleWidgets: loadVisibleWidgets(),
   widgetOrder: loadWidgetOrder(),
+  widgetSizes: loadWidgetSizes(),
   showCatalog: false,
 
-  toggleWidget: (id) => {
+  getWidgetSize: (id) => {
+    const { widgetSizes } = get();
+    const config = WIDGET_CATALOG.find((w) => w.id === id);
+    return widgetSizes[id] ?? config?.defaultSize ?? 'M';
+  },
+
+  usedCells: () => {
+    const { visibleWidgets, widgetSizes } = get();
+    return calcUsedCells(visibleWidgets, widgetSizes);
+  },
+
+  remainingCells: () => MAX_CELLS - get().usedCells(),
+
+  isGridFull: () => get().remainingCells() <= 0,
+
+  canAddSize: (size) => SIZE_CELLS[size] <= get().remainingCells(),
+
+  addWidget: (id, size) => {
+    const { visibleWidgets, widgetSizes } = get();
+    if (visibleWidgets.includes(id)) return;
+    if (!get().canAddSize(size)) return;
+    const nextVisible = [...visibleWidgets, id];
+    const nextSizes = { ...widgetSizes, [id]: size };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(nextVisible));
+    localStorage.setItem(SIZES_KEY, JSON.stringify(nextSizes));
+    set({ visibleWidgets: nextVisible, widgetSizes: nextSizes });
+  },
+
+  removeWidget: (id) => {
     const { visibleWidgets } = get();
-    const next = visibleWidgets.includes(id)
-      ? visibleWidgets.filter((w) => w !== id)
-      : [...visibleWidgets, id];
+    const next = visibleWidgets.filter((w) => w !== id);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
     set({ visibleWidgets: next });
+  },
+
+  setWidgetSize: (id, size) => {
+    const { widgetSizes, visibleWidgets } = get();
+    const oldSize = get().getWidgetSize(id);
+    const diff = SIZE_CELLS[size] - SIZE_CELLS[oldSize];
+    if (diff > 0 && diff > get().remainingCells()) return; // Not enough room
+    const next = { ...widgetSizes, [id]: size };
+    localStorage.setItem(SIZES_KEY, JSON.stringify(next));
+    // Also persist visible in case defaults changed
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(visibleWidgets));
+    set({ widgetSizes: next });
   },
 
   reorderWidgets: (order) => {
@@ -84,16 +158,4 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
   },
 
   setShowCatalog: (show) => set({ showCatalog: show }),
-
-  moveWidget: (id, direction) => {
-    const { widgetOrder } = get();
-    const idx = widgetOrder.indexOf(id);
-    if (idx === -1) return;
-    const newIdx = direction === 'up' ? idx - 1 : idx + 1;
-    if (newIdx < 0 || newIdx >= widgetOrder.length) return;
-    const next = [...widgetOrder];
-    [next[idx], next[newIdx]] = [next[newIdx], next[idx]];
-    localStorage.setItem(ORDER_KEY, JSON.stringify(next));
-    set({ widgetOrder: next });
-  },
 }));

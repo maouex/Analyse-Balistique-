@@ -1,5 +1,6 @@
 import { GripVertical, X } from 'lucide-react';
-import type { WidgetId } from '../../stores/dashboardStore';
+import type { WidgetId, WidgetSize } from '../../stores/dashboardStore';
+import { SIZE_CELLS } from '../../stores/dashboardStore';
 import { useBentoEffects } from './useBentoEffects';
 import './MagicBento.css';
 
@@ -7,6 +8,7 @@ interface WidgetShellProps {
   id: WidgetId;
   title: string;
   icon: React.ReactNode;
+  widgetSize?: WidgetSize;
   accentColor?: string;
   accentGlow?: string;
   glowColor?: string;
@@ -25,6 +27,7 @@ export function WidgetShell({
   id,
   title,
   icon,
+  widgetSize = 'M',
   accentColor = 'var(--accent2)',
   accentGlow = 'var(--accent-glow)',
   glowColor = '0, 255, 65',
@@ -50,6 +53,7 @@ export function WidgetShell({
       onDrop={onContainerDrop}
       style={{
         '--glow-color': glowColor,
+        gridColumn: `span ${SIZE_CELLS[widgetSize]}`,
         background: 'var(--surface)',
         border: isDragOver
           ? '2px solid var(--accent2)'
@@ -90,8 +94,8 @@ export function WidgetShell({
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: 8,
-          padding: '8px 12px',
+          gap: 6,
+          padding: '5px 10px',
           borderBottom: '1px solid var(--border)',
           background: accentGlow,
           flexShrink: 0,
@@ -132,7 +136,7 @@ export function WidgetShell({
       </div>
 
       {/* Content */}
-      <div style={{ flex: 1, padding: 12, overflowY: 'auto', minHeight: 0, position: 'relative', zIndex: 1 }}>
+      <div style={{ flex: 1, padding: '6px 10px', overflow: 'hidden', minHeight: 0, position: 'relative', zIndex: 1 }}>
         {children}
       </div>
     </div>
