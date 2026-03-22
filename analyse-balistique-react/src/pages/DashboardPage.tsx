@@ -1,5 +1,5 @@
-import { AnimatePresence } from 'framer-motion';
-import { LayoutGrid, Plus, Crosshair, Activity, BookOpen, Trophy, BarChart3, Zap, Clock } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Plus, Crosshair, Activity, BookOpen, Trophy, BarChart3, Zap, Clock } from 'lucide-react';
 import { useDashboardStore, WIDGET_CATALOG } from '../stores/dashboardStore';
 import type { WidgetId } from '../stores/dashboardStore';
 import { WidgetShell } from '../components/dashboard/WidgetShell';
@@ -53,72 +53,26 @@ export function DashboardPage() {
     ...visibleWidgets.filter((id) => !orderedVisible.includes(id)),
   ];
 
+  // Check if there are widgets available to add
+  const hasAvailableWidgets = WIDGET_CATALOG.some((w) => !visibleWidgets.includes(w.id));
+
   return (
     <div style={{
       height: '100%',
-      overflowY: 'auto',
-      padding: '20px 24px',
+      overflow: 'hidden',
+      display: 'flex',
+      flexDirection: 'column',
+      padding: 12,
+      gap: 12,
     }}>
-      {/* Dashboard Header */}
+      {/* Widget Grid - fills all available space */}
       <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: 20,
-        gap: 12,
-        flexWrap: 'wrap',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{
-            width: 32,
-            height: 32,
-            background: 'var(--accent-glow)',
-            border: '1px solid var(--border-light)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-            <LayoutGrid size={16} color="var(--accent2)" />
-          </div>
-          <div>
-            <h1 style={{
-              fontSize: 14,
-              fontWeight: 800,
-              letterSpacing: '2px',
-              textTransform: 'uppercase',
-              color: 'var(--accent2)',
-              fontFamily: 'var(--font-mono)',
-              textShadow: '0 0 10px var(--accent-glow)',
-              margin: 0,
-            }}>
-              Tableau de bord
-            </h1>
-            <span style={{
-              fontSize: 9,
-              color: 'var(--muted)',
-              fontFamily: 'var(--font-mono)',
-              letterSpacing: '1px',
-            }}>
-              Centre de commande S.A.G.
-            </span>
-          </div>
-        </div>
-
-        <button
-          className="btn btn-sm"
-          onClick={() => setShowCatalog(true)}
-          style={{ gap: 5 }}
-        >
-          <Plus size={13} /> Ajouter un widget
-        </button>
-      </div>
-
-      {/* Widget Grid */}
-      <div style={{
+        flex: 1,
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
-        gap: 14,
-        paddingBottom: 40,
+        gridTemplateColumns: 'repeat(3, 1fr)',
+        gridAutoRows: '1fr',
+        gap: 10,
+        minHeight: 0,
       }}>
         <AnimatePresence mode="popLayout">
           {allVisible.map((widgetId, idx) => {
@@ -133,7 +87,6 @@ export function DashboardPage() {
                 id={widgetId}
                 title={config.label}
                 icon={widgetIcons[widgetId]}
-                size={config.defaultSize}
                 accentColor={colors.color}
                 accentGlow={colors.glow}
                 onMoveUp={() => moveWidget(widgetId, 'up')}
@@ -147,42 +100,61 @@ export function DashboardPage() {
             );
           })}
         </AnimatePresence>
-      </div>
 
-      {/* Empty state */}
-      {allVisible.length === 0 && (
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 16,
-          padding: '60px 20px',
-          color: 'var(--muted)',
-        }}>
-          <LayoutGrid size={40} color="var(--border-light)" />
-          <div style={{ textAlign: 'center' }}>
-            <div style={{
-              fontSize: 13,
-              fontWeight: 700,
-              marginBottom: 4,
-              fontFamily: 'var(--font-mono)',
-            }}>
-              Tableau de bord vide
-            </div>
-            <div style={{ fontSize: 11 }}>
-              Ajoutez des widgets pour personnaliser votre espace de travail
-            </div>
-          </div>
-          <button
-            className="btn btn-primary"
+        {/* Add Widget slot - always visible when there are widgets to add */}
+        {hasAvailableWidgets && (
+          <motion.button
+            layout
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
             onClick={() => setShowCatalog(true)}
-            style={{ gap: 6 }}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 10,
+              background: 'transparent',
+              border: '1px dashed var(--border)',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              minHeight: 0,
+              position: 'relative',
+              overflow: 'hidden',
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.borderColor = 'var(--border-light)';
+              e.currentTarget.style.background = 'var(--accent-glow)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.borderColor = 'var(--border)';
+              e.currentTarget.style.background = 'transparent';
+            }}
           >
-            <Plus size={14} /> Ajouter des widgets
-          </button>
-        </div>
-      )}
+            <div style={{
+              width: 36,
+              height: 36,
+              border: '1px solid var(--border)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'all 0.2s',
+            }}>
+              <Plus size={18} color="var(--muted)" />
+            </div>
+            <span style={{
+              fontSize: 9,
+              fontWeight: 700,
+              color: 'var(--muted)',
+              fontFamily: 'var(--font-mono)',
+              letterSpacing: '1px',
+              textTransform: 'uppercase',
+            }}>
+              Ajouter un widget
+            </span>
+          </motion.button>
+        )}
+      </div>
 
       {/* Widget Catalog Modal */}
       <AnimatePresence>
