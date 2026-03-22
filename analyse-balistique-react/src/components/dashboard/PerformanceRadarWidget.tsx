@@ -30,14 +30,14 @@ export function PerformanceRadarWidget({ size = 'M' }: { size?: WidgetSize }) {
   if (size === 'S') {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        <RadialGauge value={avgScore} size={85} strokeWidth={7} label="Perf." color="auto" />
+        <RadialGauge value={avgScore} size={75} strokeWidth={7} label="Perf." color="auto" />
       </div>
     );
   }
 
-  const radarSize = size === 'L' ? 180 : 150;
+  const radarSize = size === 'L' ? 150 : 120;
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div className="widget-chart-container">
       <RadarChart axes={axes} size={radarSize} color="var(--accent2)" />
     </div>
   );

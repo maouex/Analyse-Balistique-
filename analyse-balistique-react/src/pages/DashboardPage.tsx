@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { Plus, Crosshair, Activity, BookOpen, Trophy, BarChart3, Zap, Clock, Radar, TrendingUp, Gauge, Target } from 'lucide-react';
-import { useDashboardStore, WIDGET_CATALOG, GRID_COLS } from '../stores/dashboardStore';
+import { useDashboardStore, WIDGET_CATALOG } from '../stores/dashboardStore';
 import type { WidgetId, WidgetSize } from '../stores/dashboardStore';
 import { WidgetShell } from '../components/dashboard/WidgetShell';
 import { WidgetCatalog } from '../components/dashboard/WidgetCatalog';
@@ -115,13 +115,9 @@ export function DashboardPage() {
 
       <div
         ref={gridRef}
-        className="bento-grid-section"
+        className="bento-grid-section dashboard-grid"
         style={{
           flex: 1,
-          display: 'grid',
-          gridTemplateColumns: `repeat(${GRID_COLS}, 1fr)`,
-          gridAutoRows: 'auto',
-          gap: 8,
           minHeight: 0,
           overflowY: 'auto',
           alignContent: 'start',

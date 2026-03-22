@@ -1,6 +1,5 @@
 import { GripVertical, X } from 'lucide-react';
 import type { WidgetId, WidgetSize } from '../../stores/dashboardStore';
-import { SIZE_CELLS } from '../../stores/dashboardStore';
 import { useBentoEffects } from './useBentoEffects';
 import './MagicBento.css';
 
@@ -47,13 +46,12 @@ export function WidgetShell({
     <div
       ref={particleRef}
       data-widget-id={id}
-      className="widget-bento--border-glow widget-bento-particles"
+      className={`widget-bento--border-glow widget-bento-particles widget-size-${widgetSize}`}
       onDragOver={onContainerDragOver}
       onDragLeave={onContainerDragLeave}
       onDrop={onContainerDrop}
       style={{
         '--glow-color': glowColor,
-        gridColumn: `span ${SIZE_CELLS[widgetSize]}`,
         background: 'var(--surface)',
         border: isDragOver
           ? '2px solid var(--accent2)'
@@ -133,7 +131,7 @@ export function WidgetShell({
       </div>
 
       {/* Content */}
-      <div style={{ padding: 16, position: 'relative', zIndex: 1 }}>
+      <div style={{ padding: 14, position: 'relative', zIndex: 1, overflow: 'hidden', minWidth: 0 }}>
         {children}
       </div>
     </div>

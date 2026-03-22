@@ -35,7 +35,7 @@ export function VelocityCompareWidget({ size = 'M' }: { size?: WidgetSize }) {
     .map((m) => ({ label: m.nom || 'Sans nom', value: m.penetration, color: 'var(--blue)', subLabel: m.calibre }));
 
   return (
-    <div style={{ display: 'flex', flexDirection: size === 'L' ? 'row' : 'column', gap: 12, justifyContent: 'center' }}>
+    <div style={{ display: 'flex', flexDirection: size === 'L' ? 'row' : 'column', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
       {velocityItems.length > 0 && (
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-secondary)', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'var(--font-mono)', marginBottom: 5 }}>Vitesse (m/s)</div>

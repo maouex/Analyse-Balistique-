@@ -21,7 +21,7 @@ export function TopScoresWidget({ size = 'M' }: { size?: WidgetSize }) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
         <Medal size={18} color="var(--amber)" />
-        <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--accent2)', fontFamily: 'var(--font-mono)' }}><AnimNum value={m.snap?.score ?? 0} /></div>
+        <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--accent2)', fontFamily: 'var(--font-mono)' }}><AnimNum value={m.snap?.score ?? 0} /></div>
         <div style={{ fontSize: 10, color: 'var(--muted)', fontFamily: 'var(--font-mono)', textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }}>{m.nom || 'Sans nom'}</div>
       </div>
     );

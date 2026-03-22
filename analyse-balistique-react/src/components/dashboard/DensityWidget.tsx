@@ -30,7 +30,7 @@ export function DensityWidget({ size = 'M' }: { size?: WidgetSize }) {
   if (size === 'S') {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        <RadialGauge value={pct50} size={85} strokeWidth={7} label="50cm" color="var(--accent2)" />
+        <RadialGauge value={pct50} size={75} strokeWidth={7} label="50cm" color="var(--accent2)" />
       </div>
     );
   }
@@ -38,11 +38,11 @@ export function DensityWidget({ size = 'M' }: { size?: WidgetSize }) {
   if (size === 'L') {
     const avgDisp = withSnap.reduce((a, m) => a + (m.snap?.dispMoy ?? 0), 0) / withSnap.length;
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', gap: 16 }}>
-        <DonutChart segments={segments} size={110} strokeWidth={14} centerValue={String(totalImpacts)} centerLabel="imp." />
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-          <RadialGauge value={pct50} size={85} strokeWidth={8} label="50cm" color="var(--accent2)" />
-          <RadialGauge value={pct100} size={85} strokeWidth={8} label="100cm" color="var(--amber)" />
+      <div className="widget-content-flex">
+        <DonutChart segments={segments} size={85} strokeWidth={12} centerValue={String(totalImpacts)} centerLabel="imp." />
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+          <RadialGauge value={pct50} size={70} strokeWidth={7} label="50cm" color="var(--accent2)" />
+          <RadialGauge value={pct100} size={70} strokeWidth={7} label="100cm" color="var(--amber)" />
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           <div className="stat-card" style={{ textAlign: 'center', padding: '5px 8px' }}>
@@ -60,11 +60,11 @@ export function DensityWidget({ size = 'M' }: { size?: WidgetSize }) {
 
   // M
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', gap: 8 }}>
-      <DonutChart segments={segments} size={100} strokeWidth={12} centerValue={String(totalImpacts)} centerLabel="imp." />
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-        <RadialGauge value={pct50} size={75} strokeWidth={7} label="50cm" color="var(--accent2)" />
-        <RadialGauge value={pct100} size={75} strokeWidth={7} label="100cm" color="var(--amber)" />
+    <div className="widget-content-flex">
+      <DonutChart segments={segments} size={80} strokeWidth={10} centerValue={String(totalImpacts)} centerLabel="imp." />
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+        <RadialGauge value={pct50} size={65} strokeWidth={6} label="50cm" color="var(--accent2)" />
+        <RadialGauge value={pct100} size={65} strokeWidth={6} label="100cm" color="var(--amber)" />
       </div>
     </div>
   );
