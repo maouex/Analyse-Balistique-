@@ -7,7 +7,11 @@ export type WidgetId =
   | 'stats-overview'
   | 'calibre-breakdown'
   | 'top-scores'
-  | 'activity';
+  | 'activity'
+  | 'performance-radar'
+  | 'score-evolution'
+  | 'velocity-compare'
+  | 'density';
 
 export interface WidgetConfig {
   id: WidgetId;
@@ -19,10 +23,14 @@ export interface WidgetConfig {
 export const WIDGET_CATALOG: WidgetConfig[] = [
   { id: 'welcome', label: 'Accueil', description: 'Message de bienvenue et statut système', defaultSize: 'full' },
   { id: 'quick-actions', label: 'Actions rapides', description: 'Accès direct aux fonctionnalités', defaultSize: 'medium' },
-  { id: 'stats-overview', label: 'Statistiques globales', description: 'Vue d\'ensemble de vos données', defaultSize: 'medium' },
+  { id: 'stats-overview', label: 'Statistiques globales', description: 'Scores, impacts et graphiques donut', defaultSize: 'medium' },
   { id: 'recent-analyses', label: 'Analyses récentes', description: 'Dernières analyses effectuées', defaultSize: 'large' },
-  { id: 'calibre-breakdown', label: 'Répartition calibres', description: 'Distribution par calibre', defaultSize: 'medium' },
+  { id: 'calibre-breakdown', label: 'Répartition calibres', description: 'Camembert et barres par calibre', defaultSize: 'medium' },
   { id: 'top-scores', label: 'Meilleurs scores', description: 'Top munitions par performance', defaultSize: 'medium' },
+  { id: 'performance-radar', label: 'Radar performance', description: 'Graphique radar multi-critères', defaultSize: 'medium' },
+  { id: 'score-evolution', label: 'Évolution scores', description: 'Courbe de progression et tendance', defaultSize: 'medium' },
+  { id: 'density', label: 'Densité impacts', description: 'Répartition zones et jauges de densité', defaultSize: 'medium' },
+  { id: 'velocity-compare', label: 'Vitesse & pénétration', description: 'Comparaison vitesses et pénétrations', defaultSize: 'medium' },
   { id: 'activity', label: 'Activité récente', description: 'Historique des dernières actions', defaultSize: 'large' },
 ];
 
