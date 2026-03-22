@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import { AnimatePresence } from 'framer-motion';
-import { Plus, Crosshair, Activity, BookOpen, Trophy, BarChart3, Zap, Clock } from 'lucide-react';
+import { Plus, Crosshair, Activity, BookOpen, Trophy, BarChart3, Zap, Clock, Radar, TrendingUp, Gauge, Target } from 'lucide-react';
 import { useDashboardStore, WIDGET_CATALOG } from '../stores/dashboardStore';
 import type { WidgetId } from '../stores/dashboardStore';
 import { WidgetShell } from '../components/dashboard/WidgetShell';
@@ -13,6 +13,10 @@ import { StatsOverviewWidget } from '../components/dashboard/StatsOverviewWidget
 import { CalibreBreakdownWidget } from '../components/dashboard/CalibreBreakdownWidget';
 import { TopScoresWidget } from '../components/dashboard/TopScoresWidget';
 import { ActivityWidget } from '../components/dashboard/ActivityWidget';
+import { PerformanceRadarWidget } from '../components/dashboard/PerformanceRadarWidget';
+import { ScoreEvolutionWidget } from '../components/dashboard/ScoreEvolutionWidget';
+import { VelocityCompareWidget } from '../components/dashboard/VelocityCompareWidget';
+import { DensityWidget } from '../components/dashboard/DensityWidget';
 
 const widgetIcons: Record<WidgetId, React.ReactNode> = {
   'welcome': <Crosshair size={13} />,
@@ -22,6 +26,10 @@ const widgetIcons: Record<WidgetId, React.ReactNode> = {
   'calibre-breakdown': <Activity size={13} />,
   'top-scores': <Trophy size={13} />,
   'activity': <Clock size={13} />,
+  'performance-radar': <Radar size={13} />,
+  'score-evolution': <TrendingUp size={13} />,
+  'velocity-compare': <Gauge size={13} />,
+  'density': <Target size={13} />,
 };
 
 const widgetColors: Record<WidgetId, { color: string; glow: string; glowRgb: string }> = {
@@ -32,6 +40,10 @@ const widgetColors: Record<WidgetId, { color: string; glow: string; glowRgb: str
   'calibre-breakdown': { color: 'var(--purple)', glow: 'var(--purple-glow)', glowRgb: '170, 102, 255' },
   'top-scores': { color: 'var(--amber)', glow: 'var(--amber-glow)', glowRgb: '255, 170, 0' },
   'activity': { color: 'var(--blue)', glow: 'var(--blue-glow)', glowRgb: '68, 170, 255' },
+  'performance-radar': { color: 'var(--accent2)', glow: 'var(--accent-glow)', glowRgb: '0, 255, 65' },
+  'score-evolution': { color: 'var(--green)', glow: 'var(--green-glow)', glowRgb: '0, 255, 65' },
+  'velocity-compare': { color: 'var(--amber)', glow: 'var(--amber-glow)', glowRgb: '255, 170, 0' },
+  'density': { color: 'var(--blue)', glow: 'var(--blue-glow)', glowRgb: '68, 170, 255' },
 };
 
 const widgetComponents: Record<WidgetId, React.ComponentType> = {
@@ -42,6 +54,10 @@ const widgetComponents: Record<WidgetId, React.ComponentType> = {
   'calibre-breakdown': CalibreBreakdownWidget,
   'top-scores': TopScoresWidget,
   'activity': ActivityWidget,
+  'performance-radar': PerformanceRadarWidget,
+  'score-evolution': ScoreEvolutionWidget,
+  'velocity-compare': VelocityCompareWidget,
+  'density': DensityWidget,
 };
 
 export function DashboardPage() {
