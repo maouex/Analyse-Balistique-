@@ -1,4 +1,5 @@
 /* ─── SVG Chart Components for Dashboard Widgets ─── */
+import { useAnimatedNumber } from '../../hooks/useAnimatedNumber';
 
 interface DonutSegment {
   value: number;
@@ -63,14 +64,12 @@ export function DonutChart({
         {/* Center text */}
         {centerValue && (
           <>
-            <text
+            <AnimatedSvgNumber
               x={size / 2} y={size / 2 - 6}
-              textAnchor="middle" dominantBaseline="middle"
+              value={Number(centerValue) || 0}
               fill={centerColor}
               style={{ fontSize: 24, fontWeight: 800, fontFamily: 'var(--font-mono)' }}
-            >
-              {centerValue}
-            </text>
+            />
             {centerLabel && (
               <text
                 x={size / 2} y={size / 2 + 14}
@@ -156,14 +155,12 @@ export function RadialGauge({
           }}
         />
         {/* Value text */}
-        <text
+        <AnimatedSvgNumber
           x={size / 2} y={size / 2}
-          textAnchor="middle" dominantBaseline="middle"
+          value={Math.round(value)}
           fill={dynamicColor}
           style={{ fontSize: 26, fontWeight: 800, fontFamily: 'var(--font-mono)' }}
-        >
-          {Math.round(value)}
-        </text>
+        />
         {label && (
           <text
             x={size / 2} y={size / 2 + 16}
@@ -279,9 +276,7 @@ export function HBarChart({ items, maxValue }: HBarChartProps) {
               {item.subLabel && (
                 <span style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'var(--font-mono)' }}>{item.subLabel}</span>
               )}
-              <span style={{ fontSize: 14, fontWeight: 800, color: item.color, fontFamily: 'var(--font-mono)', flexShrink: 0 }}>
-                {item.value}
-              </span>
+              <AnimatedValue value={item.value} style={{ fontSize: 14, fontWeight: 800, color: item.color, fontFamily: 'var(--font-mono)', flexShrink: 0 }} />
             </div>
           </div>
           <div style={{ height: 8, background: 'var(--surface2)', border: '1px solid var(--border)', overflow: 'hidden' }}>
@@ -374,3 +369,26 @@ export function RadarChart({ axes, size = 180, color = 'var(--accent2)' }: Radar
     </div>
   );
 }
+
+/* ─── Animated Number Helpers ─── */
+
+function AnimatedSvgNumber({ x, y, value, fill, style }: {
+  x: number; y: number; value: number; fill: string;
+  style: React.CSSProperties;
+}) {
+  const display = useAnimatedNumber(value, 1200, 0);
+  return (
+    <text x={x} y={y} textAnchor="middle" dominantBaseline="middle" fill={fill} style={style}>
+      {display}
+    </text>
+  );
+}
+
+function AnimatedValue({ value, style, decimals = 0, suffix = '' }: {
+  value: number; style: React.CSSProperties; decimals?: number; suffix?: string;
+}) {
+  const display = useAnimatedNumber(value, 1200, decimals);
+  return <span style={style}>{display}{suffix}</span>;
+}
+
+export { AnimatedValue };

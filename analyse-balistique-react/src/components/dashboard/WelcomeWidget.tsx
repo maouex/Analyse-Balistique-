@@ -1,4 +1,5 @@
 import { Shield, Activity, Database, Crosshair } from 'lucide-react';
+import { AnimNum } from '../../hooks/useAnimatedNumber';
 import { useMunitionsStore } from '../../stores/munitionsStore';
 import { useEffect } from 'react';
 import type { WidgetSize } from '../../stores/dashboardStore';
@@ -66,11 +67,14 @@ export function WelcomeWidget({ size = 'M' }: { size?: WidgetSize }) {
 }
 
 function QS({ icon, label, value, color }: { icon: React.ReactNode; label: string; value: string; color: string }) {
+  const numVal = Number(value);
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 8px', background: `${color}10`, border: `1px solid ${color}20`, minWidth: 0 }}>
       <div style={{ color, display: 'flex' }}>{icon}</div>
       <div>
-        <div style={{ fontSize: 14, fontWeight: 800, color, fontFamily: 'var(--font-mono)' }}>{value}</div>
+        <div style={{ fontSize: 14, fontWeight: 800, color, fontFamily: 'var(--font-mono)' }}>
+          {!isNaN(numVal) ? <AnimNum value={numVal} /> : value}
+        </div>
         <div style={{ fontSize: 9, color: 'var(--muted)', fontWeight: 600, letterSpacing: '0.5px', textTransform: 'uppercase' }}>{label}</div>
       </div>
     </div>

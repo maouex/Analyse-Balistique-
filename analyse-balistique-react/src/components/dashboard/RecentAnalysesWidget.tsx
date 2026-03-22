@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Play, Box, Crosshair } from 'lucide-react';
+import { AnimNum } from '../../hooks/useAnimatedNumber';
 import { useMunitionsStore } from '../../stores/munitionsStore';
 import { useAnalysisStore } from '../../stores/analysisStore';
 import { useTransitionNavigate } from '../transitions/TransitionContext';
@@ -33,7 +34,7 @@ export function RecentAnalysesWidget({ size = 'M' }: { size?: WidgetSize }) {
     const m = recents[0];
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
-        <div style={{ fontSize: 20, fontWeight: 800, color: (m.snap?.score ?? 0) >= 60 ? 'var(--green)' : 'var(--amber)', fontFamily: 'var(--font-mono)' }}>{m.snap?.score ?? '—'}</div>
+        <div style={{ fontSize: 20, fontWeight: 800, color: (m.snap?.score ?? 0) >= 60 ? 'var(--green)' : 'var(--amber)', fontFamily: 'var(--font-mono)' }}>{m.snap?.score != null ? <AnimNum value={m.snap.score} /> : '—'}</div>
         <div style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'var(--font-mono)', textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }}>{m.nom || 'Sans nom'}</div>
       </div>
     );
@@ -48,7 +49,7 @@ export function RecentAnalysesWidget({ size = 'M' }: { size?: WidgetSize }) {
             background: (m.snap?.score ?? 0) >= 60 ? 'var(--green-glow)' : 'var(--amber-glow)',
             border: `1px solid ${(m.snap?.score ?? 0) >= 60 ? 'rgba(0,255,65,0.2)' : 'rgba(255,170,0,0.2)'}`,
           }}>
-            <span style={{ fontSize: 13, fontWeight: 800, color: (m.snap?.score ?? 0) >= 60 ? 'var(--green)' : 'var(--amber)', fontFamily: 'var(--font-mono)' }}>{m.snap?.score ?? '—'}</span>
+            <span style={{ fontSize: 13, fontWeight: 800, color: (m.snap?.score ?? 0) >= 60 ? 'var(--green)' : 'var(--amber)', fontFamily: 'var(--font-mono)' }}>{m.snap?.score != null ? <AnimNum value={m.snap.score} /> : '—'}</span>
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 12, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.nom || 'Sans nom'}</div>

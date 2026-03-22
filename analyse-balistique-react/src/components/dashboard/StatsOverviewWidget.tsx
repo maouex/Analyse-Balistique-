@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useMunitionsStore } from '../../stores/munitionsStore';
-import { DonutChart, RadialGauge } from './SvgCharts';
+import { DonutChart, RadialGauge, AnimatedValue } from './SvgCharts';
 import type { WidgetSize } from '../../stores/dashboardStore';
 
 export function StatsOverviewWidget({ size = 'M' }: { size?: WidgetSize }) {
@@ -59,9 +59,13 @@ export function StatsOverviewWidget({ size = 'M' }: { size?: WidgetSize }) {
 }
 
 function MS({ label, value, color }: { label: string; value: string; color: string }) {
+  const numVal = parseFloat(value);
+  const hasDecimals = value.includes('.');
   return (
     <div className="stat-card" style={{ textAlign: 'center', padding: '5px 8px' }}>
-      <div style={{ fontSize: 15, fontWeight: 800, color, fontFamily: 'var(--font-mono)' }}>{value}</div>
+      <div style={{ fontSize: 15, fontWeight: 800, color, fontFamily: 'var(--font-mono)' }}>
+        {!isNaN(numVal) ? <AnimatedValue value={numVal} decimals={hasDecimals ? 1 : 0} suffix={value.replace(/[\d.]+/, '')} style={{ fontSize: 15, fontWeight: 800, color, fontFamily: 'var(--font-mono)' }} /> : value}
+      </div>
       <div style={{ fontSize: 9, color: 'var(--muted)', fontWeight: 600, letterSpacing: '0.5px', textTransform: 'uppercase' }}>{label}</div>
     </div>
   );

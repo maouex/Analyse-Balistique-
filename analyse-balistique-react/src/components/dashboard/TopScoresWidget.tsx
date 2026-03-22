@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Trophy, Medal } from 'lucide-react';
+import { AnimNum } from '../../hooks/useAnimatedNumber';
 import { useMunitionsStore } from '../../stores/munitionsStore';
 import type { WidgetSize } from '../../stores/dashboardStore';
 
@@ -20,7 +21,7 @@ export function TopScoresWidget({ size = 'M' }: { size?: WidgetSize }) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
         <Medal size={18} color="var(--amber)" />
-        <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--accent2)', fontFamily: 'var(--font-mono)' }}>{m.snap?.score}</div>
+        <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--accent2)', fontFamily: 'var(--font-mono)' }}><AnimNum value={m.snap?.score ?? 0} /></div>
         <div style={{ fontSize: 10, color: 'var(--muted)', fontFamily: 'var(--font-mono)', textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }}>{m.nom || 'Sans nom'}</div>
       </div>
     );
@@ -36,7 +37,7 @@ export function TopScoresWidget({ size = 'M' }: { size?: WidgetSize }) {
             <div style={{ fontSize: 12, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.nom || 'Sans nom'}</div>
             <div style={{ fontSize: 10, color: 'var(--muted)', fontFamily: 'var(--font-mono)' }}>{m.calibre} — {m.snap?.nbImpacts} imp.</div>
           </div>
-          <div style={{ fontSize: 16, fontWeight: 800, flexShrink: 0, fontFamily: 'var(--font-mono)', color: (m.snap?.score ?? 0) >= 80 ? 'var(--accent2)' : (m.snap?.score ?? 0) >= 60 ? 'var(--green)' : 'var(--amber)' }}>{m.snap?.score}</div>
+          <div style={{ fontSize: 16, fontWeight: 800, flexShrink: 0, fontFamily: 'var(--font-mono)', color: (m.snap?.score ?? 0) >= 80 ? 'var(--accent2)' : (m.snap?.score ?? 0) >= 60 ? 'var(--green)' : 'var(--amber)' }}><AnimNum value={m.snap?.score ?? 0} /></div>
         </div>
       ))}
     </div>
