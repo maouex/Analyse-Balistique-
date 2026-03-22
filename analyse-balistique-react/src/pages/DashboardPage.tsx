@@ -1,3 +1,4 @@
+import { useState, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Plus, Crosshair, Activity, BookOpen, Trophy, BarChart3, Zap, Clock } from 'lucide-react';
 import { useDashboardStore, WIDGET_CATALOG } from '../stores/dashboardStore';
@@ -43,18 +44,75 @@ const widgetComponents: Record<WidgetId, React.ComponentType> = {
 };
 
 export function DashboardPage() {
-  const { visibleWidgets, widgetOrder, showCatalog, setShowCatalog, toggleWidget, moveWidget } = useDashboardStore();
+  const { visibleWidgets, widgetOrder, showCatalog, setShowCatalog, toggleWidget, reorderWidgets } = useDashboardStore();
+
+  // Drag state
+  const [draggedId, setDraggedId] = useState<WidgetId | null>(null);
+  const [dragOverId, setDragOverId] = useState<WidgetId | null>(null);
 
   // Determine display order: ordered widgets that are visible
   const orderedVisible = widgetOrder.filter((id) => visibleWidgets.includes(id));
-  // Add any visible widgets not in the order array
   const allVisible = [
     ...orderedVisible,
     ...visibleWidgets.filter((id) => !orderedVisible.includes(id)),
   ];
 
-  // Check if there are widgets available to add
   const hasAvailableWidgets = WIDGET_CATALOG.some((w) => !visibleWidgets.includes(w.id));
+
+  const handleDragStart = useCallback((widgetId: WidgetId) => (e: React.DragEvent) => {
+    setDraggedId(widgetId);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', widgetId);
+  }, []);
+
+  const handleDragEnd = useCallback(() => {
+    setDraggedId(null);
+    setDragOverId(null);
+  }, []);
+
+  const handleDragOver = useCallback((widgetId: WidgetId) => (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (widgetId !== draggedId) {
+      setDragOverId(widgetId);
+    }
+  }, [draggedId]);
+
+  const handleDragLeave = useCallback((widgetId: WidgetId) => (e: React.DragEvent) => {
+    // Only clear if we actually left this widget (not entering a child)
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    if (
+      e.clientX <= rect.left || e.clientX >= rect.right ||
+      e.clientY <= rect.top || e.clientY >= rect.bottom
+    ) {
+      if (dragOverId === widgetId) {
+        setDragOverId(null);
+      }
+    }
+  }, [dragOverId]);
+
+  const handleDrop = useCallback((targetId: WidgetId) => (e: React.DragEvent) => {
+    e.preventDefault();
+    const sourceId = e.dataTransfer.getData('text/plain') as WidgetId;
+    if (!sourceId || sourceId === targetId) {
+      setDragOverId(null);
+      setDraggedId(null);
+      return;
+    }
+
+    // Build new order by moving source to target position
+    const newOrder = [...allVisible];
+    const sourceIdx = newOrder.indexOf(sourceId);
+    const targetIdx = newOrder.indexOf(targetId);
+    if (sourceIdx !== -1 && targetIdx !== -1) {
+      newOrder.splice(sourceIdx, 1);
+      newOrder.splice(targetIdx, 0, sourceId);
+      reorderWidgets(newOrder);
+    }
+
+    setDragOverId(null);
+    setDraggedId(null);
+  }, [allVisible, reorderWidgets]);
 
   return (
     <div style={{
@@ -65,7 +123,7 @@ export function DashboardPage() {
       padding: 12,
       gap: 12,
     }}>
-      {/* Widget Grid - fills all available space */}
+      {/* Widget Grid */}
       <div style={{
         flex: 1,
         display: 'grid',
@@ -75,7 +133,7 @@ export function DashboardPage() {
         minHeight: 0,
       }}>
         <AnimatePresence mode="popLayout">
-          {allVisible.map((widgetId, idx) => {
+          {allVisible.map((widgetId) => {
             const config = WIDGET_CATALOG.find((w) => w.id === widgetId);
             if (!config) return null;
             const Component = widgetComponents[widgetId];
@@ -89,11 +147,16 @@ export function DashboardPage() {
                 icon={widgetIcons[widgetId]}
                 accentColor={colors.color}
                 accentGlow={colors.glow}
-                onMoveUp={() => moveWidget(widgetId, 'up')}
-                onMoveDown={() => moveWidget(widgetId, 'down')}
                 onRemove={() => toggleWidget(widgetId)}
-                isFirst={idx === 0}
-                isLast={idx === allVisible.length - 1}
+                isDragging={draggedId === widgetId}
+                isDragOver={dragOverId === widgetId && draggedId !== widgetId}
+                dragHandlers={{
+                  onDragStart: handleDragStart(widgetId),
+                  onDragEnd: handleDragEnd,
+                  onDragOver: handleDragOver(widgetId),
+                  onDragLeave: handleDragLeave(widgetId),
+                  onDrop: handleDrop(widgetId),
+                }}
               >
                 <Component />
               </WidgetShell>
@@ -101,7 +164,7 @@ export function DashboardPage() {
           })}
         </AnimatePresence>
 
-        {/* Add Widget slot - always visible when there are widgets to add */}
+        {/* Add Widget slot */}
         {hasAvailableWidgets && (
           <motion.button
             layout
