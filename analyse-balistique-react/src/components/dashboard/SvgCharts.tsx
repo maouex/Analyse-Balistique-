@@ -17,8 +17,8 @@ interface DonutChartProps {
 
 export function DonutChart({
   segments,
-  size = 120,
-  strokeWidth = 14,
+  size = 140,
+  strokeWidth = 16,
   centerLabel,
   centerValue,
   centerColor = 'var(--accent2)',
@@ -39,7 +39,7 @@ export function DonutChart({
   });
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
         {/* Background circle */}
         <circle
@@ -64,19 +64,19 @@ export function DonutChart({
         {centerValue && (
           <>
             <text
-              x={size / 2} y={size / 2 - 4}
+              x={size / 2} y={size / 2 - 6}
               textAnchor="middle" dominantBaseline="middle"
               fill={centerColor}
-              style={{ fontSize: 18, fontWeight: 800, fontFamily: 'var(--font-mono)' }}
+              style={{ fontSize: 24, fontWeight: 800, fontFamily: 'var(--font-mono)' }}
             >
               {centerValue}
             </text>
             {centerLabel && (
               <text
-                x={size / 2} y={size / 2 + 12}
+                x={size / 2} y={size / 2 + 14}
                 textAnchor="middle" dominantBaseline="middle"
                 fill="var(--muted)"
-                style={{ fontSize: 8, fontWeight: 600, letterSpacing: '0.5px', textTransform: 'uppercase' }}
+                style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.5px', textTransform: 'uppercase' }}
               >
                 {centerLabel}
               </text>
@@ -85,11 +85,11 @@ export function DonutChart({
         )}
       </svg>
       {/* Legend */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 12px', justifyContent: 'center' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px 14px', justifyContent: 'center' }}>
         {arcs.filter((a) => a.value > 0).map((arc, i) => (
-          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <div style={{ width: 6, height: 6, background: arc.color, flexShrink: 0 }} />
-            <span style={{ fontSize: 8, color: 'var(--muted)', fontFamily: 'var(--font-mono)', whiteSpace: 'nowrap' }}>
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <div style={{ width: 8, height: 8, background: arc.color, flexShrink: 0 }} />
+            <span style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'var(--font-mono)', whiteSpace: 'nowrap' }}>
               {arc.label} ({(arc.pct * 100).toFixed(0)}%)
             </span>
           </div>
@@ -111,8 +111,8 @@ interface RadialGaugeProps {
 
 export function RadialGauge({
   value,
-  size = 100,
-  strokeWidth = 10,
+  size = 120,
+  strokeWidth = 12,
   label,
   color = 'var(--accent2)',
 }: RadialGaugeProps) {
@@ -160,16 +160,16 @@ export function RadialGauge({
           x={size / 2} y={size / 2}
           textAnchor="middle" dominantBaseline="middle"
           fill={dynamicColor}
-          style={{ fontSize: 20, fontWeight: 800, fontFamily: 'var(--font-mono)' }}
+          style={{ fontSize: 26, fontWeight: 800, fontFamily: 'var(--font-mono)' }}
         >
           {Math.round(value)}
         </text>
         {label && (
           <text
-            x={size / 2} y={size / 2 + 14}
+            x={size / 2} y={size / 2 + 16}
             textAnchor="middle" dominantBaseline="middle"
             fill="var(--muted)"
-            style={{ fontSize: 7, fontWeight: 600, letterSpacing: '0.5px', textTransform: 'uppercase' }}
+            style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.5px', textTransform: 'uppercase' }}
           >
             {label}
           </text>
@@ -193,8 +193,8 @@ interface SparklineProps {
 
 export function Sparkline({
   data,
-  width = 200,
-  height = 60,
+  width = 280,
+  height = 80,
   color = 'var(--accent2)',
   fillOpacity = 0.15,
   showDots = true,
@@ -202,7 +202,7 @@ export function Sparkline({
 }: SparklineProps) {
   if (data.length < 2) return null;
 
-  const padding = { top: 4, right: 4, bottom: labels ? 16 : 4, left: 4 };
+  const padding = { top: 6, right: 6, bottom: labels ? 20 : 6, left: 6 };
   const w = width - padding.left - padding.right;
   const h = height - padding.top - padding.bottom;
   const max = Math.max(...data);
@@ -222,12 +222,12 @@ export function Sparkline({
       {/* Fill */}
       <path d={areaPath} fill={color} opacity={fillOpacity} />
       {/* Line */}
-      <path d={linePath} fill="none" stroke={color} strokeWidth={1.5} strokeLinejoin="round" />
+      <path d={linePath} fill="none" stroke={color} strokeWidth={2} strokeLinejoin="round" />
       {/* Dots */}
       {showDots && points.map((p, i) => (
         <circle
-          key={i} cx={p.x} cy={p.y} r={2.5}
-          fill="var(--surface)" stroke={color} strokeWidth={1.5}
+          key={i} cx={p.x} cy={p.y} r={3}
+          fill="var(--surface)" stroke={color} strokeWidth={2}
         />
       ))}
       {/* Labels */}
@@ -238,7 +238,7 @@ export function Sparkline({
           y={height - 2}
           textAnchor="middle"
           fill="var(--muted)"
-          style={{ fontSize: 7, fontFamily: 'var(--font-mono)' }}
+          style={{ fontSize: 10, fontFamily: 'var(--font-mono)' }}
         >
           {l}
         </text>
@@ -265,26 +265,26 @@ export function HBarChart({ items, maxValue }: HBarChartProps) {
   const max = maxValue ?? Math.max(...items.map((it) => it.value), 1);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       {items.map((item, i) => (
         <div key={i}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 3 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
             <span style={{
-              fontSize: 10, fontWeight: 700, fontFamily: 'var(--font-mono)', letterSpacing: '0.3px',
+              fontSize: 13, fontWeight: 700, fontFamily: 'var(--font-mono)', letterSpacing: '0.3px',
               overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1,
             }}>
               {item.label}
             </span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               {item.subLabel && (
-                <span style={{ fontSize: 8, color: 'var(--muted)', fontFamily: 'var(--font-mono)' }}>{item.subLabel}</span>
+                <span style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'var(--font-mono)' }}>{item.subLabel}</span>
               )}
-              <span style={{ fontSize: 11, fontWeight: 800, color: item.color, fontFamily: 'var(--font-mono)', flexShrink: 0 }}>
+              <span style={{ fontSize: 14, fontWeight: 800, color: item.color, fontFamily: 'var(--font-mono)', flexShrink: 0 }}>
                 {item.value}
               </span>
             </div>
           </div>
-          <div style={{ height: 6, background: 'var(--surface2)', border: '1px solid var(--border)', overflow: 'hidden' }}>
+          <div style={{ height: 8, background: 'var(--surface2)', border: '1px solid var(--border)', overflow: 'hidden' }}>
             <div style={{
               height: '100%',
               width: `${(item.value / max) * 100}%`,
@@ -312,12 +312,12 @@ interface RadarChartProps {
   color?: string;
 }
 
-export function RadarChart({ axes, size = 140, color = 'var(--accent2)' }: RadarChartProps) {
+export function RadarChart({ axes, size = 180, color = 'var(--accent2)' }: RadarChartProps) {
   if (axes.length < 3) return null;
 
   const cx = size / 2;
   const cy = size / 2;
-  const maxR = size / 2 - 20;
+  const maxR = size / 2 - 24;
   const n = axes.length;
 
   const getPoint = (i: number, r: number) => {
@@ -351,20 +351,20 @@ export function RadarChart({ axes, size = 140, color = 'var(--accent2)' }: Radar
         {/* Data fill */}
         <path d={dataPath} fill={color} opacity={0.15} />
         {/* Data stroke */}
-        <path d={dataPath} fill="none" stroke={color} strokeWidth={1.5} strokeLinejoin="round"
+        <path d={dataPath} fill="none" stroke={color} strokeWidth={2} strokeLinejoin="round"
           style={{ filter: `drop-shadow(0 0 3px ${color}40)` }}
         />
         {/* Data dots */}
         {dataPoints.map((p, i) => (
-          <circle key={i} cx={p.x} cy={p.y} r={3} fill="var(--surface)" stroke={color} strokeWidth={1.5} />
+          <circle key={i} cx={p.x} cy={p.y} r={3.5} fill="var(--surface)" stroke={color} strokeWidth={2} />
         ))}
         {/* Labels */}
         {axes.map((a, i) => {
-          const p = getPoint(i, maxR + 12);
+          const p = getPoint(i, maxR + 16);
           return (
             <text key={i} x={p.x} y={p.y} textAnchor="middle" dominantBaseline="middle"
               fill="var(--muted)"
-              style={{ fontSize: 7, fontWeight: 600, fontFamily: 'var(--font-mono)', letterSpacing: '0.3px' }}
+              style={{ fontSize: 10, fontWeight: 600, fontFamily: 'var(--font-mono)', letterSpacing: '0.3px' }}
             >
               {a.label}
             </text>

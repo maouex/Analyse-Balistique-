@@ -13,7 +13,7 @@ export function ScoreEvolutionWidget({ size = 'M' }: { size?: WidgetSize }) {
     .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 
   if (withSnap.length < 2) {
-    return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)', fontSize: 9, fontFamily: 'var(--font-mono)' }}>Min. 2 analyses</div>;
+    return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)', fontSize: 12, fontFamily: 'var(--font-mono)' }}>Min. 2 analyses</div>;
   }
 
   const scores = withSnap.map((m) => m.snap?.score ?? 0);
@@ -24,32 +24,32 @@ export function ScoreEvolutionWidget({ size = 'M' }: { size?: WidgetSize }) {
 
   if (size === 'S') {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
-        {trend > 2 ? <TrendingUp size={14} color="var(--green)" /> : trend < -2 ? <TrendingDown size={14} color="var(--red)" /> : <Minus size={14} color="var(--muted)" />}
-        <div style={{ fontSize: 10, fontWeight: 800, fontFamily: 'var(--font-mono)', color: trend > 2 ? 'var(--green)' : trend < -2 ? 'var(--red)' : 'var(--muted)' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+        {trend > 2 ? <TrendingUp size={18} color="var(--green)" /> : trend < -2 ? <TrendingDown size={18} color="var(--red)" /> : <Minus size={18} color="var(--muted)" />}
+        <div style={{ fontSize: 14, fontWeight: 800, fontFamily: 'var(--font-mono)', color: trend > 2 ? 'var(--green)' : trend < -2 ? 'var(--red)' : 'var(--muted)' }}>
           {trend > 0 ? '+' : ''}{trend.toFixed(0)}
         </div>
-        <div style={{ fontSize: 7, color: 'var(--muted)', fontFamily: 'var(--font-mono)' }}>pts</div>
+        <div style={{ fontSize: 10, color: 'var(--muted)', fontFamily: 'var(--font-mono)' }}>pts</div>
       </div>
     );
   }
 
-  const sparkW = size === 'L' ? 380 : 220;
+  const sparkW = size === 'L' ? 480 : 300;
   const r90s = size === 'L' ? withSnap.map((m) => m.snap?.r90 ?? 0) : null;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, justifyContent: 'center' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        <div style={{ width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: trend > 2 ? 'var(--green-glow)' : trend < -2 ? 'var(--red-glow)' : 'var(--surface2)', border: `1px solid ${trend > 2 ? 'rgba(0,255,65,0.2)' : trend < -2 ? 'rgba(255,68,68,0.2)' : 'var(--border)'}` }}>
-          {trend > 2 ? <TrendingUp size={10} color="var(--green)" /> : trend < -2 ? <TrendingDown size={10} color="var(--red)" /> : <Minus size={10} color="var(--muted)" />}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, justifyContent: 'center' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: trend > 2 ? 'var(--green-glow)' : trend < -2 ? 'var(--red-glow)' : 'var(--surface2)', border: `1px solid ${trend > 2 ? 'rgba(0,255,65,0.2)' : trend < -2 ? 'rgba(255,68,68,0.2)' : 'var(--border)'}` }}>
+          {trend > 2 ? <TrendingUp size={13} color="var(--green)" /> : trend < -2 ? <TrendingDown size={13} color="var(--red)" /> : <Minus size={13} color="var(--muted)" />}
         </div>
-        <span style={{ fontSize: 9, fontWeight: 700, fontFamily: 'var(--font-mono)' }}>{trend > 2 ? 'Progression' : trend < -2 ? 'Baisse' : 'Stable'} ({trend > 0 ? '+' : ''}{trend.toFixed(1)}pts)</span>
+        <span style={{ fontSize: 12, fontWeight: 700, fontFamily: 'var(--font-mono)' }}>{trend > 2 ? 'Progression' : trend < -2 ? 'Baisse' : 'Stable'} ({trend > 0 ? '+' : ''}{trend.toFixed(1)}pts)</span>
       </div>
-      <Sparkline data={scores} width={sparkW} height={45} color="var(--accent2)" labels={labels.length <= 8 ? labels : undefined} />
+      <Sparkline data={scores} width={sparkW} height={60} color="var(--accent2)" labels={labels.length <= 8 ? labels : undefined} />
       {r90s && r90s.some((r) => r > 0) && (
         <div>
-          <div style={{ fontSize: 7, fontWeight: 700, color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.5px', marginBottom: 2 }}>R90 (cm)</div>
-          <Sparkline data={r90s} width={sparkW} height={35} color="var(--blue)" showDots={false} />
+          <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.5px', marginBottom: 4 }}>R90 (cm)</div>
+          <Sparkline data={r90s} width={sparkW} height={50} color="var(--blue)" showDots={false} />
         </div>
       )}
     </div>
