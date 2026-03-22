@@ -1,8 +1,8 @@
 import { useState, useCallback, useRef } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { Plus, Crosshair, Activity, BookOpen, Trophy, BarChart3, Zap, Clock, Radar, TrendingUp, Gauge, Target } from 'lucide-react';
-import { useDashboardStore, WIDGET_CATALOG } from '../stores/dashboardStore';
-import type { WidgetId } from '../stores/dashboardStore';
+import { useDashboardStore, WIDGET_CATALOG, GRID_COLS } from '../stores/dashboardStore';
+import type { WidgetId, WidgetSize } from '../stores/dashboardStore';
 import { WidgetShell } from '../components/dashboard/WidgetShell';
 import { WidgetCatalog } from '../components/dashboard/WidgetCatalog';
 import { BentoSpotlight } from '../components/dashboard/BentoSpotlight';
@@ -46,7 +46,7 @@ const widgetColors: Record<WidgetId, { color: string; glow: string; glowRgb: str
   'density': { color: 'var(--blue)', glow: 'var(--blue-glow)', glowRgb: '68, 170, 255' },
 };
 
-const widgetComponents: Record<WidgetId, React.ComponentType> = {
+const widgetComponents: Record<WidgetId, React.ComponentType<{ size?: WidgetSize }>> = {
   'welcome': WelcomeWidget,
   'quick-actions': QuickActionsWidget,
   'recent-analyses': RecentAnalysesWidget,
@@ -61,22 +61,21 @@ const widgetComponents: Record<WidgetId, React.ComponentType> = {
 };
 
 export function DashboardPage() {
-  const { visibleWidgets, widgetOrder, showCatalog, setShowCatalog, toggleWidget, reorderWidgets } = useDashboardStore();
+  const { visibleWidgets, widgetOrder, showCatalog, setShowCatalog, removeWidget, reorderWidgets, getWidgetSize, isGridFull } = useDashboardStore();
   const gridRef = useRef<HTMLDivElement>(null);
 
   const [draggedId, setDraggedId] = useState<WidgetId | null>(null);
   const [dragOverId, setDragOverId] = useState<WidgetId | null>(null);
 
-  // Determine display order
   const orderedVisible = widgetOrder.filter((id) => visibleWidgets.includes(id));
   const allVisible = [
     ...orderedVisible,
     ...visibleWidgets.filter((id) => !orderedVisible.includes(id)),
   ];
 
-  const hasAvailableWidgets = WIDGET_CATALOG.some((w) => !visibleWidgets.includes(w.id));
-
-  // --- Drag handlers ---
+  const gridFull = isGridFull();
+  const hasAvailable = WIDGET_CATALOG.some((w) => !visibleWidgets.includes(w.id));
+  const showAddSlot = hasAvailable && !gridFull;
 
   const handleDragStart = useCallback((widgetId: WidgetId, e: React.DragEvent) => {
     setDraggedId(widgetId);
@@ -84,75 +83,46 @@ export function DashboardPage() {
     e.dataTransfer.setData('text/plain', widgetId);
   }, []);
 
-  const handleDragEnd = useCallback(() => {
-    setDraggedId(null);
-    setDragOverId(null);
-  }, []);
+  const handleDragEnd = useCallback(() => { setDraggedId(null); setDragOverId(null); }, []);
 
   const handleDragOver = useCallback((widgetId: WidgetId, e: React.DragEvent) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
-    if (widgetId !== draggedId) {
-      setDragOverId(widgetId);
-    }
+    if (widgetId !== draggedId) setDragOverId(widgetId);
   }, [draggedId]);
 
   const handleDragLeave = useCallback((widgetId: WidgetId, e: React.DragEvent) => {
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    if (
-      e.clientX <= rect.left || e.clientX >= rect.right ||
-      e.clientY <= rect.top || e.clientY >= rect.bottom
-    ) {
-      if (dragOverId === widgetId) {
-        setDragOverId(null);
-      }
+    if (e.clientX <= rect.left || e.clientX >= rect.right || e.clientY <= rect.top || e.clientY >= rect.bottom) {
+      if (dragOverId === widgetId) setDragOverId(null);
     }
   }, [dragOverId]);
 
   const handleDrop = useCallback((targetId: WidgetId, e: React.DragEvent) => {
     e.preventDefault();
     const sourceId = e.dataTransfer.getData('text/plain') as WidgetId;
-    if (!sourceId || sourceId === targetId) {
-      setDragOverId(null);
-      setDraggedId(null);
-      return;
-    }
-
+    if (!sourceId || sourceId === targetId) { setDragOverId(null); setDraggedId(null); return; }
     const newOrder = [...allVisible];
-    const sourceIdx = newOrder.indexOf(sourceId);
-    const targetIdx = newOrder.indexOf(targetId);
-    if (sourceIdx !== -1 && targetIdx !== -1) {
-      newOrder.splice(sourceIdx, 1);
-      newOrder.splice(targetIdx, 0, sourceId);
-      reorderWidgets(newOrder);
-    }
-
+    const si = newOrder.indexOf(sourceId);
+    const ti = newOrder.indexOf(targetId);
+    if (si !== -1 && ti !== -1) { newOrder.splice(si, 1); newOrder.splice(ti, 0, sourceId); reorderWidgets(newOrder); }
     setDragOverId(null);
     setDraggedId(null);
   }, [allVisible, reorderWidgets]);
 
   return (
-    <div style={{
-      height: '100%',
-      overflow: 'hidden',
-      display: 'flex',
-      flexDirection: 'column',
-      padding: 12,
-      gap: 12,
-    }}>
-      {/* Global spotlight effect */}
+    <div style={{ height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column', padding: 10, gap: 10 }}>
       <BentoSpotlight gridRef={gridRef} spotlightRadius={400} glowColor="0, 255, 65" />
 
-      {/* Widget Grid */}
       <div
         ref={gridRef}
         className="bento-grid-section"
         style={{
           flex: 1,
           display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
+          gridTemplateColumns: `repeat(${GRID_COLS}, 1fr)`,
           gridAutoRows: '1fr',
-          gap: 10,
+          gap: 8,
           minHeight: 0,
         }}
       >
@@ -161,6 +131,7 @@ export function DashboardPage() {
           if (!config) return null;
           const Component = widgetComponents[widgetId];
           const colors = widgetColors[widgetId];
+          const wSize = getWidgetSize(widgetId);
 
           return (
             <WidgetShell
@@ -168,10 +139,11 @@ export function DashboardPage() {
               id={widgetId}
               title={config.label}
               icon={widgetIcons[widgetId]}
+              widgetSize={wSize}
               accentColor={colors.color}
               accentGlow={colors.glow}
               glowColor={colors.glowRgb}
-              onRemove={() => toggleWidget(widgetId)}
+              onRemove={() => removeWidget(widgetId)}
               isDragging={draggedId === widgetId}
               isDragOver={dragOverId === widgetId && draggedId !== widgetId}
               onHeaderDragStart={(e) => handleDragStart(widgetId, e)}
@@ -180,64 +152,29 @@ export function DashboardPage() {
               onContainerDragLeave={(e) => handleDragLeave(widgetId, e)}
               onContainerDrop={(e) => handleDrop(widgetId, e)}
             >
-              <Component />
+              <Component size={wSize} />
             </WidgetShell>
           );
         })}
 
-        {/* Add Widget slot */}
-        {hasAvailableWidgets && (
+        {/* Add slot */}
+        {showAddSlot && (
           <button
             onClick={() => setShowCatalog(true)}
             style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 10,
-              background: 'transparent',
-              border: '1px dashed var(--border)',
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-              minHeight: 0,
-              position: 'relative',
-              overflow: 'hidden',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6,
+              background: 'transparent', border: '1px dashed var(--border)', cursor: 'pointer', transition: 'all 0.2s',
+              minHeight: 0, overflow: 'hidden',
             }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.borderColor = 'var(--border-light)';
-              e.currentTarget.style.background = 'var(--accent-glow)';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.borderColor = 'var(--border)';
-              e.currentTarget.style.background = 'transparent';
-            }}
+            onMouseOver={(e) => { e.currentTarget.style.borderColor = 'var(--border-light)'; e.currentTarget.style.background = 'var(--accent-glow)'; }}
+            onMouseOut={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.background = 'transparent'; }}
           >
-            <div style={{
-              width: 36,
-              height: 36,
-              border: '1px solid var(--border)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'all 0.2s',
-            }}>
-              <Plus size={18} color="var(--muted)" />
-            </div>
-            <span style={{
-              fontSize: 9,
-              fontWeight: 700,
-              color: 'var(--muted)',
-              fontFamily: 'var(--font-mono)',
-              letterSpacing: '1px',
-              textTransform: 'uppercase',
-            }}>
-              Ajouter un widget
-            </span>
+            <Plus size={16} color="var(--muted)" />
+            <span style={{ fontSize: 8, fontWeight: 700, color: 'var(--muted)', fontFamily: 'var(--font-mono)', letterSpacing: '1px', textTransform: 'uppercase' }}>Ajouter</span>
           </button>
         )}
       </div>
 
-      {/* Widget Catalog Modal */}
       <AnimatePresence>
         {showCatalog && <WidgetCatalog />}
       </AnimatePresence>

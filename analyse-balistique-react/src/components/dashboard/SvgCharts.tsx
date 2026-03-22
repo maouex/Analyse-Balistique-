@@ -270,25 +270,16 @@ export function HBarChart({ items, maxValue }: HBarChartProps) {
         <div key={i}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 3 }}>
             <span style={{
-              fontSize: 10,
-              fontWeight: 700,
-              fontFamily: 'var(--font-mono)',
-              letterSpacing: '0.3px',
+              fontSize: 10, fontWeight: 700, fontFamily: 'var(--font-mono)', letterSpacing: '0.3px',
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1,
             }}>
               {item.label}
             </span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               {item.subLabel && (
-                <span style={{ fontSize: 8, color: 'var(--muted)', fontFamily: 'var(--font-mono)' }}>
-                  {item.subLabel}
-                </span>
+                <span style={{ fontSize: 8, color: 'var(--muted)', fontFamily: 'var(--font-mono)' }}>{item.subLabel}</span>
               )}
-              <span style={{
-                fontSize: 11,
-                fontWeight: 800,
-                color: item.color,
-                fontFamily: 'var(--font-mono)',
-              }}>
+              <span style={{ fontSize: 11, fontWeight: 800, color: item.color, fontFamily: 'var(--font-mono)', flexShrink: 0 }}>
                 {item.value}
               </span>
             </div>
