@@ -8,6 +8,8 @@ import { DashboardPage } from './pages/DashboardPage';
 import { LandingPage } from './pages/LandingPage';
 import { LoginScreen } from './components/auth/LoginScreen';
 import { TransitionProvider } from './components/transitions/TransitionContext';
+import { CommandPalette } from './components/command-palette/CommandPalette';
+import { ToastContainer } from './components/toast/Toast';
 
 function App() {
   const [authed, setAuthed] = useState(() => sessionStorage.getItem('sag-auth') === '1');
@@ -22,6 +24,8 @@ function App() {
   return (
     <HashRouter>
       <TransitionProvider>
+        <CommandPalette />
+        <ToastContainer />
         <Routes>
           <Route path="/" element={<LandingPage />} />
           {authed ? (

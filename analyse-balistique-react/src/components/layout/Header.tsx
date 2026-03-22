@@ -1,5 +1,6 @@
-import { useRef } from 'react';
-import { Sun, Moon, Scan, BookOpen, Crosshair, LogOut, LayoutGrid } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { Sun, Moon, Scan, BookOpen, Crosshair, LogOut, LayoutGrid, Volume2, VolumeX } from 'lucide-react';
+import { isSoundEnabled, toggleSound } from '../../lib/sounds';
 import { useLocation } from 'react-router-dom';
 import { useThemeStore } from '../../stores/themeStore';
 import { useAnalysisStore } from '../../stores/analysisStore';
@@ -165,6 +166,8 @@ export function Header({ onLogout }: HeaderProps) {
           SYS:OK
         </span>
 
+        <SoundToggle />
+
         <button
           ref={themeButtonRef}
           onClick={() => animatedToggle(themeButtonRef.current)}
@@ -208,5 +211,29 @@ export function Header({ onLogout }: HeaderProps) {
         )}
       </div>
     </header>
+  );
+}
+
+function SoundToggle() {
+  const [on, setOn] = useState(isSoundEnabled);
+  return (
+    <button
+      onClick={() => setOn(toggleSound())}
+      title={on ? 'Couper le son' : 'Activer le son'}
+      style={{
+        width: 28,
+        height: 28,
+        border: '1px solid var(--border)',
+        background: on ? 'var(--accent-glow)' : 'transparent',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: on ? 'var(--accent2)' : 'var(--muted)',
+        transition: 'all 0.2s',
+      }}
+    >
+      {on ? <Volume2 size={12} /> : <VolumeX size={12} />}
+    </button>
   );
 }

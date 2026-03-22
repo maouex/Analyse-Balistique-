@@ -4,6 +4,7 @@ import { useTransitionNavigate } from '../transitions/TransitionContext';
 import { useAnalysisStore } from '../../stores/analysisStore';
 import { computeFullAnalysis, distancePx, pxToCm, classifyZone } from '../../lib/ballistics';
 import { generatePdfReport } from '../../lib/pdf-export';
+import { toast } from '../toast/Toast';
 import { ScoreGauge } from './ScoreGauge';
 import type { AnalysisStats } from '../../types';
 
@@ -258,6 +259,7 @@ export function StatsPanel({ onExport, onSaveMunition, collapsed, pinned, canCol
                 impactStyle,
                 pixelsPerCm: scale.pixelsPerCm,
               });
+              toast('Rapport PDF généré', 'export');
             }}
             style={{ flex: 1, justifyContent: 'center', background: 'var(--blue-glow)', borderColor: 'rgba(68,170,255,0.3)', color: 'var(--blue)' }}
           >
