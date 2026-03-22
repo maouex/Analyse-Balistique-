@@ -4,6 +4,7 @@ import { AppLayout } from './components/layout/AppLayout';
 import { AnalysisPage } from './pages/AnalysisPage';
 import { LibraryPage } from './pages/LibraryPage';
 import { View3DPage } from './pages/View3DPage';
+import { DashboardPage } from './pages/DashboardPage';
 import { LandingPage } from './pages/LandingPage';
 import { LoginScreen } from './components/auth/LoginScreen';
 import { TransitionProvider } from './components/transitions/TransitionContext';
@@ -16,6 +17,8 @@ function App() {
     setAuthed(false);
   }, []);
 
+  const loginElement = <LoginScreen onAuth={() => setAuthed(true)} redirectTo="/dashboard" />;
+
   return (
     <HashRouter>
       <TransitionProvider>
@@ -23,12 +26,18 @@ function App() {
           <Route path="/" element={<LandingPage />} />
           {authed ? (
             <Route element={<AppLayout onLogout={handleLogout} />}>
+              <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/analyse" element={<AnalysisPage />} />
               <Route path="/bibliotheque" element={<LibraryPage />} />
               <Route path="/3d" element={<View3DPage />} />
             </Route>
           ) : (
-            <Route path="/analyse" element={<LoginScreen onAuth={() => setAuthed(true)} />} />
+            <>
+              <Route path="/analyse" element={loginElement} />
+              <Route path="/dashboard" element={loginElement} />
+              <Route path="/bibliotheque" element={loginElement} />
+              <Route path="/3d" element={loginElement} />
+            </>
           )}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

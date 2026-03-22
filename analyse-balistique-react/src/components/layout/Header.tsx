@@ -1,11 +1,12 @@
 import { useRef } from 'react';
-import { Sun, Moon, Scan, BookOpen, Crosshair, LogOut } from 'lucide-react';
+import { Sun, Moon, Scan, BookOpen, Crosshair, LogOut, LayoutGrid } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { useThemeStore } from '../../stores/themeStore';
 import { useAnalysisStore } from '../../stores/analysisStore';
 import { useTransitionNavigate } from '../transitions/TransitionContext';
 
 const NAV_ITEMS = [
+  { path: '/dashboard', label: 'DASHBOARD', icon: LayoutGrid },
   { path: '/analyse', label: 'ANALYSE', icon: Scan },
   { path: '/bibliotheque', label: 'BIBLIOTHÈQUE', icon: BookOpen },
 ];

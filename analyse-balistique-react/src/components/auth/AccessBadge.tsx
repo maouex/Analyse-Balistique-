@@ -450,7 +450,7 @@ export default function AccessBadge({ onComplete }: AccessBadgeProps) {
         <div className="access-badge-status-text">Accès autorisé</div>
         {showButton && (
           <button className="access-badge-button" onClick={handleContinue}>
-            CONTINUER VERS L'ANALYSE
+            CONTINUER VERS LE TABLEAU DE BORD
           </button>
         )}
       </div>

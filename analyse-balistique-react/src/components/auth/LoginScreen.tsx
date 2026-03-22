@@ -1,4 +1,5 @@
 import { useState, useCallback, lazy, Suspense } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Lock, ArrowRight, AlertCircle, Crosshair } from 'lucide-react';
 import DecryptedText from '../landing/DecryptedText';
@@ -18,13 +19,20 @@ const EXPECTED = simpleHash('taradeau');
 
 interface LoginScreenProps {
   onAuth: () => void;
+  redirectTo?: string;
 }
 
-export function LoginScreen({ onAuth }: LoginScreenProps) {
+export function LoginScreen({ onAuth, redirectTo = '/dashboard' }: LoginScreenProps) {
+  const navigate = useNavigate();
   const [password, setPassword] = useState('');
   const [error, setError] = useState(false);
   const [shaking, setShaking] = useState(false);
   const [showBadge, setShowBadge] = useState(false);
+
+  const handleAuthComplete = useCallback(() => {
+    onAuth();
+    navigate(redirectTo);
+  }, [onAuth, navigate, redirectTo]);
 
   const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
@@ -269,7 +277,7 @@ export function LoginScreen({ onAuth }: LoginScreenProps) {
 
       {showBadge && (
         <Suspense fallback={null}>
-          <AccessBadge onComplete={onAuth} />
+          <AccessBadge onComplete={handleAuthComplete} />
         </Suspense>
       )}
     </div>

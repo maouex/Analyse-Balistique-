@@ -484,7 +484,7 @@ export function LandingPage() {
     return unsub;
   }, [wp]);
 
-  const goToApp = () => navigate('/analyse');
+  const goToApp = () => navigate('/dashboard');
 
   // Panel ranges (6 panels, each 1/6 of progress)
   const ranges: [number, number][] = [
