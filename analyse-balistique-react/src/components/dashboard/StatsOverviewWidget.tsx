@@ -23,8 +23,8 @@ export function StatsOverviewWidget({ size = 'M' }: { size?: WidgetSize }) {
 
   if (size === 'S') {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
-        <RadialGauge value={avgScore} size={65} strokeWidth={6} label="Score" color="auto" />
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        <RadialGauge value={avgScore} size={90} strokeWidth={8} label="Score" color="auto" />
       </div>
     );
   }
@@ -33,10 +33,10 @@ export function StatsOverviewWidget({ size = 'M' }: { size?: WidgetSize }) {
     const totalIn50 = withSnap.reduce((a, m) => a + (m.snap?.impacts50cm ?? 0), 0);
     const pct50 = totalImpacts > 0 ? (totalIn50 / totalImpacts) * 100 : 0;
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', gap: 10, flex: 1 }}>
-        <RadialGauge value={avgScore} size={80} strokeWidth={8} label="Score moy." color="auto" />
-        <DonutChart segments={buckets} size={80} strokeWidth={11} centerValue={String(withSnap.length)} centerLabel="analyses" />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', gap: 16 }}>
+        <RadialGauge value={avgScore} size={110} strokeWidth={10} label="Score moy." color="auto" />
+        <DonutChart segments={buckets} size={110} strokeWidth={14} centerValue={String(withSnap.length)} centerLabel="analyses" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           <MS label="Impacts" value={String(totalImpacts)} color="var(--accent2)" />
           <MS label="R90 moy." value={avgR90 > 0 ? `${avgR90.toFixed(1)}cm` : '—'} color="var(--blue)" />
           <MS label="Densité 50cm" value={pct50 > 0 ? `${pct50.toFixed(0)}%` : '—'} color="var(--amber)" />
@@ -47,12 +47,12 @@ export function StatsOverviewWidget({ size = 'M' }: { size?: WidgetSize }) {
 
   // M
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', gap: 4, flex: 1 }}>
-      <RadialGauge value={avgScore} size={65} strokeWidth={6} label="Score" color="auto" />
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', gap: 8 }}>
+      <RadialGauge value={avgScore} size={95} strokeWidth={8} label="Score" color="auto" />
       {withSnap.length > 0 ? (
-        <DonutChart segments={buckets} size={65} strokeWidth={9} centerValue={String(withSnap.length)} centerLabel="anal." />
+        <DonutChart segments={buckets} size={95} strokeWidth={12} centerValue={String(withSnap.length)} centerLabel="anal." />
       ) : (
-        <div style={{ width: 65, height: 65, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px dashed var(--border)', color: 'var(--muted)', fontSize: 8, fontFamily: 'var(--font-mono)', textAlign: 'center' }}>Pas de données</div>
+        <div style={{ width: 95, height: 95, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px dashed var(--border)', color: 'var(--muted)', fontSize: 11, fontFamily: 'var(--font-mono)', textAlign: 'center' }}>Pas de données</div>
       )}
     </div>
   );
@@ -60,9 +60,9 @@ export function StatsOverviewWidget({ size = 'M' }: { size?: WidgetSize }) {
 
 function MS({ label, value, color }: { label: string; value: string; color: string }) {
   return (
-    <div className="stat-card" style={{ textAlign: 'center', padding: '3px 6px' }}>
-      <div style={{ fontSize: 12, fontWeight: 800, color, fontFamily: 'var(--font-mono)' }}>{value}</div>
-      <div style={{ fontSize: 6, color: 'var(--muted)', fontWeight: 600, letterSpacing: '0.5px', textTransform: 'uppercase' }}>{label}</div>
+    <div className="stat-card" style={{ textAlign: 'center', padding: '5px 8px' }}>
+      <div style={{ fontSize: 15, fontWeight: 800, color, fontFamily: 'var(--font-mono)' }}>{value}</div>
+      <div style={{ fontSize: 9, color: 'var(--muted)', fontWeight: 600, letterSpacing: '0.5px', textTransform: 'uppercase' }}>{label}</div>
     </div>
   );
 }

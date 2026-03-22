@@ -11,21 +11,21 @@ export function QuickActionsWidget({ size = 'M' }: { size?: WidgetSize }) {
 
   if (size === 'S') {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
-        <button onClick={goNew} style={{ border: '1px solid var(--border-light)', background: 'var(--accent-glow)', cursor: 'pointer', padding: '6px 8px', display: 'flex', alignItems: 'center', gap: 4 }}>
-          <Crosshair size={12} color="var(--accent2)" />
-          <span style={{ fontSize: 8, fontWeight: 700, color: 'var(--accent2)', fontFamily: 'var(--font-mono)', letterSpacing: '0.5px' }}>ANALYSE</span>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+        <button onClick={goNew} style={{ border: '1px solid var(--border-light)', background: 'var(--accent-glow)', cursor: 'pointer', padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 6 }}>
+          <Crosshair size={15} color="var(--accent2)" />
+          <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent2)', fontFamily: 'var(--font-mono)', letterSpacing: '0.5px' }}>ANALYSE</span>
         </button>
       </div>
     );
   }
 
   const actions = [
-    { icon: <Crosshair size={13} />, label: 'Nouvelle analyse', color: 'var(--accent2)', onClick: goNew },
-    { icon: <BookOpen size={13} />, label: 'Bibliothèque', color: 'var(--blue)', onClick: () => navigate('/bibliotheque') },
+    { icon: <Crosshair size={16} />, label: 'Nouvelle analyse', color: 'var(--accent2)', onClick: goNew },
+    { icon: <BookOpen size={16} />, label: 'Bibliothèque', color: 'var(--blue)', onClick: () => navigate('/bibliotheque') },
     ...(hasAnalysis ? [
-      { icon: <Upload size={13} />, label: `Reprendre (${useAnalysisStore.getState().impacts.length})`, color: 'var(--amber)', onClick: () => navigate('/analyse') },
-      { icon: <Box size={13} />, label: 'Vue 3D', color: 'var(--purple)', onClick: () => navigate('/3d') },
+      { icon: <Upload size={16} />, label: `Reprendre (${useAnalysisStore.getState().impacts.length})`, color: 'var(--amber)', onClick: () => navigate('/analyse') },
+      { icon: <Box size={16} />, label: 'Vue 3D', color: 'var(--purple)', onClick: () => navigate('/3d') },
     ] : []),
   ];
 
@@ -33,14 +33,14 @@ export function QuickActionsWidget({ size = 'M' }: { size?: WidgetSize }) {
   const dir = size === 'L' ? 'row' : 'column';
 
   return (
-    <div style={{ display: 'flex', flexDirection: dir as 'row' | 'column', gap: 5, justifyContent: 'center', flexWrap: size === 'L' ? 'wrap' : undefined }}>
+    <div style={{ display: 'flex', flexDirection: dir as 'row' | 'column', gap: 8, justifyContent: 'center', flexWrap: size === 'L' ? 'wrap' : undefined }}>
       {shown.map((a) => (
         <button key={a.label} onClick={a.onClick} style={{
-          display: 'flex', alignItems: 'center', gap: 6, padding: '5px 8px', flex: size === 'L' ? '1 1 40%' : undefined,
+          display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', flex: size === 'L' ? '1 1 40%' : undefined,
           background: `${a.color}10`, border: `1px solid ${a.color}25`, cursor: 'pointer', transition: 'all 0.15s',
         }}>
           <div style={{ color: a.color, display: 'flex' }}>{a.icon}</div>
-          <span style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.8px', textTransform: 'uppercase', color: a.color, fontFamily: 'var(--font-mono)' }}>{a.label}</span>
+          <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.8px', textTransform: 'uppercase', color: a.color, fontFamily: 'var(--font-mono)' }}>{a.label}</span>
         </button>
       ))}
     </div>

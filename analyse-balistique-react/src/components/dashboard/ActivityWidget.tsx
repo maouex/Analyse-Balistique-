@@ -19,31 +19,31 @@ export function ActivityWidget({ size = 'M' }: { size?: WidgetSize }) {
   const recent = activities.slice(0, count);
 
   if (recent.length === 0) {
-    return <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, color: 'var(--muted)' }}><Clock size={16} color="var(--border-light)" /><span style={{ fontSize: 9, fontFamily: 'var(--font-mono)' }}>Aucune</span></div>;
+    return <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, color: 'var(--muted)' }}><Clock size={20} color="var(--border-light)" /><span style={{ fontSize: 12, fontFamily: 'var(--font-mono)' }}>Aucune</span></div>;
   }
 
   if (size === 'S') {
     const e = recent[0];
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3 }}>
-        {e.type === 'created' ? <Plus size={12} color="var(--accent2)" /> : <Edit3 size={12} color="var(--blue)" />}
-        <div style={{ fontSize: 8, fontWeight: 700, fontFamily: 'var(--font-mono)', textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }}>{e.name}</div>
-        <div style={{ fontSize: 7, color: 'var(--muted)', fontFamily: 'var(--font-mono)' }}>{fmt(e.date)}</div>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+        {e.type === 'created' ? <Plus size={15} color="var(--accent2)" /> : <Edit3 size={15} color="var(--blue)" />}
+        <div style={{ fontSize: 11, fontWeight: 700, fontFamily: 'var(--font-mono)', textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }}>{e.name}</div>
+        <div style={{ fontSize: 10, color: 'var(--muted)', fontFamily: 'var(--font-mono)' }}>{fmt(e.date)}</div>
       </div>
     );
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 2, justifyContent: 'center' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, justifyContent: 'center' }}>
       {recent.map((e) => (
-        <div key={e.id} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '3px 0', borderBottom: '1px solid var(--border)' }}>
-          <div style={{ width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: e.type === 'created' ? 'var(--accent-glow)' : 'var(--blue-glow)', border: `1px solid ${e.type === 'created' ? 'rgba(0,255,65,0.2)' : 'rgba(68,170,255,0.2)'}` }}>
-            {e.type === 'created' ? <Plus size={8} color="var(--accent2)" /> : <Edit3 size={8} color="var(--blue)" />}
+        <div key={e.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 0', borderBottom: '1px solid var(--border)' }}>
+          <div style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: e.type === 'created' ? 'var(--accent-glow)' : 'var(--blue-glow)', border: `1px solid ${e.type === 'created' ? 'rgba(0,255,65,0.2)' : 'rgba(68,170,255,0.2)'}` }}>
+            {e.type === 'created' ? <Plus size={11} color="var(--accent2)" /> : <Edit3 size={11} color="var(--blue)" />}
           </div>
-          <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: 9, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{e.name}</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{e.name}</div>
           </div>
-          <span style={{ fontSize: 7, color: 'var(--muted)', fontFamily: 'var(--font-mono)', flexShrink: 0 }}>{fmt(e.date)}</span>
+          <span style={{ fontSize: 10, color: 'var(--muted)', fontFamily: 'var(--font-mono)', flexShrink: 0 }}>{fmt(e.date)}</span>
         </div>
       ))}
     </div>

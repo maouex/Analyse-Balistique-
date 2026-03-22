@@ -91,8 +91,8 @@ export function WidgetShell({
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: 6,
-          padding: '8px 12px',
+          gap: 8,
+          padding: '10px 14px',
           borderBottom: '1px solid var(--border)',
           background: accentGlow,
           flexShrink: 0,
@@ -102,12 +102,12 @@ export function WidgetShell({
           zIndex: 11,
         }}
       >
-        <GripVertical size={12} color="var(--muted)" style={{ opacity: 0.5, flexShrink: 0 }} />
+        <GripVertical size={14} color="var(--muted)" style={{ opacity: 0.5, flexShrink: 0 }} />
         <div style={{ color: accentColor, display: 'flex', alignItems: 'center' }}>
           {icon}
         </div>
         <span style={{
-          fontSize: 10,
+          fontSize: 12,
           fontWeight: 700,
           letterSpacing: '1.5px',
           textTransform: 'uppercase',
@@ -127,13 +127,13 @@ export function WidgetShell({
             style={removeBtnStyle}
             title="Retirer"
           >
-            <X size={11} />
+            <X size={13} />
           </button>
         )}
       </div>
 
       {/* Content */}
-      <div style={{ padding: 12, position: 'relative', zIndex: 1 }}>
+      <div style={{ padding: 16, position: 'relative', zIndex: 1 }}>
         {children}
       </div>
     </div>
