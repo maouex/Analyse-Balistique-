@@ -278,18 +278,6 @@ export function LoginScreen({ onAuth, redirectTo = '/dashboard' }: LoginScreenPr
               {error.toUpperCase()}
             </motion.div>
           )}
-
-          {/* Default credentials hint */}
-          <div style={{
-            fontSize: 9,
-            color: 'rgba(0,255,65,0.2)',
-            fontFamily: "'JetBrains Mono', monospace",
-            textAlign: 'center',
-            borderTop: '1px solid rgba(0,255,65,0.08)',
-            paddingTop: 10,
-          }}>
-            Par défaut: admin / taradeau
-          </div>
         </motion.form>
 
         {/* Footer */}
