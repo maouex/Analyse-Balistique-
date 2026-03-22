@@ -13,7 +13,7 @@ export function ScoreEvolutionWidget({ size = 'M' }: { size?: WidgetSize }) {
     .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 
   if (withSnap.length < 2) {
-    return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--muted)', fontSize: 9, fontFamily: 'var(--font-mono)' }}>Min. 2 analyses</div>;
+    return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, color: 'var(--muted)', fontSize: 9, fontFamily: 'var(--font-mono)' }}>Min. 2 analyses</div>;
   }
 
   const scores = withSnap.map((m) => m.snap?.score ?? 0);
@@ -24,7 +24,7 @@ export function ScoreEvolutionWidget({ size = 'M' }: { size?: WidgetSize }) {
 
   if (size === 'S') {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 2 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, gap: 2 }}>
         {trend > 2 ? <TrendingUp size={14} color="var(--green)" /> : trend < -2 ? <TrendingDown size={14} color="var(--red)" /> : <Minus size={14} color="var(--muted)" />}
         <div style={{ fontSize: 10, fontWeight: 800, fontFamily: 'var(--font-mono)', color: trend > 2 ? 'var(--green)' : trend < -2 ? 'var(--red)' : 'var(--muted)' }}>
           {trend > 0 ? '+' : ''}{trend.toFixed(0)}
@@ -38,7 +38,7 @@ export function ScoreEvolutionWidget({ size = 'M' }: { size?: WidgetSize }) {
   const r90s = size === 'L' ? withSnap.map((m) => m.snap?.r90 ?? 0) : null;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, height: '100%', justifyContent: 'center' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1, justifyContent: 'center' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
         <div style={{ width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: trend > 2 ? 'var(--green-glow)' : trend < -2 ? 'var(--red-glow)' : 'var(--surface2)', border: `1px solid ${trend > 2 ? 'rgba(0,255,65,0.2)' : trend < -2 ? 'rgba(255,68,68,0.2)' : 'var(--border)'}` }}>
           {trend > 2 ? <TrendingUp size={10} color="var(--green)" /> : trend < -2 ? <TrendingDown size={10} color="var(--red)" /> : <Minus size={10} color="var(--muted)" />}
