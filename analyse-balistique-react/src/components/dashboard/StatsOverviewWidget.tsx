@@ -23,7 +23,7 @@ export function StatsOverviewWidget({ size = 'M' }: { size?: WidgetSize }) {
 
   if (size === 'S') {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
         <RadialGauge value={avgScore} size={65} strokeWidth={6} label="Score" color="auto" />
       </div>
     );
@@ -33,7 +33,7 @@ export function StatsOverviewWidget({ size = 'M' }: { size?: WidgetSize }) {
     const totalIn50 = withSnap.reduce((a, m) => a + (m.snap?.impacts50cm ?? 0), 0);
     const pct50 = totalImpacts > 0 ? (totalIn50 / totalImpacts) * 100 : 0;
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', gap: 10, height: '100%' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', gap: 10, flex: 1 }}>
         <RadialGauge value={avgScore} size={80} strokeWidth={8} label="Score moy." color="auto" />
         <DonutChart segments={buckets} size={80} strokeWidth={11} centerValue={String(withSnap.length)} centerLabel="analyses" />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -47,7 +47,7 @@ export function StatsOverviewWidget({ size = 'M' }: { size?: WidgetSize }) {
 
   // M
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', gap: 4, height: '100%' }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', gap: 4, flex: 1 }}>
       <RadialGauge value={avgScore} size={65} strokeWidth={6} label="Score" color="auto" />
       {withSnap.length > 0 ? (
         <DonutChart segments={buckets} size={65} strokeWidth={9} centerValue={String(withSnap.length)} centerLabel="anal." />

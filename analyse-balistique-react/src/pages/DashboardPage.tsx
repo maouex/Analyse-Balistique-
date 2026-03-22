@@ -61,7 +61,7 @@ const widgetComponents: Record<WidgetId, React.ComponentType<{ size?: WidgetSize
 };
 
 export function DashboardPage() {
-  const { visibleWidgets, widgetOrder, showCatalog, setShowCatalog, removeWidget, reorderWidgets, getWidgetSize, isGridFull } = useDashboardStore();
+  const { visibleWidgets, widgetOrder, showCatalog, setShowCatalog, removeWidget, reorderWidgets, getWidgetSize } = useDashboardStore();
   const gridRef = useRef<HTMLDivElement>(null);
 
   const [draggedId, setDraggedId] = useState<WidgetId | null>(null);
@@ -73,9 +73,7 @@ export function DashboardPage() {
     ...visibleWidgets.filter((id) => !orderedVisible.includes(id)),
   ];
 
-  const gridFull = isGridFull();
   const hasAvailable = WIDGET_CATALOG.some((w) => !visibleWidgets.includes(w.id));
-  const showAddSlot = hasAvailable && !gridFull;
 
   const handleDragStart = useCallback((widgetId: WidgetId, e: React.DragEvent) => {
     setDraggedId(widgetId);
@@ -157,8 +155,8 @@ export function DashboardPage() {
           );
         })}
 
-        {/* Add slot */}
-        {showAddSlot && (
+        {/* Add slot - always visible when widgets are available */}
+        {hasAvailable && (
           <button
             onClick={() => setShowCatalog(true)}
             style={{

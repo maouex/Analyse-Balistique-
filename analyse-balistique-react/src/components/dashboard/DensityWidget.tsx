@@ -10,7 +10,7 @@ export function DensityWidget({ size = 'M' }: { size?: WidgetSize }) {
 
   const withSnap = store.munitions.filter((m) => m.snap);
   if (withSnap.length === 0) {
-    return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--muted)', fontSize: 9, fontFamily: 'var(--font-mono)' }}>Pas de données</div>;
+    return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, color: 'var(--muted)', fontSize: 9, fontFamily: 'var(--font-mono)' }}>Pas de données</div>;
   }
 
   const totalImpacts = withSnap.reduce((a, m) => a + (m.snap?.nbImpacts ?? 0), 0);
@@ -28,7 +28,7 @@ export function DensityWidget({ size = 'M' }: { size?: WidgetSize }) {
 
   if (size === 'S') {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
         <RadialGauge value={pct50} size={60} strokeWidth={5} label="50cm" color="var(--accent2)" />
       </div>
     );
@@ -37,7 +37,7 @@ export function DensityWidget({ size = 'M' }: { size?: WidgetSize }) {
   if (size === 'L') {
     const avgDisp = withSnap.reduce((a, m) => a + (m.snap?.dispMoy ?? 0), 0) / withSnap.length;
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', gap: 10, height: '100%' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', gap: 10, flex: 1 }}>
         <DonutChart segments={segments} size={80} strokeWidth={12} centerValue={String(totalImpacts)} centerLabel="imp." />
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
           <RadialGauge value={pct50} size={60} strokeWidth={6} label="50cm" color="var(--accent2)" />
@@ -59,7 +59,7 @@ export function DensityWidget({ size = 'M' }: { size?: WidgetSize }) {
 
   // M
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', gap: 4, height: '100%' }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', gap: 4, flex: 1 }}>
       <DonutChart segments={segments} size={70} strokeWidth={10} centerValue={String(totalImpacts)} centerLabel="imp." />
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
         <RadialGauge value={pct50} size={50} strokeWidth={5} label="50cm" color="var(--accent2)" />

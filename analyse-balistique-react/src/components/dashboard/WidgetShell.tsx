@@ -136,8 +136,10 @@ export function WidgetShell({
       </div>
 
       {/* Content */}
-      <div style={{ flex: 1, padding: 14, overflowY: 'auto', minHeight: 0, position: 'relative', zIndex: 1 }}>
-        {children}
+      <div style={{ flex: 1, padding: 12, overflowY: 'auto', minHeight: 0, position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+          {children}
+        </div>
       </div>
     </div>
   );

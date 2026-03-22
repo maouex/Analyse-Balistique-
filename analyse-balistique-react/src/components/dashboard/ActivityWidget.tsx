@@ -19,13 +19,13 @@ export function ActivityWidget({ size = 'M' }: { size?: WidgetSize }) {
   const recent = activities.slice(0, count);
 
   if (recent.length === 0) {
-    return <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, height: '100%', color: 'var(--muted)' }}><Clock size={16} color="var(--border-light)" /><span style={{ fontSize: 9, fontFamily: 'var(--font-mono)' }}>Aucune</span></div>;
+    return <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, flex: 1, color: 'var(--muted)' }}><Clock size={16} color="var(--border-light)" /><span style={{ fontSize: 9, fontFamily: 'var(--font-mono)' }}>Aucune</span></div>;
   }
 
   if (size === 'S') {
     const e = recent[0];
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 3 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, gap: 3 }}>
         {e.type === 'created' ? <Plus size={12} color="var(--accent2)" /> : <Edit3 size={12} color="var(--blue)" />}
         <div style={{ fontSize: 8, fontWeight: 700, fontFamily: 'var(--font-mono)', textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }}>{e.name}</div>
         <div style={{ fontSize: 7, color: 'var(--muted)', fontFamily: 'var(--font-mono)' }}>{fmt(e.date)}</div>
@@ -34,7 +34,7 @@ export function ActivityWidget({ size = 'M' }: { size?: WidgetSize }) {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 2, height: '100%', justifyContent: 'center' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flex: 1, justifyContent: 'center' }}>
       {recent.map((e) => (
         <div key={e.id} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '3px 0', borderBottom: '1px solid var(--border)' }}>
           <div style={{ width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: e.type === 'created' ? 'var(--accent-glow)' : 'var(--blue-glow)', border: `1px solid ${e.type === 'created' ? 'rgba(0,255,65,0.2)' : 'rgba(68,170,255,0.2)'}` }}>

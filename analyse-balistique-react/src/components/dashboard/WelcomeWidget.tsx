@@ -16,7 +16,7 @@ export function WelcomeWidget({ size = 'M' }: { size?: WidgetSize }) {
 
   if (size === 'S') {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 4 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, gap: 4 }}>
         <Crosshair size={16} color="var(--accent2)" />
         <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--accent2)', fontFamily: 'var(--font-mono)' }}>S.A.G.</div>
         <div style={{ fontSize: 8, color: 'var(--muted)', fontFamily: 'var(--font-mono)' }}>SYS:OK</div>
@@ -27,7 +27,7 @@ export function WelcomeWidget({ size = 'M' }: { size?: WidgetSize }) {
   if (size === 'L') {
     const now = new Date();
     return (
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16, height: '100%' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16, flex: 1 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <Crosshair size={24} color="var(--accent2)" style={{ flexShrink: 0 }} />
           <div>
@@ -49,7 +49,7 @@ export function WelcomeWidget({ size = 'M' }: { size?: WidgetSize }) {
 
   // M
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, height: '100%', justifyContent: 'center' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flex: 1, justifyContent: 'center' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <Crosshair size={16} color="var(--accent2)" style={{ flexShrink: 0 }} />
         <div>

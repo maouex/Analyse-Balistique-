@@ -10,7 +10,7 @@ export function PerformanceRadarWidget({ size = 'M' }: { size?: WidgetSize }) {
 
   const withSnap = store.munitions.filter((m) => m.snap);
   if (withSnap.length === 0) {
-    return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--muted)', fontSize: 9, fontFamily: 'var(--font-mono)' }}>Pas de données</div>;
+    return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, color: 'var(--muted)', fontSize: 9, fontFamily: 'var(--font-mono)' }}>Pas de données</div>;
   }
 
   const avgScore = withSnap.reduce((a, m) => a + (m.snap?.score ?? 0), 0) / withSnap.length;
@@ -29,7 +29,7 @@ export function PerformanceRadarWidget({ size = 'M' }: { size?: WidgetSize }) {
 
   if (size === 'S') {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
         <RadialGauge value={avgScore} size={60} strokeWidth={5} label="Perf." color="auto" />
       </div>
     );
@@ -37,7 +37,7 @@ export function PerformanceRadarWidget({ size = 'M' }: { size?: WidgetSize }) {
 
   const radarSize = size === 'L' ? 130 : 105;
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
       <RadarChart axes={axes} size={radarSize} color="var(--accent2)" />
     </div>
   );
